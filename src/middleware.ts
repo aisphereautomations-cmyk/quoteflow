@@ -14,6 +14,6 @@ export const config = {
          * - favicon.ico (favicon file)
          * - api/payments/webhook (Airwallex webhook — needs to be public)
          */
-        '/((?!_next/static|_next/image|favicon.ico|api/payments/webhook|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!_next/static|_next/image|favicon.ico|api/webhooks|manifest.json|sw.js|icons/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 };

@@ -1,0 +1,275 @@
+.container {
+    min-height: 100vh;
+    background: #000;
+    color: #fff;
+    padding: 24px 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6b21a8, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.subtitle {
+    font-size: 0.8rem;
+    color: #666;
+    margin-top: 4px;
+}
+
+.headerActions {
+    display: flex;
+    gap: 10px;
+}
+
+.backBtn {
+    padding: 9px 16px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    color: #aaa;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.backBtn:hover {
+    background: #1a1a1a;
+    color: #fff;
+}
+
+.createBtn {
+    padding: 9px 18px;
+    background: linear-gradient(135deg, #6b21a8, #06b6d4);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.createBtn:hover {
+    transform: translateY(-1px);
+}
+
+/* Form */
+.formCard {
+    background: #0d0d0d;
+    border: 1px solid #1a1a1a;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 28px;
+}
+
+.formTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.formError {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-bottom: 12px;
+}
+
+.formGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+    .formGrid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.formGroup label {
+    display: block;
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.formInput {
+    width: 100%;
+    padding: 10px 12px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.formInput:focus {
+    border-color: #6b21a8;
+}
+
+.planToggleGroup {
+    display: flex;
+    gap: 8px;
+}
+
+.planToggle {
+    padding: 6px 14px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 8px;
+    color: #666;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.planToggleActive {
+    background: rgba(107, 33, 168, 0.2);
+    border-color: #6b21a8;
+    color: #c084fc;
+}
+
+.formActions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.cancelBtn {
+    padding: 10px 20px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    color: #888;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.saveBtn {
+    padding: 10px 24px;
+    background: linear-gradient(135deg, #6b21a8, #06b6d4);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* Table */
+.loading,
+.empty {
+    text-align: center;
+    color: #555;
+    padding: 48px 0;
+    font-size: 0.9rem;
+}
+
+.tableWrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid #1a1a1a;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.table th {
+    text-align: left;
+    padding: 12px 14px;
+    background: #0a0a0a;
+    color: #666;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #111;
+    color: #ccc;
+}
+
+.table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.rowInactive td {
+    opacity: 0.4;
+}
+
+.codeCell {
+    font-family: monospace;
+    font-weight: 700;
+    color: #fff !important;
+    letter-spacing: 0.05em;
+}
+
+.statusBadge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.statusActive {
+    background: rgba(74, 222, 128, 0.15);
+    color: #4ade80;
+}
+
+.statusInactive {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.actionsCell {
+    display: flex;
+    gap: 6px;
+}
+
+.editBtn,
+.deleteBtn {
+    padding: 4px 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.editBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.deleteBtn:hover {
+    background: rgba(239, 68, 68, 0.1);
+}

@@ -38,24 +38,43 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser();
 
+    const pathname = request.nextUrl.pathname;
+
     // Protected routes: redirect to login if not authenticated
-    if (
-        !user &&
-        request.nextUrl.pathname.startsWith('/main')
-    ) {
+    if (!user && (pathname.startsWith('/main') || pathname.startsWith('/pricing') || pathname.startsWith('/admin'))) {
         const url = request.nextUrl.clone();
         url.pathname = '/login';
         return NextResponse.redirect(url);
     }
 
-    // If logged in and on login page, redirect to main
-    if (
-        user &&
-        request.nextUrl.pathname === '/login'
-    ) {
+    // If logged in and on login page, redirect to pricing (which will redirect to main if subscribed)
+    if (user && pathname === '/login') {
         const url = request.nextUrl.clone();
-        url.pathname = '/main';
+        url.pathname = '/pricing';
         return NextResponse.redirect(url);
+    }
+
+    // Paywall: check subscription before allowing access to /main
+    if (user && pathname.startsWith('/main')) {
+        const { data: subscription } = await supabase
+            .from('subscriptions')
+            .select('status, trial_ends_at')
+            .eq('user_id', user.id)
+            .in('status', ['active', 'trial'])
+            .maybeSingle();
+
+        const isActive = !!subscription && (
+            subscription.status === 'active' ||
+            (subscription.status === 'trial' && subscription.trial_ends_at
+                ? new Date(subscription.trial_ends_at) > new Date()
+                : false)
+        );
+
+        if (!isActive) {
+            const url = request.nextUrl.clone();
+            url.pathname = '/pricing';
+            return NextResponse.redirect(url);
+        }
     }
 
     return supabaseResponse;

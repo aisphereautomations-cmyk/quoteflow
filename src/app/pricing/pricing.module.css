@@ -1,0 +1,309 @@
+.container {
+    min-height: 100vh;
+    background: #000;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+}
+
+/* Header */
+.header {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #6b21a8, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+}
+
+.subtitle {
+    color: var(--color-text-secondary);
+    font-size: 1rem;
+}
+
+/* Billing Toggle */
+.billingToggle {
+    display: flex;
+    background: #111;
+    border-radius: 12px;
+    padding: 4px;
+    margin-bottom: 36px;
+    border: 1px solid #222;
+}
+
+.toggleBtn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #888;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.toggleActive {
+    background: linear-gradient(135deg, #6b21a8, #06b6d4);
+    color: #fff;
+}
+
+.saveBadge {
+    font-size: 0.7rem;
+    background: rgba(74, 222, 128, 0.2);
+    color: #4ade80;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+}
+
+/* Plan Cards Grid */
+.plansGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 36px;
+}
+
+@media (min-width: 768px) {
+    .plansGrid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Plan Card */
+.planCard {
+    background: #0d0d0d;
+    border: 1px solid #1a1a1a;
+    border-radius: 16px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.planCard:hover {
+    border-color: #333;
+    transform: translateY(-2px);
+}
+
+.planHighlight {
+    border-color: #6b21a8;
+    background: linear-gradient(180deg, rgba(107, 33, 168, 0.08) 0%, #0d0d0d 40%);
+}
+
+.planHighlight:hover {
+    border-color: #7c3aed;
+}
+
+.popularBadge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #6b21a8, #06b6d4);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 16px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.planName {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #eee;
+}
+
+/* Price */
+.priceArea {
+    margin-bottom: 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.price {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #fff;
+}
+
+.originalPrice {
+    font-size: 1.2rem;
+    color: #666;
+    text-decoration: line-through;
+}
+
+.pricePeriod {
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.yearlySaving {
+    font-size: 0.8rem;
+    color: #4ade80;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Features */
+.featuresList {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.featuresList li {
+    font-size: 0.85rem;
+    color: #aaa;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.featureCheck {
+    color: #4ade80;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+/* Subscribe Button */
+.subscribeBtn {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #333;
+    border-radius: 12px;
+    background: #111;
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.subscribeBtn:hover {
+    background: #1a1a1a;
+    border-color: #555;
+    transform: translateY(-1px);
+}
+
+.subscribeBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.subscribeBtnHighlight {
+    background: linear-gradient(135deg, #6b21a8, #06b6d4);
+    border-color: transparent;
+}
+
+.subscribeBtnHighlight:hover {
+    background: linear-gradient(135deg, #7c3aed, #0891b2);
+    border-color: transparent;
+}
+
+/* Promo Section */
+.promoSection {
+    text-align: center;
+    margin-bottom: 16px;
+    width: 100%;
+    max-width: 400px;
+}
+
+.promoLabel {
+    font-size: 0.9rem;
+    color: #888;
+    margin-bottom: 10px;
+}
+
+.promoInputRow {
+    display: flex;
+    gap: 8px;
+}
+
+.promoInput {
+    flex: 1;
+    padding: 10px 14px;
+    background: #111;
+    border: 1px solid #222;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.promoInput:focus {
+    border-color: #6b21a8;
+}
+
+.promoInput::placeholder {
+    color: #555;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+.promoApplyBtn {
+    padding: 10px 20px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 10px;
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.promoApplyBtn:hover {
+    background: #222;
+}
+
+.promoApplyBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.promoSuccess {
+    color: #4ade80;
+    font-size: 0.8rem;
+    margin-top: 8px;
+    font-weight: 600;
+}
+
+.promoError {
+    color: #ef4444;
+    font-size: 0.8rem;
+    margin-top: 8px;
+}
+
+.vatNote {
+    font-size: 0.75rem;
+    color: #555;
+    text-align: center;
+}
