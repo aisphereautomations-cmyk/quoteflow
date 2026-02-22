@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <defs>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6b21a8"/>
+      <stop offset="100%" style="stop-color:#06b6d4"/>
+    </linearGradient>
+  </defs>
+  <rect width="192" height="192" rx="32" fill="#0a0a0a"/>
+  <!-- Document shape -->
+  <rect x="52" y="32" width="88" height="112" rx="8" fill="#1a1a2e" stroke="url(#accent)" stroke-width="2"/>
+  <!-- Lines on document -->
+  <rect x="68" y="56" width="56" height="4" rx="2" fill="#444"/>
+  <rect x="68" y="68" width="40" height="4" rx="2" fill="#444"/>
+  <rect x="68" y="80" width="48" height="4" rx="2" fill="#444"/>
+  <!-- Accent bar -->
+  <rect x="52" y="100" width="88" height="6" rx="2" fill="url(#accent)"/>
+  <!-- Checkmark -->
+  <circle cx="132" cy="136" r="20" fill="url(#accent)"/>
+  <polyline points="122,136 129,143 142,129" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- QF text -->
+  <text x="96" y="172" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold" letter-spacing="2">QF</text>
+</svg>

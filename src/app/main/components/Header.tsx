@@ -10,7 +10,7 @@ import styles from './Header.module.css';
 export default function Header() {
     const router = useRouter();
     const supabase = createClient();
-    const { saveQuote, newQuote, loadQuote, savedQuotes, isSaving, currentQuoteId } = useQuote();
+    const { saveQuote, newQuote, loadQuote, deleteQuote, savedQuotes, isSaving, currentQuoteId } = useQuote();
     const { client, clearClient } = useClient();
     const [showHistory, setShowHistory] = useState(false);
 
@@ -70,10 +70,22 @@ export default function Header() {
                                         className={`${styles.historyItem} ${q.id === currentQuoteId ? styles.historyItemActive : ''}`}
                                         onClick={() => handleLoadQuote(q.id)}
                                     >
-                                        <span className={styles.historyTitle}>{q.title}</span>
-                                        <span className={styles.historyMeta}>
-                                            {q.clientName && `${q.clientName} · `}
-                                            {new Date(q.updatedAt).toLocaleDateString()}
+                                        <div className={styles.historyContent}>
+                                            <span className={styles.historyTitle}>{q.title}</span>
+                                            <span className={styles.historyMeta}>
+                                                {q.clientName && `${q.clientName} · `}
+                                                {new Date(q.updatedAt).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <span
+                                            className={styles.historyDelete}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (confirm('Delete this quote?')) deleteQuote(q.id);
+                                            }}
+                                            title="Delete quote"
+                                        >
+                                            ✕
                                         </span>
                                     </button>
                                 ))

@@ -42,6 +42,7 @@ interface QuoteContextType {
     updateService: (id: string, updates: Partial<ServiceBlock>) => void;
     saveQuote: (clientName?: string, clientEmail?: string, clientWhatsapp?: string, clientServiceTitle?: string) => Promise<void>;
     loadQuote: (id: string) => Promise<void>;
+    deleteQuote: (id: string) => Promise<void>;
     newQuote: () => void;
     savedQuotes: SavedQuote[];
     loadSavedQuotes: () => Promise<void>;
@@ -241,6 +242,30 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
         }
     }, [user, supabase]);
 
+    const deleteQuote = useCallback(async (id: string) => {
+        if (!user) return;
+
+        try {
+            const { error } = await supabase
+                .from('quotes')
+                .delete()
+                .eq('id', id)
+                .eq('user_id', user.id);
+
+            if (error) throw error;
+
+            // If we deleted the currently active quote, clear the form
+            if (id === currentQuoteId) {
+                setQuote({ ...defaultQuote, services: [createEmptyService()] });
+                setCurrentQuoteId(null);
+            }
+
+            await loadSavedQuotes();
+        } catch (err) {
+            console.error('Error deleting quote:', err);
+        }
+    }, [user, currentQuoteId, supabase, loadSavedQuotes]);
+
     const newQuote = () => {
         setQuote({
             ...defaultQuote,
@@ -253,7 +278,7 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
         <QuoteContext.Provider
             value={{
                 quote, currentQuoteId, updateQuote, addService, removeService, updateService,
-                saveQuote, loadQuote, newQuote,
+                saveQuote, loadQuote, deleteQuote, newQuote,
                 savedQuotes, loadSavedQuotes,
                 isLoading, isSaving,
             }}

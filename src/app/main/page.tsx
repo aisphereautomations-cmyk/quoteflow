@@ -22,29 +22,10 @@ export default function MainPage() {
                         <main className={styles.mainContainer}>
                             <Header />
                             <AIChat />
-
-                            {/* Main Content Area */}
-                            <div className={styles.scrollableContent}>
-                                {/* Quote Section */}
-                                <section className={styles.quoteSection}>
-                                    <QuoteForm />
-                                </section>
-
-                                {/* PDF Preview Section */}
-                                <section className={styles.previewSection}>
-                                    <PDFPreview />
-                                </section>
-
-                                {/* Client Information */}
-                                <section className={styles.clientSection}>
-                                    <ClientInfo />
-                                </section>
-
-                                {/* Actions Section */}
-                                <section className={styles.actionsSection}>
-                                    <ActionButtons />
-                                </section>
-                            </div>
+                            <QuoteForm />
+                            <PDFPreview />
+                            <ClientInfo />
+                            <ActionButtons />
                             <SettingsDrawer />
                         </main>
                     </ClientProvider>
