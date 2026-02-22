@@ -1,0 +1,71 @@
+.actionSection {
+    padding: var(--spacing-lg);
+    background: var(--color-background);
+}
+
+.messageGroup {
+    margin-bottom: var(--spacing-lg);
+}
+
+.label {
+    display: block;
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    margin-bottom: var(--spacing-sm);
+    color: var(--color-text-primary);
+}
+
+.buttonsGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.actionBtn {
+    padding: var(--spacing-md);
+    border: none;
+    border-radius: 9999px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: var(--font-size-base);
+    text-align: center;
+    transition: all var(--transition-base);
+}
+
+.actionBtn:active {
+    transform: translateY(0) scale(0.97);
+}
+
+.emailBtn {
+    background: #ea580c;
+}
+
+.emailBtn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 14px rgba(234, 88, 12, 0.35);
+}
+
+.shareBtn {
+    background: #2563eb;
+}
+
+.shareBtn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.whatsappBtn {
+    background: #16a34a;
+    grid-column: span 2;
+    margin-top: var(--spacing-xs);
+}
+
+.whatsappBtn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+}

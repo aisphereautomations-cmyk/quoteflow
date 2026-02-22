@@ -1,0 +1,25 @@
+.mainContainer {
+    min-height: 100vh;
+    background: black;
+    color: white;
+    display: flex;
+    flex-direction: column;
+}
+
+.scrollableContent {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 80px;
+}
+
+.quoteSection {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.previewSection {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.actionsSection {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
