@@ -145,47 +145,67 @@ export async function POST(request: NextRequest) {
 
         // ─── Real Airwallex flow ───
         // Step 1: Get auth token
-        const authRes = await fetch('https://api.airwallex.com/api/v1/authentication/login', {
-            method: 'POST',
-            headers: {
-                'x-client-id': airwallexClientId,
-                'x-api-key': airwallexApiKey,
-                'Content-Type': 'application/json',
-            },
-        });
+        let authRes;
+        try {
+            authRes = await fetch('https://api.airwallex.com/api/v1/authentication/login', {
+                method: 'POST',
+                headers: {
+                    'x-client-id': airwallexClientId,
+                    'x-api-key': airwallexApiKey,
+                    'Content-Type': 'application/json',
+                },
+            });
+        } catch (fetchErr) {
+            console.error('Airwallex auth fetch failed:', fetchErr);
+            return NextResponse.json({ error: 'Cannot reach payment service', debug: String(fetchErr) }, { status: 503 });
+        }
+
         const authData = await authRes.json();
         const token = authData.token;
 
         if (!token) {
-            console.error('Airwallex auth failed:', authData);
-            return NextResponse.json({ error: 'Payment service unavailable' }, { status: 503 });
+            console.error('Airwallex auth failed:', JSON.stringify(authData));
+            return NextResponse.json({
+                error: `Airwallex auth failed: ${authData.message || authData.code || JSON.stringify(authData)}`,
+            }, { status: 503 });
         }
 
         // Step 2: Create Payment Intent
-        const intentRes = await fetch('https://api.airwallex.com/api/v1/pa/payment_intents/create', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json',
+        const intentBody = {
+            request_id: `qf_${user.id}_${Date.now()}`,
+            amount: Math.round(finalPrice * 100) / 100,
+            currency: 'EUR',
+            merchant_order_id: `qf_${plan}_${billingCycle}_${Date.now()}`,
+            metadata: {
+                user_id: user.id,
+                plan,
+                billing_cycle: billingCycle,
+                promo_code: promoData?.code || '',
             },
-            body: JSON.stringify({
-                request_id: `qf_${user.id}_${Date.now()}`,
-                amount: Math.round(finalPrice * 100) / 100,
-                currency: 'EUR',
-                merchant_order_id: `qf_${plan}_${billingCycle}_${user.id}_${Date.now()}`,
-                metadata: {
-                    user_id: user.id,
-                    plan,
-                    billing_cycle: billingCycle,
-                    promo_code: promoData?.code || '',
+        };
+
+        let intentRes;
+        try {
+            intentRes = await fetch('https://api.airwallex.com/api/v1/pa/payment_intents/create', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
                 },
-            }),
-        });
+                body: JSON.stringify(intentBody),
+            });
+        } catch (fetchErr) {
+            console.error('Airwallex intent fetch failed:', fetchErr);
+            return NextResponse.json({ error: 'Cannot reach payment service', debug: String(fetchErr) }, { status: 503 });
+        }
+
         const intentData = await intentRes.json();
 
         if (!intentData.id) {
-            console.error('Airwallex intent error:', intentData);
-            return NextResponse.json({ error: 'Failed to create payment' }, { status: 500 });
+            console.error('Airwallex intent error:', JSON.stringify(intentData));
+            return NextResponse.json({
+                error: `Payment error: ${intentData.message || intentData.code || JSON.stringify(intentData)}`,
+            }, { status: 500 });
         }
 
         // Return intent details for client-side SDK redirect
@@ -198,7 +218,7 @@ export async function POST(request: NextRequest) {
 
     } catch (err) {
         console.error('Checkout error:', err);
-        return NextResponse.json({ error: 'Server error during checkout' }, { status: 500 });
+        return NextResponse.json({ error: `Server error: ${err instanceof Error ? err.message : String(err)}` }, { status: 500 });
     }
 }
 
