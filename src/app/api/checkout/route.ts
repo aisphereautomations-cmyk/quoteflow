@@ -157,12 +157,11 @@ export async function POST(request: NextRequest) {
         const token = authData.token;
 
         if (!token) {
+            console.error('Airwallex auth failed:', authData);
             return NextResponse.json({ error: 'Payment service unavailable' }, { status: 503 });
         }
 
         // Step 2: Create Payment Intent
-        const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://quoteflow-xi.vercel.app'}/pricing/success`;
-
         const intentRes = await fetch('https://api.airwallex.com/api/v1/pa/payment_intents/create', {
             method: 'POST',
             headers: {
@@ -171,16 +170,15 @@ export async function POST(request: NextRequest) {
             },
             body: JSON.stringify({
                 request_id: `qf_${user.id}_${Date.now()}`,
-                amount: finalPrice,
+                amount: Math.round(finalPrice * 100) / 100,
                 currency: 'EUR',
-                merchant_order_id: `qf_${plan}_${billingCycle}_${user.id}`,
+                merchant_order_id: `qf_${plan}_${billingCycle}_${user.id}_${Date.now()}`,
                 metadata: {
                     user_id: user.id,
                     plan,
                     billing_cycle: billingCycle,
-                    promo_code: promoData?.code || null,
+                    promo_code: promoData?.code || '',
                 },
-                return_url: returnUrl,
             }),
         });
         const intentData = await intentRes.json();
@@ -190,13 +188,17 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to create payment' }, { status: 500 });
         }
 
-        // Return the hosted payment page URL
-        const checkoutUrl = `https://checkout.airwallex.com/checkout?intent_id=${intentData.id}&client_secret=${intentData.client_secret}&mode=payment`;
-
-        return NextResponse.json({ url: checkoutUrl });
+        // Return intent details for client-side SDK redirect
+        return NextResponse.json({
+            intentId: intentData.id,
+            clientSecret: intentData.client_secret,
+            currency: 'EUR',
+            amount: finalPrice,
+        });
 
     } catch (err) {
         console.error('Checkout error:', err);
         return NextResponse.json({ error: 'Server error during checkout' }, { status: 500 });
     }
 }
+

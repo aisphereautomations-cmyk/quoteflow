@@ -69,10 +69,22 @@ export default function PricingPage() {
             });
             const data = await res.json();
 
-            if (data.url) {
-                window.location.href = data.url;
+            if (data.intentId && data.clientSecret) {
+                // Airwallex payment — use SDK redirect
+                const { redirectToCheckout, loadAirwallex } = await import('airwallex-payment-elements');
+                await loadAirwallex({ env: 'prod' });
+                await redirectToCheckout({
+                    env: 'prod',
+                    mode: 'payment',
+                    intent_id: data.intentId,
+                    client_secret: data.clientSecret,
+                    currency: data.currency,
+                    successUrl: `${window.location.origin}/pricing/success`,
+                    failUrl: `${window.location.origin}/pricing?error=payment_failed`,
+                    country_code: 'PT',
+                });
             } else if (data.success) {
-                // Free trial activated via promo code
+                // Free trial or dev mode — subscription activated directly
                 router.push('/pricing/success');
             } else {
                 alert(data.error || 'Failed to create checkout');
