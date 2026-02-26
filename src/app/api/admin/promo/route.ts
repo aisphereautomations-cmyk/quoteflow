@@ -1,21 +1,36 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
-// Helper to check admin role
+// Service role client — bypasses RLS for admin operations
+function getAdminClient() {
+    return createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
+}
+
+// Helper to check admin role (uses session client)
 async function isAdmin(supabase: Awaited<ReturnType<typeof createClient>>) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return false;
     return user.app_metadata?.role === 'admin';
 }
 
+async function getAdminUser() {
+    const supabase = await createClient();
+    if (!(await isAdmin(supabase))) return null;
+    const { data: { user } } = await supabase.auth.getUser();
+    return user;
+}
+
 // GET — list all promo codes
 export async function GET() {
-    const supabase = await createClient();
-    if (!(await isAdmin(supabase))) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const user = await getAdminUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
-    const { data, error } = await supabase
+    const admin = getAdminClient();
+    const { data, error } = await admin
         .from('promo_codes')
         .select('*')
         .order('created_at', { ascending: false });
@@ -29,15 +44,13 @@ export async function GET() {
 
 // POST — create new promo code
 export async function POST(request: NextRequest) {
-    const supabase = await createClient();
-    if (!(await isAdmin(supabase))) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const user = await getAdminUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
-    const { data: { user } } = await supabase.auth.getUser();
     const body = await request.json();
+    const admin = getAdminClient();
 
-    const { data, error } = await supabase
+    const { data, error } = await admin
         .from('promo_codes')
         .insert({
             code: body.code?.toUpperCase().trim(),
@@ -47,7 +60,7 @@ export async function POST(request: NextRequest) {
             valid_from: body.validFrom || new Date().toISOString(),
             valid_until: body.validUntil || null,
             applies_to_plans: body.appliesTo || ['starter', 'pro', 'enterprise'],
-            created_by: user!.id,
+            created_by: user.id,
             is_active: true,
         })
         .select()
@@ -62,10 +75,8 @@ export async function POST(request: NextRequest) {
 
 // PUT — update promo code
 export async function PUT(request: NextRequest) {
-    const supabase = await createClient();
-    if (!(await isAdmin(supabase))) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const user = await getAdminUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
     const body = await request.json();
 
@@ -82,7 +93,8 @@ export async function PUT(request: NextRequest) {
     if (body.appliesTo !== undefined) updateData.applies_to_plans = body.appliesTo;
     if (body.isActive !== undefined) updateData.is_active = body.isActive;
 
-    const { data, error } = await supabase
+    const admin = getAdminClient();
+    const { data, error } = await admin
         .from('promo_codes')
         .update(updateData)
         .eq('id', body.id)
@@ -98,10 +110,8 @@ export async function PUT(request: NextRequest) {
 
 // DELETE — delete promo code
 export async function DELETE(request: NextRequest) {
-    const supabase = await createClient();
-    if (!(await isAdmin(supabase))) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const user = await getAdminUser();
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
     const { id } = await request.json();
 
@@ -109,7 +119,8 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json({ error: 'ID is required' }, { status: 400 });
     }
 
-    const { error } = await supabase
+    const admin = getAdminClient();
+    const { error } = await admin
         .from('promo_codes')
         .delete()
         .eq('id', id);
@@ -120,3 +131,4 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
 }
+
