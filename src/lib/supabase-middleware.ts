@@ -47,10 +47,11 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
-    // If logged in and on login page, redirect to pricing (which will redirect to main if subscribed)
-    if (user && pathname === '/login') {
+    // If logged in and on login page or root, redirect to /main
+    // The paywall below will redirect to /pricing if no active subscription
+    if (user && (pathname === '/login' || pathname === '/')) {
         const url = request.nextUrl.clone();
-        url.pathname = '/pricing';
+        url.pathname = '/main';
         return NextResponse.redirect(url);
     }
 

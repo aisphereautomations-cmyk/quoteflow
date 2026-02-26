@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { getPrice, type PlanId, type BillingCycle } from '@/lib/plans';
+
+// Service role client — bypasses RLS for writing subscriptions
+function getAdminClient() {
+    return createSupabaseClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -68,7 +77,8 @@ export async function POST(request: NextRequest) {
                 const trialEnd = new Date();
                 trialEnd.setDate(trialEnd.getDate() + promo.value);
 
-                const { error: subError } = await supabase
+                const admin = getAdminClient();
+                const { error: subError } = await admin
                     .from('subscriptions')
                     .insert({
                         user_id: user.id,
@@ -82,10 +92,12 @@ export async function POST(request: NextRequest) {
                         amount_paid: 0,
                     });
 
-                if (subError) throw subError;
+                if (subError) {
+                    return NextResponse.json({ error: subError.message }, { status: 500 });
+                }
 
                 // Increment promo usage
-                await supabase
+                await admin
                     .from('promo_codes')
                     .update({ times_used: promo.times_used + 1 })
                     .eq('id', promo.id);
@@ -110,7 +122,8 @@ export async function POST(request: NextRequest) {
                 periodEnd.setMonth(periodEnd.getMonth() + 1);
             }
 
-            const { error: subError } = await supabase
+            const admin = getAdminClient();
+            const { error: subError } = await admin
                 .from('subscriptions')
                 .insert({
                     user_id: user.id,
@@ -123,13 +136,22 @@ export async function POST(request: NextRequest) {
                     amount_paid: 0,
                 });
 
-            if (subError) throw subError;
+            if (subError) {
+                return NextResponse.json({ error: subError.message }, { status: 500 });
+            }
 
             // Increment promo usage
-            await supabase
+            const { data: promoRow } = await admin
                 .from('promo_codes')
-                .update({ times_used: (await supabase.from('promo_codes').select('times_used').eq('code', promoData.code).single()).data?.times_used + 1 })
-                .eq('code', promoData.code);
+                .select('times_used')
+                .eq('code', promoData.code)
+                .single();
+            if (promoRow) {
+                await admin
+                    .from('promo_codes')
+                    .update({ times_used: promoRow.times_used + 1 })
+                    .eq('code', promoData.code);
+            }
 
             return NextResponse.json({ success: true });
         }
@@ -148,7 +170,8 @@ export async function POST(request: NextRequest) {
                 periodEnd.setMonth(periodEnd.getMonth() + 1);
             }
 
-            const { error: subError } = await supabase
+            const admin = getAdminClient();
+            const { error: subError } = await admin
                 .from('subscriptions')
                 .insert({
                     user_id: user.id,
@@ -161,14 +184,23 @@ export async function POST(request: NextRequest) {
                     amount_paid: finalPrice,
                 });
 
-            if (subError) throw subError;
+            if (subError) {
+                return NextResponse.json({ error: subError.message }, { status: 500 });
+            }
 
             // Increment promo usage
             if (promoData) {
-                await supabase
+                const { data: promoRow } = await admin
                     .from('promo_codes')
-                    .update({ times_used: (await supabase.from('promo_codes').select('times_used').eq('code', promoData.code).single()).data?.times_used + 1 })
-                    .eq('code', promoData.code);
+                    .select('times_used')
+                    .eq('code', promoData.code)
+                    .single();
+                if (promoRow) {
+                    await admin
+                        .from('promo_codes')
+                        .update({ times_used: promoRow.times_used + 1 })
+                        .eq('code', promoData.code);
+                }
             }
 
             return NextResponse.json({ success: true });
