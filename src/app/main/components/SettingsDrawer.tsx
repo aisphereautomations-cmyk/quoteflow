@@ -122,7 +122,7 @@ export default function SettingsDrawer() {
     };
 
     const handleSave = async () => {
-        updateSettings({
+        const newSettings = {
             companyName: localCompanyName,
             email: localEmail,
             phone: localPhone,
@@ -135,16 +135,18 @@ export default function SettingsDrawer() {
             whatsappMessage: localWhatsappMessage,
             emailMessage: localEmailMessage,
             quoteDescription: localQuoteDescription,
-        });
-        // Persist to Supabase — saveSettings will use the updated state
-        // We need a small delay to ensure state has been updated
-        setTimeout(async () => {
-            try {
-                await saveSettings();
-            } catch (err) {
-                console.error('Failed to save settings:', err);
-            }
-        }, 100);
+        };
+
+        // Update context state for immediate UI reflection
+        updateSettings(newSettings);
+
+        // Persist to Supabase — pass data directly to avoid stale closure
+        try {
+            await saveSettings(newSettings);
+        } catch (err) {
+            console.error('Failed to save settings:', err);
+        }
+
         setIsOpen(false);
     };
 

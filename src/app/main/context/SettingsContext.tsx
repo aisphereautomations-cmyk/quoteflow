@@ -4,7 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, ReactNode 
 import { createClient } from '@/lib/supabase-browser';
 import { useAuth } from './AuthContext';
 
-interface SettingsData {
+export interface SettingsData {
     companyName: string;
     email: string;
     phone: string;
@@ -22,7 +22,7 @@ interface SettingsData {
 interface SettingsContextType {
     settings: SettingsData;
     updateSettings: (updates: Partial<SettingsData>) => void;
-    saveSettings: () => Promise<void>;
+    saveSettings: (dataToSave?: SettingsData) => Promise<void>;
     isLoading: boolean;
     isSaving: boolean;
 }
@@ -103,13 +103,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         setSettings((prev) => ({ ...prev, ...updates }));
     };
 
-    const saveSettings = useCallback(async () => {
+    const saveSettings = useCallback(async (dataToSave?: SettingsData) => {
         if (!user) return;
+
+        // Use provided data (avoids stale closure), or fall back to current state
+        const data = dataToSave ?? settings;
 
         setIsSaving(true);
         try {
             // Handle logo upload if it's a data URL (from crop)
-            let logoUrl = settings.logoUrl;
+            let logoUrl = data.logoUrl;
             if (logoUrl && logoUrl.startsWith('data:')) {
                 // Convert data URL to blob and upload to Supabase Storage
                 const response = await fetch(logoUrl);
@@ -126,7 +129,6 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
                 if (uploadError) {
                     console.error('Error uploading logo:', uploadError);
-                    // Continue saving other settings even if logo upload fails
                 } else {
                     const { data: urlData } = supabase.storage
                         .from('logos')
@@ -139,18 +141,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                 .from('user_settings')
                 .upsert({
                     user_id: user.id,
-                    company_name: settings.companyName,
-                    email: settings.email,
-                    phone: settings.phone,
-                    website: settings.website,
-                    brand_color: settings.brandColor,
-                    currency: settings.currency,
-                    vat_enabled: settings.vatEnabled,
-                    vat_percentage: settings.vatPercentage,
+                    company_name: data.companyName,
+                    email: data.email,
+                    phone: data.phone,
+                    website: data.website,
+                    brand_color: data.brandColor,
+                    currency: data.currency,
+                    vat_enabled: data.vatEnabled,
+                    vat_percentage: data.vatPercentage,
                     logo_url: logoUrl,
-                    whatsapp_message: settings.whatsappMessage,
-                    email_message: settings.emailMessage,
-                    quote_description: settings.quoteDescription,
+                    whatsapp_message: data.whatsappMessage,
+                    email_message: data.emailMessage,
+                    quote_description: data.quoteDescription,
                     updated_at: new Date().toISOString(),
                 }, {
                     onConflict: 'user_id',
@@ -162,7 +164,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
             }
 
             // Update local state with the stored logo URL
-            if (logoUrl !== settings.logoUrl) {
+            if (logoUrl !== data.logoUrl) {
                 setSettings((prev) => ({ ...prev, logoUrl }));
             }
         } catch (err) {
