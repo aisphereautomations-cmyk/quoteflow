@@ -101,9 +101,40 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        // ─── If price is zero after promo, activate subscription directly ───
+        if (finalPrice <= 0 && promoData) {
+            const periodEnd = new Date();
+            if (billingCycle === 'yearly') {
+                periodEnd.setFullYear(periodEnd.getFullYear() + 1);
+            } else {
+                periodEnd.setMonth(periodEnd.getMonth() + 1);
+            }
+
+            const { error: subError } = await supabase
+                .from('subscriptions')
+                .insert({
+                    user_id: user.id,
+                    plan,
+                    billing_cycle: billingCycle,
+                    status: 'active',
+                    current_period_start: new Date().toISOString(),
+                    current_period_end: periodEnd.toISOString(),
+                    promo_code_used: promoData.code,
+                    amount_paid: 0,
+                });
+
+            if (subError) throw subError;
+
+            // Increment promo usage
+            await supabase
+                .from('promo_codes')
+                .update({ times_used: (await supabase.from('promo_codes').select('times_used').eq('code', promoData.code).single()).data?.times_used + 1 })
+                .eq('code', promoData.code);
+
+            return NextResponse.json({ success: true });
+        }
+
         // ─── Airwallex Integration ───
-        // TODO: Replace with real Airwallex API call when API keys are provided
-        // For now, create a placeholder subscription that can be activated via webhook
 
         const airwallexApiKey = process.env.AIRWALLEX_API_KEY;
         const airwallexClientId = process.env.AIRWALLEX_CLIENT_ID;
