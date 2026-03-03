@@ -9,7 +9,7 @@ export interface ClientData {
     serviceTitle: string;
 }
 
-/* ── colour helpers ─────────────────────────────────────────── */
+/* ── helpers ─────────────────────────────────────────────────── */
 
 function hexToRGB(hex: string): [number, number, number] {
     const h = hex.replace('#', '');
@@ -20,46 +20,31 @@ function hexToRGB(hex: string): [number, number, number] {
     ];
 }
 
-/* ── image loader ───────────────────────────────────────────── */
-
 async function loadImageAsBase64(url: string): Promise<string | null> {
     if (url.startsWith('data:')) return url;
-
     try {
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.src = url;
-        await new Promise<void>((resolve, reject) => {
-            img.onload = () => resolve();
-            img.onerror = () => reject();
-        });
-        const canvas = document.createElement('canvas');
-        canvas.width = img.naturalWidth;
-        canvas.height = img.naturalHeight;
-        const ctx = canvas.getContext('2d');
+        await new Promise<void>((ok, fail) => { img.onload = () => ok(); img.onerror = () => fail(); });
+        const c = document.createElement('canvas');
+        c.width = img.naturalWidth;
+        c.height = img.naturalHeight;
+        const ctx = c.getContext('2d');
         if (!ctx) return null;
         ctx.drawImage(img, 0, 0);
-        return canvas.toDataURL('image/png');
-    } catch {
-        console.warn('Could not load logo for PDF');
-        return null;
-    }
+        return c.toDataURL('image/png');
+    } catch { return null; }
 }
-
-/* ── text wrapping helper ───────────────────────────────────── */
 
 function wrapText(pdf: jsPDF, text: string, maxWidth: number): string[] {
-    const lines: string[] = [];
-    const paragraphs = text.split('\n');
-    for (const para of paragraphs) {
-        if (!para.trim()) { lines.push(''); continue; }
-        const wrapped = pdf.splitTextToSize(para, maxWidth) as string[];
-        lines.push(...wrapped);
+    const out: string[] = [];
+    for (const para of text.split('\n')) {
+        if (!para.trim()) { out.push(''); continue; }
+        out.push(...(pdf.splitTextToSize(para, maxWidth) as string[]));
     }
-    return lines;
+    return out;
 }
-
-/* ── pricing helpers ────────────────────────────────────────── */
 
 function getUnitLabel(mode: string) {
     if (mode === 'sqm') return 'm\u00B2';
@@ -67,271 +52,250 @@ function getUnitLabel(mode: string) {
     return '';
 }
 
-/* ── main generator ─────────────────────────────────────────── */
+/*
+ * ═══════════════════════════════════════════════════════
+ *  generateQuotePDF
+ *
+ *  Uses POINTS as the unit so that 1 pt ≈ 1 CSS px.
+ *  The preview is 595 px wide → PDF is 595 pt wide (=A4).
+ *  Font sizes in pt match the CSS font-sizes in px.
+ *  Paddings/margins match the CSS values exactly.
+ * ═══════════════════════════════════════════════════════
+ */
 
 export async function generateQuotePDF(
     settings: SettingsData,
     quote: QuoteData,
     client?: ClientData,
 ): Promise<Blob> {
-    const PAGE_W = 210;
-    const MARGIN = 18;
-    const CONTENT_W = PAGE_W - MARGIN * 2;
 
-    // ─── Load logo first ───
-    let logoBase64: string | null = null;
-    let logoW = 0;
-    let logoH = 0;
-    const LOGO_MAX_W = 40;
-    const LOGO_MAX_H = 22;
+    // ── Page constants matching the CSS ──
+    const W = 595;           // page width (= previewFrame 595px)
+    const PAD = 40;          // side padding (= CSS padding: 40px)
+    const CW = W - PAD * 2; // content width = 515
 
+    // ── Load logo ──
+    let logoB64: string | null = null;
+    let logoW = 0, logoH = 0;
     if (settings.logoUrl) {
-        logoBase64 = await loadImageAsBase64(settings.logoUrl);
-        if (logoBase64) {
+        logoB64 = await loadImageAsBase64(settings.logoUrl);
+        if (logoB64) {
             try {
                 const img = new Image();
-                img.src = logoBase64;
+                img.src = logoB64;
                 await new Promise<void>((r) => { img.onload = () => r(); });
-                logoW = LOGO_MAX_W;
-                logoH = (img.naturalHeight / img.naturalWidth) * logoW;
-                if (logoH > LOGO_MAX_H) {
-                    logoH = LOGO_MAX_H;
-                    logoW = (img.naturalWidth / img.naturalHeight) * logoH;
-                }
-            } catch { logoBase64 = null; }
+                // Logo area in CSS: 90×90 px
+                logoW = 90; logoH = (img.naturalHeight / img.naturalWidth) * 90;
+                if (logoH > 90) { logoH = 90; logoW = (img.naturalWidth / img.naturalHeight) * 90; }
+            } catch { logoB64 = null; }
         }
     }
 
-    // ─── First pass: calculate the exact height needed ───
-    const tmp = new jsPDF('p', 'mm', 'a4');
-    let h = MARGIN;
+    // ── Calculate total height ──
+    const m = new jsPDF('p', 'pt', 'a4');  // temp for text measurement
+    let h = 40; // top padding (CSS: padding-top 40px in pdfHeader)
 
-    // Header block
-    const headerTextH = (() => {
-        let th = 0;
-        if (settings.companyName) th += 8;
-        if (settings.phone) th += 5;
-        if (settings.email) th += 5;
-        if (settings.website) th += 5;
-        return th;
-    })();
-    const headerH = Math.max(headerTextH, logoH + 4);
-    h += headerH + 6;
+    // Header
+    const hdrTextH = (settings.companyName ? 36 : 0) + // 22px font + 14px margin-bottom
+        (settings.phone ? 16 : 0) +
+        (settings.email ? 16 : 0) +
+        (settings.website ? 16 : 0);
+    h += Math.max(hdrTextH, logoH) + 28; // 28 = bottom padding of header
 
     // Description bar
-    h += 12;
+    h += 29; // CSS: height 29px
 
-    // Services
+    // Services area
     const filledServices = quote.services.filter(
         (s) => s.title || s.description || s.fixedPrice || (s.quantity && s.unitPrice),
     );
     if (filledServices.length > 0) {
-        h += 4;
-        for (const service of filledServices) {
-            h += 6; // title line
-            if (service.description) {
-                tmp.setFontSize(9);
-                const lines = wrapText(tmp, service.description, CONTENT_W);
-                h += lines.length * 4;
+        h += 30; // top padding of servicesArea
+        for (const svc of filledServices) {
+            h += 8 + 18; // serviceRow: margin-bottom 8 + title 18px line
+            if (svc.description) {
+                m.setFontSize(16);
+                const lines = wrapText(m, svc.description, CW);
+                h += lines.length * 16 * 1.7; // 16px font × 1.7 line-height
             }
-            h += 4; // gap
+            h += 28; // margin-bottom per service
         }
+        h += 40; // bottom padding of servicesArea
+    } else {
+        // Even with no services, equal amount of padding
+        h += 60;
     }
 
-    // Divider bar
-    h += 6;
+    // Totals divider bar
+    h += 14; // CSS: height 14px
 
-    // Bottom section (totals + footer)
-    h += 6; // base excl vat
-    h += 5; // vat line
-    h += 7; // total line
-    if (quote.estimatedTime) h += 5;
-    if (quote.expirationDate) h += 5;
+    // Bottom section
+    h += 20; // padding-top
+    h += 20 + 20 + 22; // baseValueLine×2 + totalValueLine
+    if (quote.estimatedTime) h += 16 * 1.6;
+    if (quote.expirationDate) h += 16 * 1.6;
     if (quote.paymentConditions) {
-        tmp.setFontSize(9);
-        const lines = wrapText(tmp, quote.paymentConditions, CONTENT_W / 2);
-        h += lines.length * 4;
+        m.setFontSize(15);
+        h += wrapText(m, quote.paymentConditions, CW / 2).length * 15 * 1.6;
     }
-    h += MARGIN;
+    h += 36; // padding-bottom
 
-    const PAGE_H = Math.max(h, 80);
+    const PAGE_H = Math.max(h, 400);
 
-    // ─── Create PDF ───
-    const pdf = new jsPDF('p', 'mm', [PAGE_W, PAGE_H]);
-    let y = MARGIN;
+    // ── Create the PDF ──
+    const pdf = new jsPDF('p', 'pt', [W, PAGE_H]);
+    let y = 40; // start at top padding
 
-    // ══════ HEADER ══════
-    const headerStartY = y;
+    const [br, bg, bb] = hexToRGB(settings.brandColor);
 
-    // Logo (top-right with margin)
-    if (logoBase64 && logoW > 0) {
-        const logoX = PAGE_W - MARGIN - logoW;
-        pdf.addImage(logoBase64, 'PNG', logoX, headerStartY, logoW, logoH);
+    // ════════ HEADER (CSS: padding 40px 40px 28px) ════════
+    const headerTop = y;
+
+    // Logo top-right
+    if (logoB64 && logoW > 0) {
+        const lx = W - PAD - logoW;
+        try { pdf.addImage(logoB64, 'PNG', lx, headerTop, logoW, logoH); } catch { /* skip */ }
     }
 
-    // Company info (top-left)
-    const textMaxW = logoBase64 ? CONTENT_W - logoW - 8 : CONTENT_W;
+    // Company info top-left
+    let ty = headerTop;
     if (settings.companyName) {
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(15);
-        pdf.setTextColor(0, 0, 0);
-        pdf.text(settings.companyName, MARGIN, y + 6);
-        y += 10;
+        pdf.setFontSize(22);
+        pdf.setTextColor(17, 17, 17);
+        pdf.text(settings.companyName, PAD, ty + 22); // baseline offset ≈ font size
+        ty += 36; // 22 + 14 margin-bottom
     }
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
-    pdf.setTextColor(80, 80, 80);
-    if (settings.phone) {
-        pdf.text(settings.phone, MARGIN, y + 3);
-        y += 5;
-    }
-    if (settings.email) {
-        pdf.text(settings.email, MARGIN, y + 3);
-        y += 5;
-    }
-    if (settings.website) {
-        pdf.text(settings.website, MARGIN, y + 3);
-        y += 5;
-    }
+    pdf.setFontSize(15);
+    pdf.setTextColor(68, 68, 68);
+    if (settings.phone) { pdf.text(settings.phone, PAD, ty + 13); ty += 16; }
+    if (settings.email) { pdf.text(settings.email, PAD, ty + 13); ty += 16; }
+    if (settings.website) { pdf.text(settings.website, PAD, ty + 13); ty += 16; }
 
-    y = headerStartY + headerH + 6;
+    y = headerTop + Math.max(ty - headerTop, logoH) + 28;
 
-    // ══════ DESCRIPTION BAR ══════
-    const [br, bg, bb] = hexToRGB(settings.brandColor);
+    // ════════ DESCRIPTION BAR (full width, 29px tall) ════════
     pdf.setFillColor(br, bg, bb);
-    pdf.rect(MARGIN, y, CONTENT_W, 10, 'F');
+    pdf.rect(0, y, W, 29, 'F');   // full width, no side margins
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(11);
+    pdf.setFontSize(14);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(settings.quoteDescription || 'Quote Description', MARGIN + 4, y + 7);
-    y += 12;
+    pdf.text(settings.quoteDescription || 'Quote Description', W / 2, y + 19, { align: 'center' });
+    y += 29;
 
-    // ══════ SERVICES ══════
+    // ════════ SERVICES (CSS: padding 30px 40px) ════════
     if (filledServices.length > 0) {
-        y += 4;
-        pdf.setTextColor(0, 0, 0);
+        y += 30; // top padding
 
-        for (const service of filledServices) {
-            let priceDisplay = '';
-            if (service.pricingMode === 'fixed') {
-                if (service.fixedPrice) {
-                    priceDisplay = parseFloat(service.fixedPrice).toFixed(2) + ' ' + settings.currency;
-                }
-            } else if (service.quantity && service.unitPrice) {
-                const unit = getUnitLabel(service.pricingMode);
-                const total = (parseFloat(service.quantity) * parseFloat(service.unitPrice)).toFixed(2);
-                priceDisplay = total + ' ' + settings.currency + ' (' + service.quantity + ' ' + unit + ')';
+        for (const svc of filledServices) {
+            let priceStr = '';
+            if (svc.pricingMode === 'fixed' && svc.fixedPrice) {
+                priceStr = parseFloat(svc.fixedPrice).toFixed(2) + ' ' + settings.currency;
+            } else if (svc.quantity && svc.unitPrice) {
+                const u = getUnitLabel(svc.pricingMode);
+                const t = (parseFloat(svc.quantity) * parseFloat(svc.unitPrice)).toFixed(2);
+                priceStr = t + ' ' + settings.currency + ' (' + svc.quantity + ' ' + u + ')';
             }
 
-            // Title + price
-            if (service.title) {
+            // Title (left) + price (right) on same line
+            if (svc.title) {
                 pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(10);
-                pdf.setTextColor(0, 0, 0);
-                pdf.text(service.title, MARGIN, y + 4);
+                pdf.setFontSize(18);
+                pdf.setTextColor(17, 17, 17);
+                pdf.text(svc.title, PAD, y + 14);
             }
-            if (priceDisplay) {
+            if (priceStr) {
                 pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(10);
-                pdf.setTextColor(0, 0, 0);
-                pdf.text(priceDisplay, PAGE_W - MARGIN, y + 4, { align: 'right' });
+                pdf.setFontSize(14);
+                pdf.setTextColor(34, 34, 34);
+                const pw = pdf.getTextWidth(priceStr);
+                pdf.text(priceStr, W - PAD - pw, y + 14);
             }
-            y += 6;
+            y += 26; // serviceRow height + margin
 
             // Description
-            if (service.description) {
+            if (svc.description) {
                 pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(9);
-                pdf.setTextColor(100, 100, 100);
-                const descLines = wrapText(pdf, service.description, CONTENT_W);
-                for (const line of descLines) {
-                    pdf.text(line, MARGIN, y + 3);
-                    y += 4;
+                pdf.setFontSize(16);
+                pdf.setTextColor(68, 68, 68);
+                const lines = wrapText(pdf, svc.description, CW);
+                const lh = 16 * 1.7;
+                for (const line of lines) {
+                    pdf.text(line, PAD, y + 13);
+                    y += lh;
                 }
             }
-            y += 4;
+            y += 28; // gap between services
         }
+    } else {
+        y += 60;
     }
 
-    // ══════ DIVIDER BAR ══════
-    y += 2;
+    // ════════ TOTALS DIVIDER BAR (full width, 14px tall) ════════
     pdf.setFillColor(br, bg, bb);
-    pdf.rect(MARGIN, y, CONTENT_W, 2, 'F');
-    y += 6;
+    pdf.rect(0, y, W, 14, 'F');   // full width
+    y += 14;
 
-    // ══════ BOTTOM SECTION ══════
-    const settingsVat = settings.vatEnabled ? settings.vatPercentage : 0;
-    const vatPercent = quote.vatOverride !== '' ? (parseFloat(quote.vatOverride) || 0) : settingsVat;
-    const baseVal = parseFloat(quote.baseValue) || 0;
-    const vatAmount = (baseVal * vatPercent) / 100;
-    const totalValue = baseVal + vatAmount;
+    // ════════ BOTTOM SECTION (CSS: padding 20px 40px 36px) ════════
+    y += 20;
 
-    const bottomStartY = y;
+    const sVat = settings.vatEnabled ? settings.vatPercentage : 0;
+    const vPct = quote.vatOverride !== '' ? (parseFloat(quote.vatOverride) || 0) : sVat;
+    const base = parseFloat(quote.baseValue) || 0;
+    const vatAmt = (base * vPct) / 100;
+    const total = base + vatAmt;
 
-    // RIGHT SIDE: totals (right-aligned)
+    const bY = y; // save start for footer on left side
+
+    // Totals — right-aligned (manually positioned)
+    const rx = W - PAD; // right edge
+
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
-    pdf.setTextColor(100, 100, 100);
+    pdf.setFontSize(16);
+    pdf.setTextColor(51, 51, 51);
 
-    const rightEdge = PAGE_W - MARGIN;
+    const t1 = 'Price excluding VAT: ' + settings.currency + ' ' + (base > 0 ? base.toFixed(2) : '0.00');
+    const t1w = pdf.getTextWidth(t1);
+    pdf.text(t1, rx - t1w, y + 13);
+    y += 20;
 
-    pdf.text(
-        'Price excluding VAT: ' + settings.currency + ' ' + (baseVal > 0 ? baseVal.toFixed(2) : '0.00'),
-        rightEdge, y + 3,
-        { align: 'right' },
-    );
-    y += 5;
-
-    pdf.text(
-        'VAT ' + vatPercent + '%: ' + settings.currency + ' ' + (baseVal > 0 ? vatAmount.toFixed(2) : '0.00'),
-        rightEdge, y + 3,
-        { align: 'right' },
-    );
-    y += 6;
+    const t2 = 'VAT ' + vPct + '%: ' + settings.currency + ' ' + (base > 0 ? vatAmt.toFixed(2) : '0.00');
+    const t2w = pdf.getTextWidth(t2);
+    pdf.text(t2, rx - t2w, y + 13);
+    y += 20;
 
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(11);
-    pdf.setTextColor(0, 0, 0);
-    pdf.text(
-        'Total incl. VAT: ' + settings.currency + ' ' + (totalValue > 0 ? totalValue.toFixed(2) : '0.00'),
-        rightEdge, y + 3,
-        { align: 'right' },
-    );
+    pdf.setFontSize(18);
+    pdf.setTextColor(17, 17, 17);
+    const t3 = 'Total incl. VAT: ' + settings.currency + ' ' + (total > 0 ? total.toFixed(2) : '0.00');
+    const t3w = pdf.getTextWidth(t3);
+    pdf.text(t3, rx - t3w, y + 14);
 
-    // LEFT SIDE: footer info
-    let footerY = bottomStartY;
+    // Footer — left side
+    let fy = bY;
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
-    pdf.setTextColor(100, 100, 100);
-
-    if (quote.estimatedTime) {
-        pdf.text(quote.estimatedTime, MARGIN, footerY + 3);
-        footerY += 5;
-    }
-    if (quote.expirationDate) {
-        pdf.text(quote.expirationDate, MARGIN, footerY + 3);
-        footerY += 5;
-    }
+    pdf.setFontSize(15);
+    pdf.setTextColor(68, 68, 68);
+    if (quote.estimatedTime) { pdf.text(quote.estimatedTime, PAD, fy + 13); fy += 16 * 1.6; }
+    if (quote.expirationDate) { pdf.text(quote.expirationDate, PAD, fy + 13); fy += 16 * 1.6; }
     if (quote.paymentConditions) {
-        const condLines = wrapText(pdf, quote.paymentConditions, CONTENT_W / 2);
-        for (const line of condLines) {
-            pdf.text(line, MARGIN, footerY + 3);
-            footerY += 4;
-        }
+        const cl = wrapText(pdf, quote.paymentConditions, CW / 2);
+        for (const ln of cl) { pdf.text(ln, PAD, fy + 13); fy += 15 * 1.6; }
     }
 
     return pdf.output('blob');
 }
 
-/* ── download helper ────────────────────────────────────────── */
+/* ── download helper ── */
 
 export function downloadPDF(blob: Blob, filename: string = 'quote.pdf'): void {
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
