@@ -14,18 +14,23 @@ export default function PDFPreview() {
     const scalerRef = useRef<HTMLDivElement>(null);
     const pageRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
+    const [scaledH, setScaledH] = useState<number | undefined>(undefined);
 
     const recalc = useCallback(() => {
         if (!scalerRef.current || !pageRef.current) return;
         const containerW = scalerRef.current.offsetWidth;
         const s = containerW / PAGE_WIDTH;
         setScale(s);
+        // Measure page's real height and set wrapper height to the scaled version
+        const pageH = pageRef.current.offsetHeight;
+        setScaledH(pageH * s);
     }, []);
 
     useEffect(() => {
         recalc();
         const ro = new ResizeObserver(recalc);
         if (scalerRef.current) ro.observe(scalerRef.current);
+        if (pageRef.current) ro.observe(pageRef.current);
         return () => ro.disconnect();
     }, [recalc]);
 
@@ -54,14 +59,13 @@ export default function PDFPreview() {
         <div className={styles.previewContainer}>
             <h2 className={styles.sectionTitle}>PDF Preview</h2>
 
-            <div ref={scalerRef} className={styles.previewScaler}>
+            <div ref={scalerRef} className={styles.previewScaler} style={{ height: scaledH }}>
                 <div
                     ref={pageRef}
                     className={styles.previewFrame}
                     style={{
                         transform: `scale(${scale})`,
                         transformOrigin: 'top left',
-                        marginBottom: `calc(${(scale - 1) * 100}%)`,
                     }}
                 >
                     {/* PDF Header */}
