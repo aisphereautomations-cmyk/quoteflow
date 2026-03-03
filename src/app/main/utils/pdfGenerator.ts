@@ -248,7 +248,7 @@ export async function generateQuotePDF(
 
     const bY = y; // save start for footer on left side
 
-    // Totals — right-aligned (manually positioned)
+    // Totals — right-aligned using jsPDF align option
     const rx = W - PAD; // right edge
 
     pdf.setFont('helvetica', 'normal');
@@ -256,21 +256,18 @@ export async function generateQuotePDF(
     pdf.setTextColor(51, 51, 51);
 
     const t1 = 'Price excluding VAT: ' + settings.currency + ' ' + (base > 0 ? base.toFixed(2) : '0.00');
-    const t1w = pdf.getTextWidth(t1);
-    pdf.text(t1, rx - t1w, y + 13);
+    pdf.text(t1, rx, y + 13, { align: 'right' });
     y += 20;
 
     const t2 = 'VAT ' + vPct + '%: ' + settings.currency + ' ' + (base > 0 ? vatAmt.toFixed(2) : '0.00');
-    const t2w = pdf.getTextWidth(t2);
-    pdf.text(t2, rx - t2w, y + 13);
+    pdf.text(t2, rx, y + 13, { align: 'right' });
     y += 20;
 
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(18);
     pdf.setTextColor(17, 17, 17);
     const t3 = 'Total incl. VAT: ' + settings.currency + ' ' + (total > 0 ? total.toFixed(2) : '0.00');
-    const t3w = pdf.getTextWidth(t3);
-    pdf.text(t3, rx - t3w, y + 14);
+    pdf.text(t3, rx, y + 14, { align: 'right' });
 
     // Footer — left side
     let fy = bY;
