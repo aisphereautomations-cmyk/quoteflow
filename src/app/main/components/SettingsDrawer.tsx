@@ -40,6 +40,7 @@ export default function SettingsDrawer() {
     const [crop, setCrop] = useState({ x: 0, y: 0 });
     const [zoom, setZoom] = useState(1);
     const [croppedArea, setCroppedArea] = useState<Area | null>(null);
+    const [cropAspect, setCropAspect] = useState<number | undefined>(undefined); // undefined = free
 
     const onCropComplete = useCallback((_: Area, croppedAreaPixels: Area) => {
         setCroppedArea(croppedAreaPixels);
@@ -52,12 +53,14 @@ export default function SettingsDrawer() {
         setCropSrc(null);
         setCrop({ x: 0, y: 0 });
         setZoom(1);
+        setCropAspect(undefined);
     };
 
     const handleCropCancel = () => {
         setCropSrc(null);
         setCrop({ x: 0, y: 0 });
         setZoom(1);
+        setCropAspect(undefined);
     };
 
     const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,13 +171,37 @@ export default function SettingsDrawer() {
                             image={cropSrc}
                             crop={crop}
                             zoom={zoom}
-                            aspect={1}
+                            aspect={cropAspect}
                             onCropChange={setCrop}
                             onZoomChange={setZoom}
                             onCropComplete={onCropComplete}
                         />
                     </div>
                     <div className={styles.cropControls}>
+                        <div className={styles.aspectRow}>
+                            <span className={styles.aspectLabel}>Shape:</span>
+                            <button
+                                type="button"
+                                className={`${styles.aspectBtn} ${cropAspect === undefined ? styles.aspectBtnActive : ''}`}
+                                onClick={() => setCropAspect(undefined)}
+                            >
+                                Free
+                            </button>
+                            <button
+                                type="button"
+                                className={`${styles.aspectBtn} ${cropAspect === 1 ? styles.aspectBtnActive : ''}`}
+                                onClick={() => setCropAspect(1)}
+                            >
+                                Square
+                            </button>
+                            <button
+                                type="button"
+                                className={`${styles.aspectBtn} ${cropAspect === 16 / 9 ? styles.aspectBtnActive : ''}`}
+                                onClick={() => setCropAspect(16 / 9)}
+                            >
+                                Wide
+                            </button>
+                        </div>
                         <label className={styles.zoomLabel}>
                             Zoom
                             <input

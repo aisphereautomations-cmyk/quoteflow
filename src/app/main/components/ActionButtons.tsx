@@ -1,17 +1,16 @@
 'use client';
 
-import { useRef, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useClient } from '../context/ClientContext';
 import { useSettings } from '../context/SettingsContext';
 import { useQuote } from '../context/QuoteContext';
-import { generatePDF, downloadPDF } from '../utils/pdfGenerator';
+import { generateQuotePDF, downloadPDF } from '../utils/pdfGenerator';
 import styles from './ActionButtons.module.css';
 
 export default function ActionButtons() {
     const { client } = useClient();
     const { settings } = useSettings();
     const { quote } = useQuote();
-    const previewRef = useRef<HTMLDivElement>(null);
 
     // Local editable messages — initialized from Settings defaults
     const [whatsappMsg, setWhatsappMsg] = useState(settings.whatsappMessage);
@@ -21,227 +20,81 @@ export default function ActionButtons() {
     useEffect(() => { setWhatsappMsg(settings.whatsappMessage); }, [settings.whatsappMessage]);
     useEffect(() => { setEmailMsg(settings.emailMessage); }, [settings.emailMessage]);
 
-    const settingsVat = settings.vatEnabled ? settings.vatPercentage : 0;
-    const vatPercent = quote.vatOverride !== '' ? (parseFloat(quote.vatOverride) || 0) : settingsVat;
-    const baseVal = parseFloat(quote.baseValue) || 0;
-    const totalValue = baseVal + (baseVal * vatPercent) / 100;
+    /* ── Share helper — tries Web Share API with file, otherwise falls back ── */
+    async function shareOrFallback(
+        blob: Blob,
+        fallbackAction: () => void,
+    ) {
+        try {
+            const file = new File([blob], 'quote.pdf', { type: 'application/pdf' });
 
-    // Only show services that have some content filled in
-    const filledServices = quote.services.filter(
-        (s) => s.title || s.description || s.fixedPrice || (s.quantity && s.unitPrice)
-    );
+            // Check if Web Share with files is supported
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({
+                    title: 'Quote',
+                    text: settings.emailMessage || client.serviceTitle || 'Please find the quote attached',
+                    files: [file],
+                });
+                return; // shared successfully
+            }
+        } catch (err: unknown) {
+            // User cancelled the share sheet — do nothing
+            if (err instanceof Error && err.name === 'AbortError') return;
+            console.warn('Web Share failed, using fallback:', err);
+        }
 
+        // Fallback: download PDF + open the appropriate link
+        downloadPDF(blob, 'quote.pdf');
+        fallbackAction();
+    }
+
+    /* ── Email handler ── */
     const handleEmail = async () => {
         if (!client.email) {
             alert('Please enter client email address');
             return;
         }
 
-        if (!previewRef.current) return;
+        const blob = await generateQuotePDF(settings, quote, client);
 
-        try {
-            // Generate and download PDF
-            const blob = await generatePDF(previewRef.current, 'quote.pdf');
-            downloadPDF(blob, 'quote.pdf');
+        const subject = `Quote from ${settings.companyName || 'Quote Flow'}`;
+        const body = emailMsg || 'Hello! Please find attached the quote for your review.';
+        const mailtoUrl = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
-            // Build mailto URL
-            const subject = `Quote from ${settings.companyName || 'Quote Flow'}`;
-            const body = emailMsg || 'Hello! Please find attached the quote for your review.';
-            const mailtoUrl = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-
-            // Open email client
+        await shareOrFallback(blob, () => {
             window.location.href = mailtoUrl;
-        } catch (error) {
-            console.error('Error sending email:', error);
-            alert('Failed to prepare email. Please try again.');
-        }
+        });
     };
 
+    /* ── Share handler ── */
     const handleShare = async () => {
-        if (!previewRef.current) return;
+        const blob = await generateQuotePDF(settings, quote, client);
 
-        try {
-            // Generate PDF blob
-            const blob = await generatePDF(previewRef.current, 'quote.pdf');
-
-            // Check if Web Share API is supported
-            if (navigator.share && navigator.canShare) {
-                const file = new File([blob], 'quote.pdf', { type: 'application/pdf' });
-
-                // Check if files can be shared
-                if (navigator.canShare({ files: [file] })) {
-                    await navigator.share({
-                        title: 'Quote',
-                        text: settings.emailMessage || client.serviceTitle || 'Please find the quote attached',
-                        files: [file],
-                    });
-                } else {
-                    // Fallback to download if file sharing not supported
-                    downloadPDF(blob, 'quote.pdf');
-                    alert('PDF downloaded. File sharing is not supported on this browser.');
-                }
-            } else {
-                // Fallback for unsupported browsers
-                downloadPDF(blob, 'quote.pdf');
-                alert('PDF downloaded. Web Share API is not supported on this browser.');
-            }
-        } catch (error: any) {
-            if (error.name === 'AbortError') {
-                // User cancelled - do nothing
-                return;
-            }
-            console.error('Error sharing:', error);
-            // Fallback to download
-            if (previewRef.current) {
-                const blob = await generatePDF(previewRef.current, 'quote.pdf');
-                downloadPDF(blob, 'quote.pdf');
-            }
-        }
+        await shareOrFallback(blob, () => {
+            // Fallback: just download, no specific link
+        });
     };
 
+    /* ── WhatsApp handler ── */
     const handleWhatsapp = async () => {
         if (!client.whatsapp) {
             alert('Please enter client WhatsApp number');
             return;
         }
 
-        if (!previewRef.current) return;
+        const blob = await generateQuotePDF(settings, quote, client);
 
-        try {
-            // Generate and download PDF
-            const blob = await generatePDF(previewRef.current, 'quote.pdf');
-            downloadPDF(blob, 'quote.pdf');
+        const message = whatsappMsg || 'Hello! Please find attached the quote for your review.';
+        const phone = client.whatsapp.replace(/\D/g, ''); // Remove non-digits
+        const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
-            // Build WhatsApp URL
-            const message = whatsappMsg || 'Hello! Please find attached the quote for your review.';
-            const phone = client.whatsapp.replace(/\D/g, ''); // Remove non-digits
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
-            // Open WhatsApp
+        await shareOrFallback(blob, () => {
             window.open(whatsappUrl, '_blank');
-        } catch (error) {
-            console.error('Error sending WhatsApp:', error);
-            alert('Failed to prepare WhatsApp message. Please try again.');
-        }
+        });
     };
 
     return (
         <>
-            {/* Hidden PDF Preview for generation */}
-            <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-                <div ref={previewRef} style={{ width: '794px', background: '#ffffff', padding: '20px' }}>
-                    {/* PDF Header */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                        <div>
-                            {settings.companyName && (
-                                <h3 style={{ margin: '0 0 10px 0', fontSize: '18px', fontWeight: 'bold', color: '#000' }}>
-                                    {settings.companyName}
-                                </h3>
-                            )}
-                            {settings.phone && (
-                                <p style={{ margin: '5px 0', fontSize: '12px', color: '#333' }}>
-                                    {settings.phone}
-                                </p>
-                            )}
-                            {settings.email && (
-                                <p style={{ margin: '5px 0', fontSize: '12px', color: '#333' }}>
-                                    {settings.email}
-                                </p>
-                            )}
-                            {settings.website && (
-                                <p style={{ margin: '5px 0', fontSize: '12px', color: '#333' }}>
-                                    {settings.website}
-                                </p>
-                            )}
-                        </div>
-                        {settings.logoUrl && (
-                            <div style={{ width: '150px', height: '80px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <img src={settings.logoUrl} alt="Company logo" style={{ maxWidth: '100%', maxHeight: '100%' }} />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Quote Description Bar */}
-                    <div style={{ backgroundColor: settings.brandColor, color: '#fff', padding: '10px', marginBottom: '20px', fontWeight: 'bold' }}>
-                        {settings.quoteDescription}
-                    </div>
-
-                    {/* Services */}
-                    <div style={{ marginBottom: '20px' }}>
-                        {filledServices.map((service) => {
-                            let priceDisplay = '';
-
-                            if (service.pricingMode === 'fixed') {
-                                if (service.fixedPrice) {
-                                    priceDisplay = `${parseFloat(service.fixedPrice).toFixed(2)} ${settings.currency}`;
-                                }
-                            } else if (service.quantity && service.unitPrice) {
-                                const unit = service.pricingMode === 'sqm' ? 'm²' : 'hr';
-                                const total = (
-                                    parseFloat(service.quantity) *
-                                    parseFloat(service.unitPrice)
-                                ).toFixed(2);
-                                priceDisplay = `${total} ${settings.currency} (${service.quantity} ${unit})`;
-                            }
-
-                            return (
-                                <div key={service.id} style={{ marginBottom: '15px' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-                                        {service.title && (
-                                            <span style={{ fontWeight: 'bold', fontSize: '14px', color: '#000' }}>
-                                                {service.title}
-                                            </span>
-                                        )}
-                                        {priceDisplay && (
-                                            <span style={{ fontSize: '14px', color: '#000' }}>
-                                                {priceDisplay}
-                                            </span>
-                                        )}
-                                    </div>
-                                    {service.description && (
-                                        <p style={{ margin: '0', fontSize: '12px', color: '#555', lineHeight: '1.5' }}>
-                                            {service.description}
-                                        </p>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Totals Divider Bar */}
-                    <div style={{ backgroundColor: settings.brandColor, height: '3px', marginBottom: '20px' }}></div>
-
-                    {/* Bottom Section */}
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <div style={{ fontSize: '12px', color: '#555' }}>
-                            <p style={{ margin: '5px 0' }}>
-                                {quote.estimatedTime || 'Estimated time for execution'}
-                            </p>
-                            <p style={{ margin: '5px 0' }}>
-                                {quote.expirationDate || 'Quote expiration date'}
-                            </p>
-                            <p style={{ margin: '5px 0' }}>
-                                {quote.paymentConditions || 'Payment Conditions'}
-                            </p>
-                        </div>
-                        <div style={{ textAlign: 'right', fontSize: '12px' }}>
-                            <p style={{ margin: '5px 0', color: '#555' }}>
-                                Price excluding VAT: {settings.currency}{' '}
-                                {baseVal > 0 ? baseVal.toFixed(2) : '0.00'}
-                            </p>
-                            <p style={{ margin: '5px 0', color: '#555' }}>
-                                VAT {vatPercent}%: {settings.currency}{' '}
-                                {baseVal > 0 ? (totalValue - baseVal).toFixed(2) : '0.00'}
-                            </p>
-                            <p style={{ margin: '5px 0', fontWeight: 'bold', fontSize: '14px', color: '#000' }}>
-                                Total incl. VAT: {settings.currency}{' '}
-                                {totalValue > 0 ? totalValue.toFixed(2) : '0.00'}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {/* Action Buttons UI */}
             <div className={styles.actionSection}>
                 <h2 className="shared-section-title">Pre-defined messages</h2>

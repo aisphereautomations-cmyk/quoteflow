@@ -1,15 +1,13 @@
 'use client';
 
-import { useRef } from 'react';
 import { useQuote } from '../context/QuoteContext';
 import { useSettings } from '../context/SettingsContext';
-import { generateAndDownloadPDF } from '../utils/pdfGenerator';
+import { generateQuotePDF, downloadPDF } from '../utils/pdfGenerator';
 import styles from './PDFPreview.module.css';
 
 export default function PDFPreview() {
     const { quote } = useQuote();
     const { settings } = useSettings();
-    const previewRef = useRef<HTMLDivElement>(null);
 
     const settingsVat = settings.vatEnabled ? settings.vatPercentage : 0;
     const vatPercent = quote.vatOverride !== '' ? (parseFloat(quote.vatOverride) || 0) : settingsVat;
@@ -17,8 +15,8 @@ export default function PDFPreview() {
     const totalValue = baseVal + (baseVal * vatPercent) / 100;
 
     const handleDownload = async () => {
-        if (!previewRef.current) return;
-        await generateAndDownloadPDF(previewRef.current, 'quote.pdf');
+        const blob = await generateQuotePDF(settings, quote);
+        downloadPDF(blob, 'quote.pdf');
     };
 
     // Only show services that have some content filled in
@@ -36,7 +34,7 @@ export default function PDFPreview() {
         <div className={styles.previewContainer}>
             <h2 className={styles.sectionTitle}>PDF Preview</h2>
 
-            <div className={styles.previewFrame} ref={previewRef}>
+            <div className={styles.previewFrame}>
                 {/* PDF Header */}
                 <div className={styles.pdfHeader}>
                     <div className={styles.companyInfo}>
