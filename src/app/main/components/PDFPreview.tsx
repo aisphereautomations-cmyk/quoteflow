@@ -1,9 +1,10 @@
 'use client';
 
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useQuote } from '../context/QuoteContext';
 import { useSettings } from '../context/SettingsContext';
-import { generateQuotePDF, downloadPDF } from '../utils/pdfGenerator';
+import { usePDF } from '../context/PDFContext';
+import { downloadPDF } from '../utils/pdfGenerator';
 import styles from './PDFPreview.module.css';
 
 const PAGE_WIDTH = 595; // A4 width at 72dpi
@@ -11,18 +12,23 @@ const PAGE_WIDTH = 595; // A4 width at 72dpi
 export default function PDFPreview() {
     const { quote } = useQuote();
     const { settings } = useSettings();
+    const { previewRef, capturePDF } = usePDF();
     const scalerRef = useRef<HTMLDivElement>(null);
-    const pageRef = useRef<HTMLDivElement>(null);
+    const localPageRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const [scaledH, setScaledH] = useState<number | undefined>(undefined);
 
+    // Register the local page ref into the shared PDF context
+    useEffect(() => {
+        previewRef.current = localPageRef.current;
+    });
+
     const recalc = useCallback(() => {
-        if (!scalerRef.current || !pageRef.current) return;
+        if (!scalerRef.current || !localPageRef.current) return;
         const containerW = scalerRef.current.offsetWidth;
         const s = containerW / PAGE_WIDTH;
         setScale(s);
-        // Measure page's real height and set wrapper height to the scaled version
-        const pageH = pageRef.current.offsetHeight;
+        const pageH = localPageRef.current.offsetHeight;
         setScaledH(pageH * s);
     }, []);
 
@@ -30,7 +36,7 @@ export default function PDFPreview() {
         recalc();
         const ro = new ResizeObserver(recalc);
         if (scalerRef.current) ro.observe(scalerRef.current);
-        if (pageRef.current) ro.observe(pageRef.current);
+        if (localPageRef.current) ro.observe(localPageRef.current);
         return () => ro.disconnect();
     }, [recalc]);
 
@@ -40,8 +46,8 @@ export default function PDFPreview() {
     const totalValue = baseVal + (baseVal * vatPercent) / 100;
 
     const handleDownload = async () => {
-        const blob = await generateQuotePDF(settings, quote);
-        downloadPDF(blob, 'quote.pdf');
+        const blob = await capturePDF();
+        if (blob) downloadPDF(blob, 'quote.pdf');
     };
 
     // Only show services that have some content filled in
@@ -61,7 +67,7 @@ export default function PDFPreview() {
 
             <div ref={scalerRef} className={styles.previewScaler} style={{ height: scaledH }}>
                 <div
-                    ref={pageRef}
+                    ref={localPageRef}
                     className={styles.previewFrame}
                     style={{
                         transform: `scale(${scale})`,

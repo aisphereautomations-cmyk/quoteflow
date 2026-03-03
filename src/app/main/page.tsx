@@ -12,6 +12,7 @@ import { AuthProvider } from './context/AuthContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { QuoteProvider } from './context/QuoteContext';
 import { ClientProvider } from './context/ClientContext';
+import { PDFProvider } from './context/PDFContext';
 
 export default function MainPage() {
     return (
@@ -19,18 +20,21 @@ export default function MainPage() {
             <SettingsProvider>
                 <QuoteProvider>
                     <ClientProvider>
-                        <main className={styles.mainContainer}>
-                            <Header />
-                            <AIChat />
-                            <QuoteForm />
-                            <PDFPreview />
-                            <ClientInfo />
-                            <ActionButtons />
-                            <SettingsDrawer />
-                        </main>
+                        <PDFProvider>
+                            <main className={styles.mainContainer}>
+                                <Header />
+                                <AIChat />
+                                <QuoteForm />
+                                <PDFPreview />
+                                <ClientInfo />
+                                <ActionButtons />
+                                <SettingsDrawer />
+                            </main>
+                        </PDFProvider>
                     </ClientProvider>
                 </QuoteProvider>
             </SettingsProvider>
         </AuthProvider>
     );
 }
+

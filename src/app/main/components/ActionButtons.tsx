@@ -4,13 +4,15 @@ import { useState, useEffect } from 'react';
 import { useClient } from '../context/ClientContext';
 import { useSettings } from '../context/SettingsContext';
 import { useQuote } from '../context/QuoteContext';
-import { generateQuotePDF, downloadPDF } from '../utils/pdfGenerator';
+import { usePDF } from '../context/PDFContext';
+import { downloadPDF } from '../utils/pdfGenerator';
 import styles from './ActionButtons.module.css';
 
 export default function ActionButtons() {
     const { client } = useClient();
     const { settings } = useSettings();
     const { quote } = useQuote();
+    const { capturePDF } = usePDF();
 
     // Local editable messages — initialized from Settings defaults
     const [whatsappMsg, setWhatsappMsg] = useState(settings.whatsappMessage);
@@ -55,7 +57,8 @@ export default function ActionButtons() {
             return;
         }
 
-        const blob = await generateQuotePDF(settings, quote, client);
+        const blob = await capturePDF();
+        if (!blob) return;
 
         const subject = `Quote from ${settings.companyName || 'Quote Flow'}`;
         const body = emailMsg || 'Hello! Please find attached the quote for your review.';
@@ -68,7 +71,8 @@ export default function ActionButtons() {
 
     /* ── Share handler ── */
     const handleShare = async () => {
-        const blob = await generateQuotePDF(settings, quote, client);
+        const blob = await capturePDF();
+        if (!blob) return;
 
         await shareOrFallback(blob, () => {
             // Fallback: just download, no specific link
@@ -82,7 +86,8 @@ export default function ActionButtons() {
             return;
         }
 
-        const blob = await generateQuotePDF(settings, quote, client);
+        const blob = await capturePDF();
+        if (!blob) return;
 
         const message = whatsappMsg || 'Hello! Please find attached the quote for your review.';
         const phone = client.whatsapp.replace(/\D/g, ''); // Remove non-digits
