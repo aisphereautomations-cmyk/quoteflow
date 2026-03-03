@@ -1,13 +1,33 @@
 'use client';
 
+import { useRef, useState, useEffect, useCallback } from 'react';
 import { useQuote } from '../context/QuoteContext';
 import { useSettings } from '../context/SettingsContext';
 import { generateQuotePDF, downloadPDF } from '../utils/pdfGenerator';
 import styles from './PDFPreview.module.css';
 
+const PAGE_WIDTH = 595; // A4 width at 72dpi
+
 export default function PDFPreview() {
     const { quote } = useQuote();
     const { settings } = useSettings();
+    const scalerRef = useRef<HTMLDivElement>(null);
+    const pageRef = useRef<HTMLDivElement>(null);
+    const [scale, setScale] = useState(1);
+
+    const recalc = useCallback(() => {
+        if (!scalerRef.current || !pageRef.current) return;
+        const containerW = scalerRef.current.offsetWidth;
+        const s = containerW / PAGE_WIDTH;
+        setScale(s);
+    }, []);
+
+    useEffect(() => {
+        recalc();
+        const ro = new ResizeObserver(recalc);
+        if (scalerRef.current) ro.observe(scalerRef.current);
+        return () => ro.disconnect();
+    }, [recalc]);
 
     const settingsVat = settings.vatEnabled ? settings.vatPercentage : 0;
     const vatPercent = quote.vatOverride !== '' ? (parseFloat(quote.vatOverride) || 0) : settingsVat;
@@ -34,130 +54,140 @@ export default function PDFPreview() {
         <div className={styles.previewContainer}>
             <h2 className={styles.sectionTitle}>PDF Preview</h2>
 
-            <div className={styles.previewFrame}>
-                {/* PDF Header */}
-                <div className={styles.pdfHeader}>
-                    <div className={styles.companyInfo}>
-                        {settings.companyName && (
-                            <h3 className={styles.companyName}>
-                                {settings.companyName}
-                            </h3>
-                        )}
-                        {settings.phone && (
-                            <p className={styles.companyDetail}>
-                                {settings.phone}
-                            </p>
-                        )}
-                        {settings.email && (
-                            <p className={styles.companyDetail}>
-                                {settings.email}
-                            </p>
-                        )}
-                        {settings.website && (
-                            <p className={styles.companyDetail}>
-                                {settings.website}
-                            </p>
+            <div ref={scalerRef} className={styles.previewScaler}>
+                <div
+                    ref={pageRef}
+                    className={styles.previewFrame}
+                    style={{
+                        transform: `scale(${scale})`,
+                        transformOrigin: 'top left',
+                        marginBottom: `calc(${(scale - 1) * 100}%)`,
+                    }}
+                >
+                    {/* PDF Header */}
+                    <div className={styles.pdfHeader}>
+                        <div className={styles.companyInfo}>
+                            {settings.companyName && (
+                                <h3 className={styles.companyName}>
+                                    {settings.companyName}
+                                </h3>
+                            )}
+                            {settings.phone && (
+                                <p className={styles.companyDetail}>
+                                    {settings.phone}
+                                </p>
+                            )}
+                            {settings.email && (
+                                <p className={styles.companyDetail}>
+                                    {settings.email}
+                                </p>
+                            )}
+                            {settings.website && (
+                                <p className={styles.companyDetail}>
+                                    {settings.website}
+                                </p>
+                            )}
+                        </div>
+                        {settings.logoUrl && (
+                            <div className={styles.logoArea}>
+                                <img
+                                    src={settings.logoUrl}
+                                    alt="Company logo"
+                                    className={styles.logoImage}
+                                />
+                            </div>
                         )}
                     </div>
-                    {settings.logoUrl && (
-                        <div className={styles.logoArea}>
-                            <img
-                                src={settings.logoUrl}
-                                alt="Company logo"
-                                className={styles.logoImage}
-                            />
-                        </div>
-                    )}
-                </div>
 
-                {/* Quote Description Bar */}
-                <div
-                    className={styles.descriptionBar}
-                    style={{ backgroundColor: settings.brandColor }}
-                >
-                    {settings.quoteDescription}
-                </div>
+                    {/* Quote Description Bar */}
+                    <div
+                        className={styles.descriptionBar}
+                        style={{ backgroundColor: settings.brandColor }}
+                    >
+                        {settings.quoteDescription}
+                    </div>
 
-                {/* Services — only show filled ones */}
-                <div className={styles.servicesArea}>
-                    {filledServices.map((service) => {
-                        let priceDisplay = '';
+                    {/* Services — only show filled ones */}
+                    <div className={styles.servicesArea}>
+                        {filledServices.map((service) => {
+                            let priceDisplay = '';
 
-                        if (service.pricingMode === 'fixed') {
-                            if (service.fixedPrice) {
-                                priceDisplay = `${parseFloat(service.fixedPrice).toFixed(2)} ${settings.currency}`;
+                            if (service.pricingMode === 'fixed') {
+                                if (service.fixedPrice) {
+                                    priceDisplay = `${parseFloat(service.fixedPrice).toFixed(2)} ${settings.currency}`;
+                                }
+                            } else if (service.quantity && service.unitPrice) {
+                                const unit = getUnitLabel(service.pricingMode);
+                                const total = (
+                                    parseFloat(service.quantity) *
+                                    parseFloat(service.unitPrice)
+                                ).toFixed(2);
+                                priceDisplay = `${total} ${settings.currency} (${service.quantity} ${unit})`;
                             }
-                        } else if (service.quantity && service.unitPrice) {
-                            const unit = getUnitLabel(service.pricingMode);
-                            const total = (
-                                parseFloat(service.quantity) *
-                                parseFloat(service.unitPrice)
-                            ).toFixed(2);
-                            priceDisplay = `${total} ${settings.currency} (${service.quantity} ${unit})`;
-                        }
 
-                        return (
-                            <div key={service.id} className={styles.serviceItem}>
-                                <div className={styles.serviceRow}>
-                                    {service.title && (
-                                        <span className={styles.serviceTitle}>
-                                            {service.title}
-                                        </span>
-                                    )}
-                                    {priceDisplay && (
-                                        <span className={styles.servicePrice}>
-                                            {priceDisplay}
-                                        </span>
+                            return (
+                                <div key={service.id} className={styles.serviceItem}>
+                                    <div className={styles.serviceRow}>
+                                        {service.title && (
+                                            <span className={styles.serviceTitle}>
+                                                {service.title}
+                                            </span>
+                                        )}
+                                        {priceDisplay && (
+                                            <span className={styles.servicePrice}>
+                                                {priceDisplay}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {service.description && (
+                                        <p className={styles.serviceDescription}>
+                                            {service.description}
+                                        </p>
                                     )}
                                 </div>
-                                {service.description && (
-                                    <p className={styles.serviceDescription}>
-                                        {service.description}
-                                    </p>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* Totals Divider Bar */}
-                <div
-                    className={styles.totalsBar}
-                    style={{ backgroundColor: settings.brandColor }}
-                ></div>
-
-                {/* Bottom Section: Values on top, Footer below */}
-                <div className={styles.bottomSection}>
-                    <div className={styles.valuesRight}>
-                        <p className={styles.baseValueLine}>
-                            Price excluding VAT: {settings.currency}{' '}
-                            {baseVal > 0 ? baseVal.toFixed(2) : '0.00'}
-                        </p>
-                        <p className={styles.baseValueLine}>
-                            VAT {vatPercent}%: {settings.currency}{' '}
-                            {baseVal > 0 ? (totalValue - baseVal).toFixed(2) : '0.00'}
-                        </p>
-                        <p className={styles.totalValueLine}>
-                            Total incl. VAT: {settings.currency}{' '}
-                            {totalValue > 0 ? totalValue.toFixed(2) : '0.00'}
-                        </p>
+                            );
+                        })}
                     </div>
-                    <div className={styles.footerLeft}>
-                        {quote.estimatedTime && (
-                            <p className={styles.footerLine}>
-                                {quote.estimatedTime}
+
+                    {/* Totals Divider Bar */}
+                    <div
+                        className={styles.totalsBar}
+                        style={{ backgroundColor: settings.brandColor }}
+                    ></div>
+
+                    {/* Bottom Section: Values on top, Footer below */}
+                    <div className={styles.bottomSection}>
+                        <div className={styles.valuesRight}>
+                            <p className={styles.baseValueLine}>
+                                Price excluding VAT: {settings.currency}{' '}
+                                {baseVal > 0 ? baseVal.toFixed(2) : '0.00'}
                             </p>
-                        )}
-                        {quote.expirationDate && (
-                            <p className={styles.footerLine}>
-                                {quote.expirationDate}
+                            <p className={styles.baseValueLine}>
+                                VAT {vatPercent}%: {settings.currency}{' '}
+                                {baseVal > 0 ? (totalValue - baseVal).toFixed(2) : '0.00'}
                             </p>
-                        )}
-                        {quote.paymentConditions && (
-                            <p className={styles.footerLine}>
-                                {quote.paymentConditions}
+                            <p className={styles.totalValueLine}>
+                                Total incl. VAT: {settings.currency}{' '}
+                                {totalValue > 0 ? totalValue.toFixed(2) : '0.00'}
                             </p>
-                        )}
+                        </div>
+                        <div className={styles.footerLeft}>
+                            {quote.estimatedTime && (
+                                <p className={styles.footerLine}>
+                                    {quote.estimatedTime}
+                                </p>
+                            )}
+                            {quote.expirationDate && (
+                                <p className={styles.footerLine}>
+                                    {quote.expirationDate}
+                                </p>
+                            )}
+                            {quote.paymentConditions && (
+                                <p className={styles.footerLine}>
+                                    {quote.paymentConditions}
+                                </p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>

@@ -13,10 +13,15 @@
     align-self: flex-start;
 }
 
-/* PDF Frame — A4 proportions */
-.previewFrame {
+/* Scaler wrapper */
+.previewScaler {
     width: 100%;
-    max-width: 595px;
+    overflow: hidden;
+}
+
+/* PDF Frame — fixed A4 width, scaled down by JS */
+.previewFrame {
+    width: 595px;
     min-height: 842px;
     background: white;
     border-radius: 4px;
