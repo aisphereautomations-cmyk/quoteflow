@@ -161,10 +161,10 @@ export async function generateQuotePDF(
     let ty = headerTop;
     if (settings.companyName) {
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(20);
+        pdf.setFontSize(28);
         pdf.setTextColor(17, 17, 17);
-        pdf.text(settings.companyName, PAD, ty + 20); // baseline offset ≈ font size
-        ty += 34; // 20 + 14 margin-bottom
+        pdf.text(settings.companyName, PAD, ty + 28); // baseline offset ≈ font size
+        ty += 42; // 28 + 14 margin-bottom
     }
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(15);
