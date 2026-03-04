@@ -1,4 +1,4 @@
-const CACHE_NAME = 'quoteflow-v1';
+const CACHE_NAME = 'quoteflow-v2';
 const STATIC_ASSETS = [
     '/',
     '/login',
