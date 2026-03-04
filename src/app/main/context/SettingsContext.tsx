@@ -130,13 +130,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
                 if (uploadError) {
                     console.error('Error uploading logo:', uploadError);
-                } else {
-                    const { data: urlData } = supabase.storage
-                        .from('logos')
-                        .getPublicUrl(fileName);
-                    // Append cache-busting param so the browser fetches the new image
-                    logoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
+                    throw new Error(`Logo upload failed: ${uploadError.message}`);
                 }
+
+                const { data: urlData } = supabase.storage
+                    .from('logos')
+                    .getPublicUrl(fileName);
+                // Append cache-busting param so the browser fetches the new image
+                logoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
             }
 
             const { error } = await supabase

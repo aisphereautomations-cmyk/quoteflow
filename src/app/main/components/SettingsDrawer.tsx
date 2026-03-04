@@ -147,11 +147,12 @@ export default function SettingsDrawer() {
         // Persist to Supabase — pass data directly to avoid stale closure
         try {
             await saveSettings(newSettings);
+            setIsOpen(false);
         } catch (err) {
             console.error('Failed to save settings:', err);
+            const msg = err instanceof Error ? err.message : 'Unknown error';
+            alert(`Failed to save settings: ${msg}`);
         }
-
-        setIsOpen(false);
     };
 
     const handleToggle = () => {
