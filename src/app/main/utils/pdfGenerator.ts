@@ -112,7 +112,7 @@ export async function generateQuotePDF(
     if (filledServices.length > 0) {
         h += 30; // top padding of servicesArea
         for (const svc of filledServices) {
-            h += 8 + 18; // serviceRow: margin-bottom 8 + title 18px line
+            h += 8 + 19; // serviceRow: margin-bottom 8 + title 19px line
             if (svc.description) {
                 m.setFontSize(15);
                 const lines = wrapText(m, svc.description, CW);
@@ -132,11 +132,11 @@ export async function generateQuotePDF(
     // Bottom section
     h += 20; // padding-top
     h += 20 + 20 + 22; // baseValueLine×2 + totalValueLine
-    if (quote.estimatedTime) h += 12 * 1.6;
-    if (quote.expirationDate) h += 12 * 1.6;
+    if (quote.estimatedTime) h += 13 * 1.6;
+    if (quote.expirationDate) h += 13 * 1.6;
     if (quote.paymentConditions) {
-        m.setFontSize(12);
-        h += wrapText(m, quote.paymentConditions, CW / 2).length * 12 * 1.6;
+        m.setFontSize(13);
+        h += wrapText(m, quote.paymentConditions, CW / 2).length * 13 * 1.6;
     }
     h += 36; // padding-bottom
 
@@ -161,17 +161,17 @@ export async function generateQuotePDF(
     let ty = headerTop;
     if (settings.companyName) {
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(28);
+        pdf.setFontSize(29);
         pdf.setTextColor(17, 17, 17);
-        pdf.text(settings.companyName, PAD, ty + 28); // baseline offset ≈ font size
-        ty += 42; // 28 + 14 margin-bottom
+        pdf.text(settings.companyName, PAD, ty + 29); // baseline offset ≈ font size
+        ty += 43; // 29 + 14 margin-bottom
     }
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(15);
+    pdf.setFontSize(16);
     pdf.setTextColor(68, 68, 68);
-    if (settings.phone) { pdf.text(settings.phone, PAD, ty + 13); ty += 16; }
-    if (settings.email) { pdf.text(settings.email, PAD, ty + 13); ty += 16; }
-    if (settings.website) { pdf.text(settings.website, PAD, ty + 13); ty += 16; }
+    if (settings.phone) { pdf.text(settings.phone, PAD, ty + 14); ty += 17; }
+    if (settings.email) { pdf.text(settings.email, PAD, ty + 14); ty += 17; }
+    if (settings.website) { pdf.text(settings.website, PAD, ty + 14); ty += 17; }
 
     y = headerTop + Math.max(ty - headerTop, logoH) + 28;
 
@@ -179,7 +179,7 @@ export async function generateQuotePDF(
     pdf.setFillColor(br, bg, bb);
     pdf.rect(0, y, W, 29, 'F');   // full width, no side margins
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(18);
+    pdf.setFontSize(19);
     pdf.setTextColor(255, 255, 255);
     pdf.text(settings.quoteDescription || 'Quote Description', W / 2, y + 20, { align: 'center' });
     y += 29;
@@ -201,16 +201,16 @@ export async function generateQuotePDF(
             // Title (left) + price (right) on same line
             if (svc.title) {
                 pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(18);
+                pdf.setFontSize(19);
                 pdf.setTextColor(17, 17, 17);
-                pdf.text(svc.title, PAD, y + 15);
+                pdf.text(svc.title, PAD, y + 16);
             }
             if (priceStr) {
                 pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(17);
+                pdf.setFontSize(18);
                 pdf.setTextColor(34, 34, 34);
                 const pw = pdf.getTextWidth(priceStr);
-                pdf.text(priceStr, W - PAD - pw, y + 15);
+                pdf.text(priceStr, W - PAD - pw, y + 16);
             }
             y += 24; // serviceRow height + margin
 
@@ -252,33 +252,33 @@ export async function generateQuotePDF(
     const rx = W - PAD; // right edge
 
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(16);
+    pdf.setFontSize(17);
     pdf.setTextColor(51, 51, 51);
 
     const t1 = 'Price excluding VAT: ' + settings.currency + ' ' + (base > 0 ? base.toFixed(2) : '0.00');
-    pdf.text(t1, rx, y + 13, { align: 'right' });
-    y += 20;
+    pdf.text(t1, rx, y + 14, { align: 'right' });
+    y += 21;
 
     const t2 = 'VAT ' + vPct + '%: ' + settings.currency + ' ' + (base > 0 ? vatAmt.toFixed(2) : '0.00');
-    pdf.text(t2, rx, y + 13, { align: 'right' });
-    y += 20;
+    pdf.text(t2, rx, y + 14, { align: 'right' });
+    y += 21;
 
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(18);
+    pdf.setFontSize(19);
     pdf.setTextColor(17, 17, 17);
     const t3 = 'Total incl. VAT: ' + settings.currency + ' ' + (total > 0 ? total.toFixed(2) : '0.00');
-    pdf.text(t3, rx, y + 14, { align: 'right' });
+    pdf.text(t3, rx, y + 15, { align: 'right' });
 
     // Footer — left side
     let fy = bY;
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(12);
+    pdf.setFontSize(13);
     pdf.setTextColor(68, 68, 68);
-    if (quote.estimatedTime) { pdf.text(quote.estimatedTime, PAD, fy + 11); fy += 12 * 1.6; }
-    if (quote.expirationDate) { pdf.text(quote.expirationDate, PAD, fy + 11); fy += 12 * 1.6; }
+    if (quote.estimatedTime) { pdf.text(quote.estimatedTime, PAD, fy + 12); fy += 13 * 1.6; }
+    if (quote.expirationDate) { pdf.text(quote.expirationDate, PAD, fy + 12); fy += 13 * 1.6; }
     if (quote.paymentConditions) {
         const cl = wrapText(pdf, quote.paymentConditions, CW / 2);
-        for (const ln of cl) { pdf.text(ln, PAD, fy + 11); fy += 12 * 1.6; }
+        for (const ln of cl) { pdf.text(ln, PAD, fy + 12); fy += 13 * 1.6; }
     }
 
     return pdf.output('blob');
