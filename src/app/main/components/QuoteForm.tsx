@@ -2,11 +2,13 @@
 
 import { useQuote, PricingMode } from '../context/QuoteContext';
 import { useSettings } from '../context/SettingsContext';
+import { useTranslation } from '../context/LanguageContext';
 import styles from './QuoteForm.module.css';
 
 export default function QuoteForm() {
     const { quote, updateQuote, addService, removeService, updateService } = useQuote();
     const { settings } = useSettings();
+    const { t } = useTranslation();
 
     const settingsVat = settings.vatEnabled ? settings.vatPercentage : 0;
     const vatPercent = quote.vatOverride !== '' ? (parseFloat(quote.vatOverride) || 0) : settingsVat;
@@ -15,19 +17,19 @@ export default function QuoteForm() {
 
     const pricingModeLabels: Record<PricingMode, { quantity: string; unitPrice: string; unit: string }> = {
         sqm: { quantity: 'm²', unitPrice: `${settings.currency}/m²`, unit: 'm²' },
-        hour: { quantity: 'Hours', unitPrice: `${settings.currency}/hr`, unit: 'hr' },
+        hour: { quantity: t('quoteForm.hour'), unitPrice: `${settings.currency}/hr`, unit: 'hr' },
         fixed: { quantity: '', unitPrice: '', unit: '' },
     };
 
     return (
         <div className={styles.formContainer}>
-            <h2 className={styles.sectionTitle}>Fill the Quote</h2>
+            <h2 className={styles.sectionTitle}>{t('quoteForm.sectionTitle')}</h2>
 
             {/* Service Blocks */}
             {quote.services.map((service, index) => (
                 <div key={service.id} className={styles.serviceBlock}>
                     <div className={styles.serviceHeader}>
-                        <span className={styles.serviceLabel}>Service {index + 1}</span>
+                        <span className={styles.serviceLabel}>{t('quoteForm.service')} {index + 1}</span>
                         {quote.services.length > 1 && (
                             <button
                                 className={styles.removeBtn}
@@ -41,7 +43,7 @@ export default function QuoteForm() {
 
                     <input
                         type="text"
-                        placeholder="Service Title"
+                        placeholder={t('quoteForm.serviceTitlePlaceholder')}
                         className={styles.input}
                         value={service.title}
                         onChange={(e) =>
@@ -50,7 +52,7 @@ export default function QuoteForm() {
                     />
 
                     <textarea
-                        placeholder="Service description..."
+                        placeholder={t('quoteForm.serviceDescriptionPlaceholder')}
                         className={styles.textarea}
                         value={service.description}
                         onChange={(e) =>
@@ -60,7 +62,7 @@ export default function QuoteForm() {
 
                     {/* Pricing Mode Selector */}
                     <div className={styles.pricingModeRow}>
-                        <label className={styles.metricLabel}>Pricing:</label>
+                        <label className={styles.metricLabel}>{t('quoteForm.pricing')}</label>
                         <div className={styles.pricingModeOptions}>
                             {(['sqm', 'hour', 'fixed'] as PricingMode[]).map((mode) => (
                                 <button
@@ -74,7 +76,7 @@ export default function QuoteForm() {
                                         fixedPrice: '',
                                     })}
                                 >
-                                    {mode === 'sqm' ? 'm²' : mode === 'hour' ? 'Hour' : 'Fixed'}
+                                    {mode === 'sqm' ? 'm²' : mode === 'hour' ? t('quoteForm.hour') : t('quoteForm.fixed')}
                                 </button>
                             ))}
                         </div>
@@ -84,7 +86,7 @@ export default function QuoteForm() {
                     {service.pricingMode === 'fixed' ? (
                         <div className={styles.metricsRow}>
                             <div className={styles.metricField} style={{ flex: 1 }}>
-                                <label className={styles.metricLabel}>Price ({settings.currency})</label>
+                                <label className={styles.metricLabel}>{t('quoteForm.price')} ({settings.currency})</label>
                                 <input
                                     type="number"
                                     placeholder="0.00"
@@ -154,13 +156,13 @@ export default function QuoteForm() {
 
             {/* Add Service Button */}
             <button className={styles.addServiceBtn} onClick={addService}>
-                + Add Service
+                {t('quoteForm.addService')}
             </button>
 
             {/* Totals */}
             <div className={styles.totalsSection}>
                 <div className={styles.totalRow}>
-                    <label className={styles.totalLabel}>Base Value ({settings.currency})</label>
+                    <label className={styles.totalLabel}>{t('quoteForm.baseValue')} ({settings.currency})</label>
                     <input
                         type="number"
                         placeholder="0.00"
@@ -171,7 +173,7 @@ export default function QuoteForm() {
                 </div>
                 <div className={styles.totalRow}>
                     <span className={styles.totalLabel}>
-                        Total with VAT{' '}
+                        {t('quoteForm.totalWithVat')}{' '}
                         <input
                             type="number"
                             className={styles.vatInput}
@@ -190,14 +192,14 @@ export default function QuoteForm() {
             <div className={styles.footerFields}>
                 <input
                     type="text"
-                    placeholder="Estimated time for execution"
+                    placeholder={t('quoteForm.estimatedTimePlaceholder')}
                     className={styles.input}
                     value={quote.estimatedTime}
                     onChange={(e) => updateQuote({ estimatedTime: e.target.value })}
                 />
                 <input
                     type="text"
-                    placeholder="Quote expiration date"
+                    placeholder={t('quoteForm.expirationDatePlaceholder')}
                     className={styles.input}
                     value={quote.expirationDate}
                     onChange={(e) =>
@@ -205,7 +207,7 @@ export default function QuoteForm() {
                     }
                 />
                 <textarea
-                    placeholder="Payment conditions..."
+                    placeholder={t('quoteForm.paymentConditionsPlaceholder')}
                     className={styles.textarea}
                     value={quote.paymentConditions}
                     onChange={(e) =>

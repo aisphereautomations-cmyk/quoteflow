@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
+import { getTranslator, type Locale } from '@/locales';
 import styles from './page.module.css';
 
 export default function LoginPage() {
@@ -14,6 +15,17 @@ export default function LoginPage() {
     const [successMessage, setSuccessMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
+    // Read language from localStorage (set by settings), default to 'en'
+    const [locale, setLocale] = useState<Locale>('en');
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem('quoteflow_language');
+            if (stored) setLocale(stored as Locale);
+        } catch { /* ignore */ }
+    }, []);
+
+    const t = getTranslator(locale);
+
     const handleLogin = async (e: FormEvent) => {
         e.preventDefault();
         setErrorMessage('');
@@ -21,13 +33,13 @@ export default function LoginPage() {
 
         // Basic validation
         if (!email || !password) {
-            setErrorMessage('Please fill in all fields');
+            setErrorMessage(t('login.fillAllFields'));
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            setErrorMessage('Please enter a valid email');
+            setErrorMessage(t('login.validEmail'));
             return;
         }
 
@@ -42,9 +54,9 @@ export default function LoginPage() {
             if (error) {
                 // Handle specific Supabase auth errors
                 if (error.message.includes('Invalid login credentials')) {
-                    setErrorMessage('Incorrect email or password');
+                    setErrorMessage(t('login.incorrectCredentials'));
                 } else if (error.message.includes('Email not confirmed')) {
-                    setErrorMessage('Please confirm your email before logging in');
+                    setErrorMessage(t('login.confirmEmail'));
                 } else {
                     setErrorMessage(error.message);
                 }
@@ -55,7 +67,7 @@ export default function LoginPage() {
             router.push('/main');
             router.refresh();
         } catch {
-            setErrorMessage('An unexpected error occurred. Please try again.');
+            setErrorMessage(t('login.unexpectedError'));
         } finally {
             setIsLoading(false);
         }
@@ -67,18 +79,18 @@ export default function LoginPage() {
 
         // Validate fields are filled
         if (!email || !password) {
-            setErrorMessage('Please fill in all fields');
+            setErrorMessage(t('login.fillAllFields'));
             return;
         }
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
-            setErrorMessage('Please enter a valid email');
+            setErrorMessage(t('login.validEmail'));
             return;
         }
 
         if (password.length < 6) {
-            setErrorMessage('Password must be at least 6 characters');
+            setErrorMessage(t('login.passwordMinLength'));
             return;
         }
 
@@ -92,7 +104,7 @@ export default function LoginPage() {
 
             if (error) {
                 if (error.message.includes('already registered')) {
-                    setErrorMessage('This email is already registered. Please login instead.');
+                    setErrorMessage(t('login.alreadyRegistered'));
                 } else {
                     setErrorMessage(error.message);
                 }
@@ -100,9 +112,9 @@ export default function LoginPage() {
             }
 
             // Show success message
-            setSuccessMessage('Account created! Check your email to confirm, then login.');
+            setSuccessMessage(t('login.accountCreated'));
         } catch {
-            setErrorMessage('An unexpected error occurred. Please try again.');
+            setErrorMessage(t('login.unexpectedError'));
         } finally {
             setIsLoading(false);
         }
@@ -112,14 +124,14 @@ export default function LoginPage() {
         <div className={styles.container}>
             <div className={styles.card}>
                 <div className={styles.header}>
-                    <h1 className={styles.title}>Quote Flow</h1>
-                    <h2 className={styles.subtitle}>Let´s Quote together !</h2>
+                    <h1 className={styles.title}>{t('login.title')}</h1>
+                    <h2 className={styles.subtitle}>{t('login.subtitle')}</h2>
                 </div>
 
                 <form onSubmit={handleLogin} className={styles.form}>
                     <div className={styles.inputGroup}>
                         <label htmlFor="email" className={styles.label}>
-                            Email:
+                            {t('login.emailLabel')}
                         </label>
                         <input
                             id="email"
@@ -134,7 +146,7 @@ export default function LoginPage() {
 
                     <div className={styles.inputGroup}>
                         <label htmlFor="password" className={styles.label}>
-                            Password:
+                            {t('login.passwordLabel')}
                         </label>
                         <input
                             id="password"
@@ -156,7 +168,7 @@ export default function LoginPage() {
                     )}
 
                     <button type="submit" className={styles.loginButton} disabled={isLoading}>
-                        {isLoading ? 'Loading...' : 'Login'}
+                        {isLoading ? t('login.loading') : t('login.loginButton')}
                     </button>
 
                     <button
@@ -165,12 +177,12 @@ export default function LoginPage() {
                         className={styles.subscribeButton}
                         disabled={isLoading}
                     >
-                        {isLoading ? 'Loading...' : 'Subscribe'}
+                        {isLoading ? t('login.loading') : t('login.subscribeButton')}
                     </button>
                 </form>
 
                 <footer className={styles.footer}>
-                    Powered by AI Sphere Automations
+                    {t('login.footer')}
                 </footer>
             </div>
         </div>

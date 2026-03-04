@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { useQuote } from '../context/QuoteContext';
 import { useSettings } from '../context/SettingsContext';
 import { usePDF } from '../context/PDFContext';
+import { useTranslation } from '../context/LanguageContext';
 import { downloadPDF } from '../utils/pdfGenerator';
 import { getTaxLabels } from '../utils/taxLabels';
 import styles from './PDFPreview.module.css';
@@ -14,6 +15,7 @@ export default function PDFPreview() {
     const { quote } = useQuote();
     const { settings } = useSettings();
     const { previewRef, capturePDF } = usePDF();
+    const { t } = useTranslation();
     const scalerRef = useRef<HTMLDivElement>(null);
     const localPageRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
@@ -66,7 +68,7 @@ export default function PDFPreview() {
 
     return (
         <div className={styles.previewContainer}>
-            <h2 className={styles.sectionTitle}>PDF Preview</h2>
+            <h2 className={styles.sectionTitle}>{t('pdfPreview.sectionTitle')}</h2>
 
             <div ref={scalerRef} className={styles.previewScaler} style={{ height: scaledH }}>
                 <div
@@ -205,7 +207,7 @@ export default function PDFPreview() {
                 </div>
             </div>
 
-            <button className={styles.downloadBtn} onClick={handleDownload}>Download PDF</button>
+            <button className={styles.downloadBtn} onClick={handleDownload}>{t('pdfPreview.downloadPdf')}</button>
         </div>
     );
 }

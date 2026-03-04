@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useSettings } from '../context/SettingsContext';
+import { useTranslation } from '../context/LanguageContext';
 import { usePDF } from '../context/PDFContext';
 import { downloadPDF } from '../utils/pdfGenerator';
 import styles from './ActionButtons.module.css';
@@ -9,6 +10,7 @@ import styles from './ActionButtons.module.css';
 export default function ActionButtons() {
     const { settings } = useSettings();
     const { capturePDF } = usePDF();
+    const { t } = useTranslation();
 
     // Local editable message — initialized from Settings default
     const [message, setMessage] = useState(settings.message);
@@ -28,7 +30,7 @@ export default function ActionButtons() {
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     title: 'Quote',
-                    text: message || 'Please find the quote attached',
+                    text: message || t('actionButtons.defaultShareText'),
                     files: [file],
                 });
                 return; // shared successfully
@@ -49,8 +51,8 @@ export default function ActionButtons() {
         const blob = await capturePDF();
         if (!blob) return;
 
-        const subject = `Quote from ${settings.companyName || 'Quote Flow'}`;
-        const body = message || 'Hello! Please find attached the quote for your review.';
+        const subject = `${t('actionButtons.quoteFrom')} ${settings.companyName || 'Quote Flow'}`;
+        const body = message || t('actionButtons.defaultEmailBody');
         const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
         await shareOrFallback(blob, () => {
@@ -73,7 +75,7 @@ export default function ActionButtons() {
         const blob = await capturePDF();
         if (!blob) return;
 
-        const msg = message || 'Hello! Please find attached the quote for your review.';
+        const msg = message || t('actionButtons.defaultEmailBody');
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
 
         await shareOrFallback(blob, () => {
@@ -85,22 +87,22 @@ export default function ActionButtons() {
         <>
             {/* Action Buttons UI */}
             <div className={styles.actionSection}>
-                <h2 className="shared-section-title">Pre-defined message</h2>
+                <h2 className="shared-section-title">{t('actionButtons.predefinedMessage')}</h2>
 
                 <div className={styles.messageGroup}>
                     <textarea
                         id="quote-message"
                         className="shared-textarea"
-                        placeholder="Message sent with the quote..."
+                        placeholder={t('actionButtons.messagePlaceholder')}
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                     />
                     <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.35rem' }}>
-                        Default set in Settings
+                        {t('actionButtons.defaultSetInSettings')}
                     </p>
                 </div>
 
-                <h3 className="shared-subsection-title">Send by:</h3>
+                <h3 className="shared-subsection-title">{t('actionButtons.sendBy')}</h3>
 
                 <div className={styles.buttonsGrid}>
                     <button
@@ -108,21 +110,21 @@ export default function ActionButtons() {
                         onClick={handleEmail}
                         aria-label="Send via Email"
                     >
-                        Email
+                        {t('actionButtons.email')}
                     </button>
                     <button
                         className={`${styles.actionBtn} ${styles.shareBtn}`}
                         onClick={handleShare}
                         aria-label="Share quote"
                     >
-                        Share
+                        {t('actionButtons.share')}
                     </button>
                     <button
                         className={`${styles.actionBtn} ${styles.whatsappBtn}`}
                         onClick={handleWhatsapp}
                         aria-label="Send via Whatsapp"
                     >
-                        Whatsapp
+                        {t('actionButtons.whatsapp')}
                     </button>
                 </div>
             </div>

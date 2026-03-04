@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase-browser';
 import { useQuote } from '../context/QuoteContext';
 import { useClient } from '../context/ClientContext';
+import { useTranslation } from '../context/LanguageContext';
 import styles from './Header.module.css';
 
 export default function Header() {
@@ -12,6 +13,7 @@ export default function Header() {
     const supabase = createClient();
     const { saveQuote, newQuote, loadQuote, deleteQuote, savedQuotes, isSaving, currentQuoteId } = useQuote();
     const { client, clearClient } = useClient();
+    const { t } = useTranslation();
     const [showHistory, setShowHistory] = useState(false);
 
     const handleLogout = async () => {
@@ -40,11 +42,11 @@ export default function Header() {
 
     return (
         <header className={styles.header}>
-            <h1 className={styles.title}>Quote Flow</h1>
+            <h1 className={styles.title}>{t('header.title')}</h1>
 
             <div className={styles.actions}>
                 <button onClick={handleNewQuote} className={styles.actionBtn} title="New Quote">
-                    ＋ New
+                    {t('header.new')}
                 </button>
                 <button onClick={handleSave} className={styles.saveBtn} disabled={isSaving} title="Save Quote">
                     {isSaving ? '...' : '💾'}
@@ -60,9 +62,9 @@ export default function Header() {
                     </button>
                     {showHistory && (
                         <div className={styles.historyDropdown}>
-                            <div className={styles.historyHeader}>Saved Quotes</div>
+                            <div className={styles.historyHeader}>{t('header.savedQuotes')}</div>
                             {savedQuotes.length === 0 ? (
-                                <div className={styles.historyEmpty}>No saved quotes yet</div>
+                                <div className={styles.historyEmpty}>{t('header.noSavedQuotes')}</div>
                             ) : (
                                 savedQuotes.map((q) => (
                                     <button
@@ -81,7 +83,7 @@ export default function Header() {
                                             className={styles.historyDelete}
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                if (confirm('Delete this quote?')) deleteQuote(q.id);
+                                                if (confirm(t('header.deleteConfirm'))) deleteQuote(q.id);
                                             }}
                                             title="Delete quote"
                                         >
@@ -94,7 +96,7 @@ export default function Header() {
                     )}
                 </div>
                 <button onClick={handleLogout} className={styles.logoutBtn}>
-                    Log out
+                    {t('header.logOut')}
                 </button>
             </div>
         </header>

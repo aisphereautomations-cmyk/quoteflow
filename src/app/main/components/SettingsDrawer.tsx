@@ -3,7 +3,9 @@
 import { useState, useRef, useCallback } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
 import { useSettings } from '../context/SettingsContext';
+import { useTranslation } from '../context/LanguageContext';
 import { TAX_LABELS } from '../utils/taxLabels';
+import { LOCALE_OPTIONS } from '@/locales';
 import styles from './SettingsDrawer.module.css';
 import ClientInfoStyles from './ClientInfo.module.css';
 
@@ -32,6 +34,7 @@ function getCroppedImg(imageSrc: string, crop: Area): Promise<string> {
 
 export default function SettingsDrawer() {
     const { settings, updateSettings, saveSettings } = useSettings();
+    const { t } = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
     const [localLogoUrl, setLocalLogoUrl] = useState<string | null>(settings.logoUrl);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,7 +74,7 @@ export default function SettingsDrawer() {
         // Validate type
         const validTypes = ['image/png', 'image/jpeg', 'image/svg+xml', 'image/webp'];
         if (!validTypes.includes(file.type)) {
-            alert('Please upload a PNG, JPG, SVG, or WebP image.');
+            alert(t('settings.uploadValidation'));
             return;
         }
 
@@ -107,6 +110,7 @@ export default function SettingsDrawer() {
     const [localMessage, setLocalMessage] = useState(settings.message);
     const [localQuoteDescription, setLocalQuoteDescription] = useState(settings.quoteDescription);
     const [localTaxCountry, setLocalTaxCountry] = useState(settings.taxCountry);
+    const [localLanguage, setLocalLanguage] = useState(settings.language);
 
     const handleOpen = () => {
         // Sync local state from context when opening
@@ -122,6 +126,7 @@ export default function SettingsDrawer() {
         setLocalMessage(settings.message);
         setLocalQuoteDescription(settings.quoteDescription);
         setLocalTaxCountry(settings.taxCountry);
+        setLocalLanguage(settings.language);
         setIsOpen(true);
     };
 
@@ -139,6 +144,7 @@ export default function SettingsDrawer() {
             message: localMessage,
             quoteDescription: localQuoteDescription,
             taxCountry: localTaxCountry,
+            language: localLanguage,
         };
 
         // Update context state for immediate UI reflection
@@ -151,7 +157,7 @@ export default function SettingsDrawer() {
         } catch (err) {
             console.error('Failed to save settings:', err);
             const msg = err instanceof Error ? err.message : 'Unknown error';
-            alert(`Failed to save settings: ${msg}`);
+            alert(`${t('settings.failedToSave')}: ${msg}`);
         }
     };
 
@@ -181,31 +187,31 @@ export default function SettingsDrawer() {
                     </div>
                     <div className={styles.cropControls}>
                         <div className={styles.aspectRow}>
-                            <span className={styles.aspectLabel}>Shape:</span>
+                            <span className={styles.aspectLabel}>{t('settings.shape')}</span>
                             <button
                                 type="button"
                                 className={`${styles.aspectBtn} ${cropAspect === undefined ? styles.aspectBtnActive : ''}`}
                                 onClick={() => setCropAspect(undefined)}
                             >
-                                Free
+                                {t('settings.free')}
                             </button>
                             <button
                                 type="button"
                                 className={`${styles.aspectBtn} ${cropAspect === 1 ? styles.aspectBtnActive : ''}`}
                                 onClick={() => setCropAspect(1)}
                             >
-                                Square
+                                {t('settings.square')}
                             </button>
                             <button
                                 type="button"
                                 className={`${styles.aspectBtn} ${cropAspect === 16 / 9 ? styles.aspectBtnActive : ''}`}
                                 onClick={() => setCropAspect(16 / 9)}
                             >
-                                Wide
+                                {t('settings.wide')}
                             </button>
                         </div>
                         <label className={styles.zoomLabel}>
-                            Zoom
+                            {t('settings.zoom')}
                             <input
                                 type="range"
                                 min={1}
@@ -218,10 +224,10 @@ export default function SettingsDrawer() {
                         </label>
                         <div className={styles.cropActions}>
                             <button className={`${styles.actionBtn} ${styles.cancelBtn}`} onClick={handleCropCancel}>
-                                Cancel
+                                {t('settings.cancel')}
                             </button>
                             <button className={`${styles.actionBtn} ${styles.saveBtn}`} onClick={handleCropConfirm}>
-                                Confirm
+                                {t('settings.confirm')}
                             </button>
                         </div>
                     </div>
@@ -231,33 +237,33 @@ export default function SettingsDrawer() {
             <div className={styles.drawer}>
                 <div className={styles.header} onClick={handleToggle}>
                     <div className={styles.title}>
-                        <span>⚙️ Settings</span>
+                        <span>{t('settings.title')}</span>
                     </div>
                     <span>{isOpen ? '▼' : '▲'}</span>
                 </div>
 
                 <div className={`${styles.content} ${isOpen ? styles.open : ''}`}>
                     <div className={styles.section}>
-                        <h3 className="shared-subsection-title">Company Information</h3>
+                        <h3 className="shared-subsection-title">{t('settings.companyInformation')}</h3>
                         <div className={styles.companyInputsWrapper}>
                             <div className={styles.companyInputsColumn}>
                                 <input
                                     type="text"
-                                    placeholder="Company Name"
+                                    placeholder={t('settings.companyNamePlaceholder')}
                                     className={ClientInfoStyles.inputField}
                                     value={localCompanyName}
                                     onChange={(e) => setLocalCompanyName(e.target.value)}
                                 />
                                 <input
                                     type="email"
-                                    placeholder="Email"
+                                    placeholder={t('settings.emailPlaceholder')}
                                     className={ClientInfoStyles.inputField}
                                     value={localEmail}
                                     onChange={(e) => setLocalEmail(e.target.value)}
                                 />
                                 <input
                                     type="tel"
-                                    placeholder="Phone Number"
+                                    placeholder={t('settings.phonePlaceholder')}
                                     className={ClientInfoStyles.inputField}
                                     value={localPhone}
                                     onChange={(e) => setLocalPhone(e.target.value)}
@@ -283,12 +289,12 @@ export default function SettingsDrawer() {
                                         />
                                     )}
                                 </div>
-                                <div className={styles.logoLabel}>Company Logo</div>
+                                <div className={styles.logoLabel}>{t('settings.companyLogo')}</div>
                                 <button
                                     className={styles.swapImageBtn}
                                     onClick={() => fileInputRef.current?.click()}
                                 >
-                                    Swap Image
+                                    {t('settings.swapImage')}
                                 </button>
                                 {localLogoUrl && (
                                     <button
@@ -296,21 +302,21 @@ export default function SettingsDrawer() {
                                         onClick={() => setLocalLogoUrl(null)}
                                         style={{ marginTop: '0.25rem', color: '#ef4444' }}
                                     >
-                                        Remove
+                                        {t('settings.remove')}
                                     </button>
                                 )}
                             </div>
                         </div>
                         <input
                             type="text"
-                            placeholder="Website"
+                            placeholder={t('settings.websitePlaceholder')}
                             className={`${ClientInfoStyles.inputField} ${styles.websiteInput}`}
                             value={localWebsite}
                             onChange={(e) => setLocalWebsite(e.target.value)}
                         />
                         <input
                             type="text"
-                            placeholder="Quote Description"
+                            placeholder={t('settings.quoteDescriptionPlaceholder')}
                             className={`${ClientInfoStyles.inputField} ${styles.websiteInput}`}
                             value={localQuoteDescription}
                             onChange={(e) => setLocalQuoteDescription(e.target.value)}
@@ -319,7 +325,21 @@ export default function SettingsDrawer() {
 
                     <div className={styles.optionsGrid}>
                         <div className={styles.optionRow}>
-                            Brand Color:{' '}
+                            {t('settings.language')}{' '}
+                            <select
+                                value={localLanguage}
+                                onChange={(e) => setLocalLanguage(e.target.value)}
+                                className={styles.currencyInput}
+                                aria-label="App language"
+                                style={{ minWidth: 160 }}
+                            >
+                                {LOCALE_OPTIONS.map(({ code, label }) => (
+                                    <option key={code} value={code}>{label}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className={styles.optionRow}>
+                            {t('settings.brandColor')}{' '}
                             <input
                                 type="color"
                                 value={localBrandColor}
@@ -329,7 +349,7 @@ export default function SettingsDrawer() {
                             />
                         </div>
                         <div className={styles.optionRow}>
-                            Currency Used:{' '}
+                            {t('settings.currencyUsed')}{' '}
                             <input
                                 type="text"
                                 value={localCurrency}
@@ -341,7 +361,7 @@ export default function SettingsDrawer() {
                             />
                         </div>
                         <div className={styles.optionRow}>
-                            Tax Country:{' '}
+                            {t('settings.taxCountry')}{' '}
                             <select
                                 value={localTaxCountry}
                                 onChange={(e) => setLocalTaxCountry(e.target.value)}
@@ -356,7 +376,7 @@ export default function SettingsDrawer() {
                         </div>
                         <div className={styles.optionRow}>
                             <label className={styles.vatLabel}>
-                                VAT:
+                                {t('settings.vat')}
                             </label>
                             <div className={styles.vatInputWrapper}>
                                 <input
@@ -387,20 +407,20 @@ export default function SettingsDrawer() {
                                         onChange={() => setLocalVatEnabled(false)}
                                         aria-label="No VAT"
                                     />
-                                    None
+                                    {t('settings.none')}
                                 </label>
                             </div>
                         </div>
                     </div>
 
                     <div className={styles.section}>
-                        <h3 className="shared-subsection-title">Pre-defined message</h3>
+                        <h3 className="shared-subsection-title">{t('settings.predefinedMessage')}</h3>
 
                         <div className={styles.messageGroup}>
                             <textarea
                                 id="settings-message"
                                 className="shared-textarea"
-                                placeholder="Default message sent with quotes..."
+                                placeholder={t('settings.defaultMessagePlaceholder')}
                                 value={localMessage}
                                 onChange={(e) => setLocalMessage(e.target.value)}
                             />
@@ -413,14 +433,14 @@ export default function SettingsDrawer() {
                             onClick={handleSave}
                             aria-label="Save settings"
                         >
-                            Save
+                            {t('settings.save')}
                         </button>
                         <button
                             className={`${styles.actionBtn} ${styles.cancelBtn}`}
                             onClick={() => setIsOpen(false)}
                             aria-label="Cancel"
                         >
-                            Cancel
+                            {t('settings.cancel')}
                         </button>
                     </div>
                 </div>

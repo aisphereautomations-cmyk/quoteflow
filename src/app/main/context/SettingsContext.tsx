@@ -17,6 +17,7 @@ export interface SettingsData {
     message: string;
     quoteDescription: string;
     taxCountry: string;
+    language: string;
 }
 
 interface SettingsContextType {
@@ -40,6 +41,7 @@ const defaultSettings: SettingsData = {
     message: '',
     quoteDescription: 'Quote Description',
     taxCountry: 'uk',
+    language: 'en',
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -74,6 +76,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                 }
 
                 if (data) {
+                    const lang = data.language || 'en';
                     setSettings({
                         companyName: data.company_name || '',
                         email: data.email || '',
@@ -87,7 +90,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                         message: data.whatsapp_message || data.email_message || '',
                         quoteDescription: data.quote_description || 'Quote Description',
                         taxCountry: data.tax_country || 'uk',
+                        language: lang,
                     });
+                    try { localStorage.setItem('quoteflow_language', lang); } catch { /* ignore */ }
                 }
             } catch (err) {
                 console.error('Error loading settings:', err);
@@ -100,7 +105,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     }, [user]);
 
     const updateSettings = (updates: Partial<SettingsData>) => {
-        setSettings((prev) => ({ ...prev, ...updates }));
+        setSettings((prev) => {
+            const next = { ...prev, ...updates };
+            // Sync language to localStorage so pages outside the provider (e.g. Login) can read it
+            if (updates.language) {
+                try { localStorage.setItem('quoteflow_language', updates.language); } catch { /* ignore */ }
+            }
+            return next;
+        });
     };
 
     const saveSettings = useCallback(async (dataToSave?: SettingsData) => {
@@ -157,6 +169,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     email_message: data.message,
                     quote_description: data.quoteDescription,
                     tax_country: data.taxCountry,
+                    language: data.language,
                     updated_at: new Date().toISOString(),
                 }, {
                     onConflict: 'user_id',

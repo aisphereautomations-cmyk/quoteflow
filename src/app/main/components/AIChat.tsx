@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useChat } from '../context/ChatContext';
+import { useTranslation } from '../context/LanguageContext';
 import styles from './AIChat.module.css';
 
 export default function AIChat() {
@@ -14,6 +15,7 @@ export default function AIChat() {
         applyQuoteData,
         dismissQuoteData,
     } = useChat();
+    const { t } = useTranslation();
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [input, setInput] = useState('');
@@ -58,7 +60,7 @@ export default function AIChat() {
         const SpeechRecognitionAPI = w.SpeechRecognition || w.webkitSpeechRecognition;
 
         if (!SpeechRecognitionAPI) {
-            alert('Speech recognition is not supported in this browser. Try Chrome or Safari.');
+            alert(t('aiChat.speechNotSupported'));
             return;
         }
 
@@ -84,7 +86,7 @@ export default function AIChat() {
             console.error('Speech recognition error:', event.error);
             setIsRecording(false);
             if (event.error === 'not-allowed') {
-                alert('Microphone access was denied. Please allow microphone access in your browser settings.');
+                alert(t('aiChat.micDenied'));
             }
         };
 
@@ -116,7 +118,7 @@ export default function AIChat() {
         <>
             <div className={`${styles.chatContainer} ${isExpanded ? styles.expanded : styles.collapsed}`}>
                 <div className={styles.chatHeader} onClick={toggleExpand}>
-                    <span>Chat with AI To Help you Quote</span>
+                    <span>{t('aiChat.chatHeader')}</span>
                     {isExpanded && <span>✕</span>}
                 </div>
 
@@ -131,7 +133,7 @@ export default function AIChat() {
                     ))}
                     {isLoading && (
                         <div className={`${styles.message} ${styles.botMessage}`}>
-                            <span className={styles.loadingDots}>Thinking...</span>
+                            <span className={styles.loadingDots}>{t('aiChat.thinking')}</span>
                         </div>
                     )}
                     {error && <div className={styles.errorMessage}>{error}</div>}
@@ -139,13 +141,13 @@ export default function AIChat() {
                     {/* Quote Ready Banner */}
                     {pendingQuoteData && (
                         <div className={styles.quoteReadyBanner}>
-                            <span>✨ Quote ready to fill!</span>
+                            <span>{t('aiChat.quoteReady')}</span>
                             <div className={styles.quoteReadyActions}>
                                 <button
                                     className={styles.fillQuoteSmallBtn}
                                     onClick={handleFillQuote}
                                 >
-                                    Apply
+                                    {t('aiChat.apply')}
                                 </button>
                                 <button
                                     className={styles.dismissBtn}
@@ -164,7 +166,7 @@ export default function AIChat() {
                     <div className={styles.inputWrapper}>
                         <input
                             type="text"
-                            placeholder="Let's Chat"
+                            placeholder={t('aiChat.inputPlaceholder')}
                             className={styles.chatInput}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
@@ -198,8 +200,8 @@ export default function AIChat() {
                         onClick={pendingQuoteData ? handleFillQuote : toggleExpand}
                     >
                         {pendingQuoteData
-                            ? '✨ Apply AI Quote'
-                            : 'Fill Quote with the AI chat'}
+                            ? t('aiChat.applyAiQuote')
+                            : t('aiChat.fillQuoteWithAi')}
                     </button>
                 </div>
             )}
