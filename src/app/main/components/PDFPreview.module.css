@@ -146,6 +146,7 @@
     font-weight: 500;
     color: #444;
     line-height: 1.7;
+    white-space: pre-line;
 }
 
 /* ──────── Totals Divider Bar ──────── */
@@ -174,6 +175,7 @@
     color: #444;
     margin: 3px 0;
     line-height: 1.6;
+    white-space: pre-line;
 }
 
 .baseValueLine {
