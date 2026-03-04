@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import Cropper, { Area } from 'react-easy-crop';
 import { useSettings } from '../context/SettingsContext';
+import { TAX_LABELS } from '../utils/taxLabels';
 import styles from './SettingsDrawer.module.css';
 import ClientInfoStyles from './ClientInfo.module.css';
 
@@ -105,6 +106,7 @@ export default function SettingsDrawer() {
     const [localVatPercentage, setLocalVatPercentage] = useState(settings.vatPercentage);
     const [localMessage, setLocalMessage] = useState(settings.message);
     const [localQuoteDescription, setLocalQuoteDescription] = useState(settings.quoteDescription);
+    const [localTaxCountry, setLocalTaxCountry] = useState(settings.taxCountry);
 
     const handleOpen = () => {
         // Sync local state from context when opening
@@ -119,6 +121,7 @@ export default function SettingsDrawer() {
         setLocalVatPercentage(settings.vatPercentage);
         setLocalMessage(settings.message);
         setLocalQuoteDescription(settings.quoteDescription);
+        setLocalTaxCountry(settings.taxCountry);
         setIsOpen(true);
     };
 
@@ -135,6 +138,7 @@ export default function SettingsDrawer() {
             vatPercentage: localVatPercentage,
             message: localMessage,
             quoteDescription: localQuoteDescription,
+            taxCountry: localTaxCountry,
         };
 
         // Update context state for immediate UI reflection
@@ -334,6 +338,20 @@ export default function SettingsDrawer() {
                                 maxLength={3}
                                 aria-label="Currency symbol"
                             />
+                        </div>
+                        <div className={styles.optionRow}>
+                            Tax Country:{' '}
+                            <select
+                                value={localTaxCountry}
+                                onChange={(e) => setLocalTaxCountry(e.target.value)}
+                                className={styles.currencyInput}
+                                aria-label="Tax country"
+                                style={{ minWidth: 160 }}
+                            >
+                                {Object.entries(TAX_LABELS).map(([code, { label }]) => (
+                                    <option key={code} value={code}>{label}</option>
+                                ))}
+                            </select>
                         </div>
                         <div className={styles.optionRow}>
                             <label className={styles.vatLabel}>

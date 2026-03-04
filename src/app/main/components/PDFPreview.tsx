@@ -5,6 +5,7 @@ import { useQuote } from '../context/QuoteContext';
 import { useSettings } from '../context/SettingsContext';
 import { usePDF } from '../context/PDFContext';
 import { downloadPDF } from '../utils/pdfGenerator';
+import { getTaxLabels } from '../utils/taxLabels';
 import styles from './PDFPreview.module.css';
 
 const PAGE_WIDTH = 595; // A4 width at 72dpi
@@ -44,6 +45,8 @@ export default function PDFPreview() {
     const vatPercent = quote.vatOverride !== '' ? (parseFloat(quote.vatOverride) || 0) : settingsVat;
     const baseVal = parseFloat(quote.baseValue) || 0;
     const totalValue = baseVal + (baseVal * vatPercent) / 100;
+
+    const taxLabels = getTaxLabels(settings.taxCountry);
 
     const handleDownload = async () => {
         const blob = await capturePDF();
@@ -169,15 +172,15 @@ export default function PDFPreview() {
                     <div className={styles.bottomSection}>
                         <div className={styles.valuesRight}>
                             <p className={styles.baseValueLine}>
-                                Price excluding VAT: {settings.currency}{' '}
+                                {taxLabels.priceExcl}: {settings.currency}{' '}
                                 {baseVal > 0 ? baseVal.toFixed(2) : '0.00'}
                             </p>
                             <p className={styles.baseValueLine}>
-                                VAT {vatPercent}%: {settings.currency}{' '}
+                                {taxLabels.taxName} {vatPercent}%: {settings.currency}{' '}
                                 {baseVal > 0 ? (totalValue - baseVal).toFixed(2) : '0.00'}
                             </p>
                             <p className={styles.totalValueLine}>
-                                Total incl. VAT: {settings.currency}{' '}
+                                {taxLabels.totalIncl}: {settings.currency}{' '}
                                 {totalValue > 0 ? totalValue.toFixed(2) : '0.00'}
                             </p>
                         </div>

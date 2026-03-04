@@ -16,6 +16,7 @@ export interface SettingsData {
     logoUrl: string | null;
     message: string;
     quoteDescription: string;
+    taxCountry: string;
 }
 
 interface SettingsContextType {
@@ -38,6 +39,7 @@ const defaultSettings: SettingsData = {
     logoUrl: null,
     message: '',
     quoteDescription: 'Quote Description',
+    taxCountry: 'uk',
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -84,6 +86,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                         logoUrl: data.logo_url || null,
                         message: data.whatsapp_message || data.email_message || '',
                         quoteDescription: data.quote_description || 'Quote Description',
+                        taxCountry: data.tax_country || 'uk',
                     });
                 }
             } catch (err) {
@@ -150,6 +153,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     whatsapp_message: data.message,
                     email_message: data.message,
                     quote_description: data.quoteDescription,
+                    tax_country: data.taxCountry,
                     updated_at: new Date().toISOString(),
                 }, {
                     onConflict: 'user_id',
