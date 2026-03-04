@@ -12,6 +12,7 @@ import { SettingsProvider } from './context/SettingsContext';
 import { QuoteProvider } from './context/QuoteContext';
 import { ClientProvider } from './context/ClientContext';
 import { PDFProvider } from './context/PDFContext';
+import { ChatProvider } from './context/ChatContext';
 
 export default function MainPage() {
     return (
@@ -20,14 +21,16 @@ export default function MainPage() {
                 <QuoteProvider>
                     <ClientProvider>
                         <PDFProvider>
-                            <main className={styles.mainContainer}>
-                                <Header />
-                                <AIChat />
-                                <QuoteForm />
-                                <PDFPreview />
-                                <ActionButtons />
-                                <SettingsDrawer />
-                            </main>
+                            <ChatProvider>
+                                <main className={styles.mainContainer}>
+                                    <Header />
+                                    <AIChat />
+                                    <QuoteForm />
+                                    <PDFPreview />
+                                    <ActionButtons />
+                                    <SettingsDrawer />
+                                </main>
+                            </ChatProvider>
                         </PDFProvider>
                     </ClientProvider>
                 </QuoteProvider>

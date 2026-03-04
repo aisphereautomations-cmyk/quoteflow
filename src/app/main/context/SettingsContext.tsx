@@ -117,7 +117,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                 // Convert data URL to blob and upload to Supabase Storage
                 const response = await fetch(logoUrl);
                 const blob = await response.blob();
-                const fileExt = blob.type.split('/')[1] || 'png';
+                const rawExt = blob.type.split('/')[1] || 'png';
+                const fileExt = rawExt.includes('svg') ? 'svg' : rawExt;
                 const fileName = `${user.id}/logo.${fileExt}`;
 
                 const { error: uploadError } = await supabase.storage
@@ -133,7 +134,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     const { data: urlData } = supabase.storage
                         .from('logos')
                         .getPublicUrl(fileName);
-                    logoUrl = urlData.publicUrl;
+                    // Append cache-busting param so the browser fetches the new image
+                    logoUrl = `${urlData.publicUrl}?t=${Date.now()}`;
                 }
             }
 
