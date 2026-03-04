@@ -1,14 +1,38 @@
 'use client';
 
-import { useQuote, PricingMode } from '../context/QuoteContext';
+import { useState, useEffect } from 'react';
+import { useQuote, PricingMode, ServiceBlock } from '../context/QuoteContext';
 import { useSettings } from '../context/SettingsContext';
 import { useTranslation } from '../context/LanguageContext';
 import styles from './QuoteForm.module.css';
+
+function getServicesTotal(services: ServiceBlock[]): number {
+    return services.reduce((sum, s) => {
+        if (s.pricingMode === 'fixed') {
+            return sum + (parseFloat(s.fixedPrice) || 0);
+        }
+        return sum + ((parseFloat(s.quantity) || 0) * (parseFloat(s.unitPrice) || 0));
+    }, 0);
+}
 
 export default function QuoteForm() {
     const { quote, updateQuote, addService, removeService, updateService } = useQuote();
     const { settings } = useSettings();
     const { t } = useTranslation();
+    const [isBaseOverridden, setIsBaseOverridden] = useState(false);
+
+    const servicesTotal = getServicesTotal(quote.services);
+
+    // Auto-update baseValue when services change (if not manually overridden)
+    useEffect(() => {
+        if (!isBaseOverridden) {
+            const formatted = servicesTotal > 0 ? servicesTotal.toFixed(2) : '';
+            if (quote.baseValue !== formatted) {
+                updateQuote({ baseValue: formatted });
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [servicesTotal, isBaseOverridden]);
 
     const settingsVat = settings.vatEnabled ? settings.vatPercentage : 0;
     const vatPercent = quote.vatOverride !== '' ? (parseFloat(quote.vatOverride) || 0) : settingsVat;
@@ -163,13 +187,32 @@ export default function QuoteForm() {
             <div className={styles.totalsSection}>
                 <div className={styles.totalRow}>
                     <label className={styles.totalLabel}>{t('quoteForm.baseValue')} ({settings.currency})</label>
-                    <input
-                        type="number"
-                        placeholder="0.00"
-                        className={styles.totalInput}
-                        value={quote.baseValue}
-                        onChange={(e) => updateQuote({ baseValue: e.target.value })}
-                    />
+                    <div className={styles.baseInputWrapper}>
+                        <input
+                            type="number"
+                            placeholder="0.00"
+                            className={`${styles.totalInput} ${isBaseOverridden ? styles.totalInputOverridden : ''}`}
+                            value={quote.baseValue}
+                            onChange={(e) => {
+                                setIsBaseOverridden(true);
+                                updateQuote({ baseValue: e.target.value });
+                            }}
+                        />
+                        {isBaseOverridden && (
+                            <button
+                                type="button"
+                                className={styles.resetBaseBtn}
+                                onClick={() => {
+                                    setIsBaseOverridden(false);
+                                    const formatted = servicesTotal > 0 ? servicesTotal.toFixed(2) : '';
+                                    updateQuote({ baseValue: formatted });
+                                }}
+                                title="Reset to auto-sum"
+                            >
+                                ↺
+                            </button>
+                        )}
+                    </div>
                 </div>
                 <div className={styles.totalRow}>
                     <span className={styles.totalLabel}>
