@@ -161,10 +161,10 @@ export async function generateQuotePDF(
     let ty = headerTop;
     if (settings.companyName) {
         pdf.setFont('helvetica', 'bold');
-        pdf.setFontSize(22);
+        pdf.setFontSize(20);
         pdf.setTextColor(17, 17, 17);
-        pdf.text(settings.companyName, PAD, ty + 22); // baseline offset ≈ font size
-        ty += 36; // 22 + 14 margin-bottom
+        pdf.text(settings.companyName, PAD, ty + 20); // baseline offset ≈ font size
+        ty += 34; // 20 + 14 margin-bottom
     }
     pdf.setFont('helvetica', 'normal');
     pdf.setFontSize(15);
@@ -179,9 +179,9 @@ export async function generateQuotePDF(
     pdf.setFillColor(br, bg, bb);
     pdf.rect(0, y, W, 29, 'F');   // full width, no side margins
     pdf.setFont('helvetica', 'bold');
-    pdf.setFontSize(14);
+    pdf.setFontSize(18);
     pdf.setTextColor(255, 255, 255);
-    pdf.text(settings.quoteDescription || 'Quote Description', W / 2, y + 19, { align: 'center' });
+    pdf.text(settings.quoteDescription || 'Quote Description', W / 2, y + 20, { align: 'center' });
     y += 29;
 
     // ════════ SERVICES (CSS: padding 30px 40px) ════════
