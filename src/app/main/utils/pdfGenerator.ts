@@ -272,13 +272,13 @@ export async function generateQuotePDF(
     // Footer — left side
     let fy = bY;
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
+    pdf.setFontSize(7);
     pdf.setTextColor(68, 68, 68);
-    if (quote.estimatedTime) { pdf.text(quote.estimatedTime, PAD, fy + 8); fy += 9 * 1.6; }
-    if (quote.expirationDate) { pdf.text(quote.expirationDate, PAD, fy + 8); fy += 9 * 1.6; }
+    if (quote.estimatedTime) { pdf.text(quote.estimatedTime, PAD, fy + 7); fy += 7 * 1.6; }
+    if (quote.expirationDate) { pdf.text(quote.expirationDate, PAD, fy + 7); fy += 7 * 1.6; }
     if (quote.paymentConditions) {
         const cl = wrapText(pdf, quote.paymentConditions, CW / 2);
-        for (const ln of cl) { pdf.text(ln, PAD, fy + 8); fy += 9 * 1.6; }
+        for (const ln of cl) { pdf.text(ln, PAD, fy + 7); fy += 7 * 1.6; }
     }
 
     return pdf.output('blob');
