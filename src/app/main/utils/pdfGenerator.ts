@@ -112,11 +112,11 @@ export async function generateQuotePDF(
     if (filledServices.length > 0) {
         h += 30; // top padding of servicesArea
         for (const svc of filledServices) {
-            h += 8 + 14; // serviceRow: margin-bottom 8 + title 14px line
+            h += 8 + 18; // serviceRow: margin-bottom 8 + title 18px line
             if (svc.description) {
-                m.setFontSize(12);
+                m.setFontSize(15);
                 const lines = wrapText(m, svc.description, CW);
-                h += lines.length * 12 * 1.4; // 12px font × 1.4 line-height
+                h += lines.length * 15 * 1.4; // 15px font × 1.4 line-height
             }
             h += 28; // margin-bottom per service
         }
@@ -132,11 +132,11 @@ export async function generateQuotePDF(
     // Bottom section
     h += 20; // padding-top
     h += 20 + 20 + 22; // baseValueLine×2 + totalValueLine
-    if (quote.estimatedTime) h += 9 * 1.6;
-    if (quote.expirationDate) h += 9 * 1.6;
+    if (quote.estimatedTime) h += 12 * 1.6;
+    if (quote.expirationDate) h += 12 * 1.6;
     if (quote.paymentConditions) {
-        m.setFontSize(9);
-        h += wrapText(m, quote.paymentConditions, CW / 2).length * 9 * 1.6;
+        m.setFontSize(12);
+        h += wrapText(m, quote.paymentConditions, CW / 2).length * 12 * 1.6;
     }
     h += 36; // padding-bottom
 
@@ -201,26 +201,26 @@ export async function generateQuotePDF(
             // Title (left) + price (right) on same line
             if (svc.title) {
                 pdf.setFont('helvetica', 'bold');
-                pdf.setFontSize(14);
+                pdf.setFontSize(18);
                 pdf.setTextColor(17, 17, 17);
-                pdf.text(svc.title, PAD, y + 12);
+                pdf.text(svc.title, PAD, y + 15);
             }
             if (priceStr) {
                 pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(13);
+                pdf.setFontSize(17);
                 pdf.setTextColor(34, 34, 34);
                 const pw = pdf.getTextWidth(priceStr);
-                pdf.text(priceStr, W - PAD - pw, y + 12);
+                pdf.text(priceStr, W - PAD - pw, y + 15);
             }
-            y += 22; // serviceRow height + margin
+            y += 24; // serviceRow height + margin
 
             // Description
             if (svc.description) {
                 pdf.setFont('helvetica', 'normal');
-                pdf.setFontSize(12);
+                pdf.setFontSize(15);
                 pdf.setTextColor(68, 68, 68);
                 const lines = wrapText(pdf, svc.description, CW);
-                const lh = 12 * 1.4;
+                const lh = 15 * 1.4;
                 for (const line of lines) {
                     pdf.text(line, PAD, y + 13);
                     y += lh;
@@ -272,13 +272,13 @@ export async function generateQuotePDF(
     // Footer — left side
     let fy = bY;
     pdf.setFont('helvetica', 'normal');
-    pdf.setFontSize(9);
+    pdf.setFontSize(12);
     pdf.setTextColor(68, 68, 68);
-    if (quote.estimatedTime) { pdf.text(quote.estimatedTime, PAD, fy + 8); fy += 9 * 1.6; }
-    if (quote.expirationDate) { pdf.text(quote.expirationDate, PAD, fy + 8); fy += 9 * 1.6; }
+    if (quote.estimatedTime) { pdf.text(quote.estimatedTime, PAD, fy + 11); fy += 12 * 1.6; }
+    if (quote.expirationDate) { pdf.text(quote.expirationDate, PAD, fy + 11); fy += 12 * 1.6; }
     if (quote.paymentConditions) {
         const cl = wrapText(pdf, quote.paymentConditions, CW / 2);
-        for (const ln of cl) { pdf.text(ln, PAD, fy + 8); fy += 9 * 1.6; }
+        for (const ln of cl) { pdf.text(ln, PAD, fy + 11); fy += 12 * 1.6; }
     }
 
     return pdf.output('blob');

@@ -126,13 +126,13 @@
 }
 
 .serviceTitle {
-    font-size: 14px;
+    font-size: 18px;
     font-weight: 700;
     color: #111;
 }
 
 .servicePrice {
-    font-size: 13px;
+    font-size: 17px;
     font-weight: 600;
     color: #222;
     white-space: nowrap;
@@ -141,11 +141,11 @@
 
 /* Superscript-style for m² */
 .servicePrice sup {
-    font-size: 9px;
+    font-size: 11px;
 }
 
 .serviceDescription {
-    font-size: 12px;
+    font-size: 15px;
     font-weight: 500;
     color: #444;
     line-height: 1.4;
@@ -173,7 +173,7 @@
 .footerLeft {}
 
 .footerLine {
-    font-size: 9px;
+    font-size: 12px;
     font-weight: 500;
     color: #444;
     margin: 3px 0;
