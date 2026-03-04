@@ -31,6 +31,9 @@
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     display: flex;
     flex-direction: column;
+    -webkit-text-size-adjust: none;
+    -moz-text-size-adjust: none;
+    text-size-adjust: none;
 }
 
 /* ──────── PDF Header ──────── */
