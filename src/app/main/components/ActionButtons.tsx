@@ -28,7 +28,7 @@ export default function ActionButtons() {
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     title: 'Quote',
-                    text: settings.message || 'Please find the quote attached',
+                    text: message || 'Please find the quote attached',
                     files: [file],
                 });
                 return; // shared successfully
