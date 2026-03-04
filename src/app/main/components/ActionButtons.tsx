@@ -14,13 +14,11 @@ export default function ActionButtons() {
     const { quote } = useQuote();
     const { capturePDF } = usePDF();
 
-    // Local editable messages — initialized from Settings defaults
-    const [whatsappMsg, setWhatsappMsg] = useState(settings.whatsappMessage);
-    const [emailMsg, setEmailMsg] = useState(settings.emailMessage);
+    // Local editable message — initialized from Settings default
+    const [message, setMessage] = useState(settings.message);
 
     // Sync with settings when the default changes (e.g. user updates Settings drawer)
-    useEffect(() => { setWhatsappMsg(settings.whatsappMessage); }, [settings.whatsappMessage]);
-    useEffect(() => { setEmailMsg(settings.emailMessage); }, [settings.emailMessage]);
+    useEffect(() => { setMessage(settings.message); }, [settings.message]);
 
     /* ── Share helper — tries Web Share API with file, otherwise falls back ── */
     async function shareOrFallback(
@@ -34,7 +32,7 @@ export default function ActionButtons() {
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     title: 'Quote',
-                    text: settings.emailMessage || client.serviceTitle || 'Please find the quote attached',
+                    text: settings.message || client.serviceTitle || 'Please find the quote attached',
                     files: [file],
                 });
                 return; // shared successfully
@@ -61,7 +59,7 @@ export default function ActionButtons() {
         if (!blob) return;
 
         const subject = `Quote from ${settings.companyName || 'Quote Flow'}`;
-        const body = emailMsg || 'Hello! Please find attached the quote for your review.';
+        const body = message || 'Hello! Please find attached the quote for your review.';
         const mailtoUrl = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
         await shareOrFallback(blob, () => {
@@ -89,9 +87,9 @@ export default function ActionButtons() {
         const blob = await capturePDF();
         if (!blob) return;
 
-        const message = whatsappMsg || 'Hello! Please find attached the quote for your review.';
+        const msg = message || 'Hello! Please find attached the quote for your review.';
         const phone = client.whatsapp.replace(/\D/g, ''); // Remove non-digits
-        const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+        const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
 
         await shareOrFallback(blob, () => {
             window.open(whatsappUrl, '_blank');
@@ -102,34 +100,15 @@ export default function ActionButtons() {
         <>
             {/* Action Buttons UI */}
             <div className={styles.actionSection}>
-                <h2 className="shared-section-title">Pre-defined messages</h2>
+                <h2 className="shared-section-title">Pre-defined message</h2>
 
                 <div className={styles.messageGroup}>
-                    <label htmlFor="whatsapp-message" className={styles.label}>
-                        Whatsapp:
-                    </label>
                     <textarea
-                        id="whatsapp-message"
+                        id="quote-message"
                         className="shared-textarea"
-                        placeholder="Custom message for Whatsapp..."
-                        value={whatsappMsg}
-                        onChange={(e) => setWhatsappMsg(e.target.value)}
-                    />
-                    <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.35rem' }}>
-                        Default set in Settings
-                    </p>
-                </div>
-
-                <div className={styles.messageGroup}>
-                    <label htmlFor="email-message" className={styles.label}>
-                        Email:
-                    </label>
-                    <textarea
-                        id="email-message"
-                        className="shared-textarea"
-                        placeholder="Custom message for Email..."
-                        value={emailMsg}
-                        onChange={(e) => setEmailMsg(e.target.value)}
+                        placeholder="Message sent with the quote..."
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
                     />
                     <p style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.35rem' }}>
                         Default set in Settings

@@ -103,8 +103,7 @@ export default function SettingsDrawer() {
     const [localCurrency, setLocalCurrency] = useState(settings.currency);
     const [localVatEnabled, setLocalVatEnabled] = useState(settings.vatEnabled);
     const [localVatPercentage, setLocalVatPercentage] = useState(settings.vatPercentage);
-    const [localWhatsappMessage, setLocalWhatsappMessage] = useState(settings.whatsappMessage);
-    const [localEmailMessage, setLocalEmailMessage] = useState(settings.emailMessage);
+    const [localMessage, setLocalMessage] = useState(settings.message);
     const [localQuoteDescription, setLocalQuoteDescription] = useState(settings.quoteDescription);
 
     const handleOpen = () => {
@@ -118,8 +117,7 @@ export default function SettingsDrawer() {
         setLocalCurrency(settings.currency);
         setLocalVatEnabled(settings.vatEnabled);
         setLocalVatPercentage(settings.vatPercentage);
-        setLocalWhatsappMessage(settings.whatsappMessage);
-        setLocalEmailMessage(settings.emailMessage);
+        setLocalMessage(settings.message);
         setLocalQuoteDescription(settings.quoteDescription);
         setIsOpen(true);
     };
@@ -135,8 +133,7 @@ export default function SettingsDrawer() {
             currency: localCurrency,
             vatEnabled: localVatEnabled,
             vatPercentage: localVatPercentage,
-            whatsappMessage: localWhatsappMessage,
-            emailMessage: localEmailMessage,
+            message: localMessage,
             quoteDescription: localQuoteDescription,
         };
 
@@ -378,31 +375,15 @@ export default function SettingsDrawer() {
                     </div>
 
                     <div className={styles.section}>
-                        <h3 className="shared-subsection-title">Pre-defined messages</h3>
+                        <h3 className="shared-subsection-title">Pre-defined message</h3>
 
                         <div className={styles.messageGroup}>
-                            <label htmlFor="settings-whatsapp-message" className={styles.label}>
-                                Whatsapp:
-                            </label>
                             <textarea
-                                id="settings-whatsapp-message"
+                                id="settings-message"
                                 className="shared-textarea"
-                                placeholder="Default message template for Whatsapp..."
-                                value={localWhatsappMessage}
-                                onChange={(e) => setLocalWhatsappMessage(e.target.value)}
-                            />
-                        </div>
-
-                        <div className={styles.messageGroup}>
-                            <label htmlFor="settings-email-message" className={styles.label}>
-                                Email:
-                            </label>
-                            <textarea
-                                id="settings-email-message"
-                                className="shared-textarea"
-                                placeholder="Default message template for Email..."
-                                value={localEmailMessage}
-                                onChange={(e) => setLocalEmailMessage(e.target.value)}
+                                placeholder="Default message sent with quotes..."
+                                value={localMessage}
+                                onChange={(e) => setLocalMessage(e.target.value)}
                             />
                         </div>
                     </div>

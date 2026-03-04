@@ -14,8 +14,7 @@ export interface SettingsData {
     vatEnabled: boolean;
     vatPercentage: number;
     logoUrl: string | null;
-    whatsappMessage: string;
-    emailMessage: string;
+    message: string;
     quoteDescription: string;
 }
 
@@ -37,8 +36,7 @@ const defaultSettings: SettingsData = {
     vatEnabled: true,
     vatPercentage: 23,
     logoUrl: null,
-    whatsappMessage: '',
-    emailMessage: '',
+    message: '',
     quoteDescription: 'Quote Description',
 };
 
@@ -84,8 +82,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                         vatEnabled: data.vat_enabled ?? true,
                         vatPercentage: data.vat_percentage ?? 23,
                         logoUrl: data.logo_url || null,
-                        whatsappMessage: data.whatsapp_message || '',
-                        emailMessage: data.email_message || '',
+                        message: data.whatsapp_message || data.email_message || '',
                         quoteDescription: data.quote_description || 'Quote Description',
                     });
                 }
@@ -150,8 +147,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     vat_enabled: data.vatEnabled,
                     vat_percentage: data.vatPercentage,
                     logo_url: logoUrl,
-                    whatsapp_message: data.whatsappMessage,
-                    email_message: data.emailMessage,
+                    whatsapp_message: data.message,
+                    email_message: data.message,
                     quote_description: data.quoteDescription,
                     updated_at: new Date().toISOString(),
                 }, {
