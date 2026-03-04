@@ -123,13 +123,13 @@
 }
 
 .serviceTitle {
-    font-size: 17px;
+    font-size: 14px;
     font-weight: 700;
     color: #111;
 }
 
 .servicePrice {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: #222;
     white-space: nowrap;
@@ -142,7 +142,7 @@
 }
 
 .serviceDescription {
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 500;
     color: #444;
     line-height: 1.7;
