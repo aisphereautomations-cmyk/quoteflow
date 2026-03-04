@@ -1,17 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useClient } from '../context/ClientContext';
 import { useSettings } from '../context/SettingsContext';
-import { useQuote } from '../context/QuoteContext';
 import { usePDF } from '../context/PDFContext';
 import { downloadPDF } from '../utils/pdfGenerator';
 import styles from './ActionButtons.module.css';
 
 export default function ActionButtons() {
-    const { client } = useClient();
     const { settings } = useSettings();
-    const { quote } = useQuote();
     const { capturePDF } = usePDF();
 
     // Local editable message — initialized from Settings default
@@ -32,7 +28,7 @@ export default function ActionButtons() {
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 await navigator.share({
                     title: 'Quote',
-                    text: settings.message || client.serviceTitle || 'Please find the quote attached',
+                    text: settings.message || 'Please find the quote attached',
                     files: [file],
                 });
                 return; // shared successfully
@@ -50,17 +46,12 @@ export default function ActionButtons() {
 
     /* ── Email handler ── */
     const handleEmail = async () => {
-        if (!client.email) {
-            alert('Please enter client email address');
-            return;
-        }
-
         const blob = await capturePDF();
         if (!blob) return;
 
         const subject = `Quote from ${settings.companyName || 'Quote Flow'}`;
         const body = message || 'Hello! Please find attached the quote for your review.';
-        const mailtoUrl = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        const mailtoUrl = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 
         await shareOrFallback(blob, () => {
             window.location.href = mailtoUrl;
@@ -79,17 +70,11 @@ export default function ActionButtons() {
 
     /* ── WhatsApp handler ── */
     const handleWhatsapp = async () => {
-        if (!client.whatsapp) {
-            alert('Please enter client WhatsApp number');
-            return;
-        }
-
         const blob = await capturePDF();
         if (!blob) return;
 
         const msg = message || 'Hello! Please find attached the quote for your review.';
-        const phone = client.whatsapp.replace(/\D/g, ''); // Remove non-digits
-        const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(msg)}`;
+        const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(msg)}`;
 
         await shareOrFallback(blob, () => {
             window.open(whatsappUrl, '_blank');

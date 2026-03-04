@@ -4,7 +4,6 @@ import styles from './page.module.css';
 import Header from './components/Header';
 import AIChat from './components/AIChat';
 import QuoteForm from './components/QuoteForm';
-import ClientInfo from './components/ClientInfo';
 import PDFPreview from './components/PDFPreview';
 import ActionButtons from './components/ActionButtons';
 import SettingsDrawer from './components/SettingsDrawer';
@@ -26,7 +25,6 @@ export default function MainPage() {
                                 <AIChat />
                                 <QuoteForm />
                                 <PDFPreview />
-                                <ClientInfo />
                                 <ActionButtons />
                                 <SettingsDrawer />
                             </main>
