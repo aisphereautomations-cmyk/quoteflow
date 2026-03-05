@@ -31,9 +31,16 @@
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     display: flex;
     flex-direction: column;
-    -webkit-text-size-adjust: none;
-    -moz-text-size-adjust: none;
-    text-size-adjust: none;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+/* Force all children to inherit — prevents any reset from overriding */
+.previewFrame * {
+    -webkit-text-size-adjust: 100% !important;
+    -moz-text-size-adjust: 100% !important;
+    text-size-adjust: 100% !important;
 }
 
 /* ──────── PDF Header ──────── */
@@ -49,7 +56,7 @@
 }
 
 .companyName {
-    font-size: 29px;
+    font-size: 25px;
     font-weight: 800;
     color: #111;
     margin-bottom: 14px;
@@ -57,7 +64,7 @@
 }
 
 .companyDetail {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 500;
     color: #444;
     margin: 3px 0;
@@ -94,13 +101,13 @@
 
 /* ──────── Quote Description Bar ──────── */
 .descriptionBar {
-    height: 29px;
+    height: 19px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-weight: 700;
-    font-size: 19px;
+    font-size: 18px;
     text-align: center;
     letter-spacing: 0.02em;
 }
@@ -126,13 +133,13 @@
 }
 
 .serviceTitle {
-    font-size: 19px;
+    font-size: 16px;
     font-weight: 700;
     color: #111;
 }
 
 .servicePrice {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: #222;
     white-space: nowrap;
@@ -145,11 +152,14 @@
 }
 
 .serviceDescription {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 500;
     color: #444;
     line-height: 1.4;
     white-space: pre-line;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
 }
 
 /* ──────── Totals Divider Bar ──────── */
@@ -173,16 +183,19 @@
 .footerLeft {}
 
 .footerLine {
-    font-size: 7px;
+    font-size: 11px;
     font-weight: 500;
     color: #444;
     margin: 3px 0;
     line-height: 1.6;
     white-space: pre-line;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
 }
 
 .baseValueLine {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     color: #333;
     margin-bottom: 4px;
