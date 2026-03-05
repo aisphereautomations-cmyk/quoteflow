@@ -15,6 +15,8 @@ import { ClientProvider } from './context/ClientContext';
 import { PDFProvider } from './context/PDFContext';
 import { ChatProvider } from './context/ChatContext';
 
+const showAIChat = process.env.NEXT_PUBLIC_ENABLE_AI_CHAT === 'true';
+
 export default function MainPage() {
     return (
         <AuthProvider>
@@ -26,7 +28,7 @@ export default function MainPage() {
                                 <ChatProvider>
                                     <main className={styles.mainContainer}>
                                         <Header />
-                                        <AIChat />
+                                        {showAIChat && <AIChat />}
                                         <QuoteForm />
                                         <PDFPreview />
                                         <ActionButtons />
