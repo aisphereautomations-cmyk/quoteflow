@@ -25,6 +25,22 @@ export function PDFProvider({ children }: { children: ReactNode }) {
             scale: 2,
             useCORS: true,
             backgroundColor: '#ffffff',
+            onclone: (_doc: Document, clonedEl: HTMLElement) => {
+                // iOS Safari inflates font sizes on elements inside a scaled
+                // container (transform: scale). The clone is a separate DOM tree
+                // that gets re-laid-out — by removing the transform on the clone,
+                // iOS Safari won't trigger font inflation during the clone's layout.
+                clonedEl.style.setProperty('transform', 'none', 'important');
+                clonedEl.style.setProperty('-webkit-text-size-adjust', '100%', 'important');
+                clonedEl.style.setProperty('text-size-adjust', '100%', 'important');
+                // Force all children too
+                const allEls = clonedEl.querySelectorAll('*');
+                allEls.forEach((el) => {
+                    const htmlEl = el as HTMLElement;
+                    htmlEl.style.setProperty('-webkit-text-size-adjust', '100%', 'important');
+                    htmlEl.style.setProperty('text-size-adjust', '100%', 'important');
+                });
+            },
         });
 
         const imgData = canvas.toDataURL('image/png');
