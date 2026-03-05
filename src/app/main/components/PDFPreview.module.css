@@ -31,18 +31,19 @@
     font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
     display: flex;
     flex-direction: column;
-    -webkit-text-size-adjust: 100%;
-    -moz-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+    -webkit-text-size-adjust: none;
+    -moz-text-size-adjust: none;
+    text-size-adjust: none;
 }
 
-/* Force all children: prevent iOS Safari WebKit text autosizing.
-   max-height trick tells the autosizer elements have constrained height,
-   so it skips font inflation entirely. text-size-adjust handles Chrome/Android. */
+/* Prevent iOS browser text autosizing (Safari + Chrome).
+   none = disable entirely, max-height tricks the autosizer into
+   thinking elements have constrained height so it skips inflation. */
+.previewFrame,
 .previewFrame * {
-    -webkit-text-size-adjust: 100% !important;
-    -moz-text-size-adjust: 100% !important;
-    text-size-adjust: 100% !important;
+    -webkit-text-size-adjust: none !important;
+    -moz-text-size-adjust: none !important;
+    text-size-adjust: none !important;
     max-height: 999999px !important;
 }
 

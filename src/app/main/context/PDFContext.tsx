@@ -37,8 +37,8 @@ export function PDFProvider({ children }: { children: ReactNode }) {
                 const allEls = clonedEl.querySelectorAll('*');
                 allEls.forEach((el) => {
                     const htmlEl = el as HTMLElement;
-                    htmlEl.style.setProperty('-webkit-text-size-adjust', '100%', 'important');
-                    htmlEl.style.setProperty('text-size-adjust', '100%', 'important');
+                    htmlEl.style.setProperty('-webkit-text-size-adjust', 'none', 'important');
+                    htmlEl.style.setProperty('text-size-adjust', 'none', 'important');
                 });
             },
         });
