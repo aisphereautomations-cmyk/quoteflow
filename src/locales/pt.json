@@ -96,6 +96,18 @@
         "passwordMinLength": "A palavra-passe deve ter pelo menos 6 caracteres",
         "alreadyRegistered": "Este email já está registado. Faça login.",
         "accountCreated": "Conta criada! Verifique o seu email para confirmar e depois entre.",
+        "forgotPassword": "Esqueceu a palavra-passe?",
+        "forgotSubtitle": "Redefinir palavra-passe",
+        "fillEmail": "Por favor insira o seu email",
+        "sendResetLink": "Enviar Link de Redefinição",
+        "resetEmailSent": "Verifique o seu email para o link de redefinição de palavra-passe.",
+        "backToLogin": "← Voltar ao Login",
+        "resetSubtitle": "Definir nova palavra-passe",
+        "newPasswordLabel": "Nova Palavra-passe:",
+        "confirmPasswordLabel": "Confirmar Palavra-passe:",
+        "passwordsDoNotMatch": "As palavras-passe não coincidem",
+        "passwordUpdated": "Palavra-passe atualizada! A redirecionar...",
+        "updatePassword": "Atualizar Palavra-passe",
         "footer": "Desenvolvido por AI Sphere Automations"
     },
     "pricing": {

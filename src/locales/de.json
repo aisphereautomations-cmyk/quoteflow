@@ -96,6 +96,18 @@
         "passwordMinLength": "Das Passwort muss mindestens 6 Zeichen lang sein",
         "alreadyRegistered": "Diese Email ist bereits registriert. Bitte melden Sie sich an.",
         "accountCreated": "Konto erstellt! Überprüfen Sie Ihre Email zur Bestätigung, dann melden Sie sich an.",
+        "forgotPassword": "Passwort vergessen?",
+        "forgotSubtitle": "Passwort zurücksetzen",
+        "fillEmail": "Bitte geben Sie Ihre Email ein",
+        "sendResetLink": "Reset-Link Senden",
+        "resetEmailSent": "Überprüfen Sie Ihre Email für den Passwort-Reset-Link.",
+        "backToLogin": "← Zurück zur Anmeldung",
+        "resetSubtitle": "Neues Passwort festlegen",
+        "newPasswordLabel": "Neues Passwort:",
+        "confirmPasswordLabel": "Passwort Bestätigen:",
+        "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein",
+        "passwordUpdated": "Passwort aktualisiert! Weiterleitung...",
+        "updatePassword": "Passwort Aktualisieren",
         "footer": "Betrieben von AI Sphere Automations"
     },
     "pricing": {

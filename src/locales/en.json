@@ -96,6 +96,18 @@
         "passwordMinLength": "Password must be at least 6 characters",
         "alreadyRegistered": "This email is already registered. Please login instead.",
         "accountCreated": "Account created! Check your email to confirm, then login.",
+        "forgotPassword": "Forgot password?",
+        "forgotSubtitle": "Reset your password",
+        "fillEmail": "Please enter your email",
+        "sendResetLink": "Send Reset Link",
+        "resetEmailSent": "Check your email for a password reset link.",
+        "backToLogin": "← Back to Login",
+        "resetSubtitle": "Set a new password",
+        "newPasswordLabel": "New Password:",
+        "confirmPasswordLabel": "Confirm Password:",
+        "passwordsDoNotMatch": "Passwords do not match",
+        "passwordUpdated": "Password updated! Redirecting...",
+        "updatePassword": "Update Password",
         "footer": "Powered by AI Sphere Automations"
     },
     "pricing": {

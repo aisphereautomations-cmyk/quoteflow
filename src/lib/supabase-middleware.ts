@@ -47,6 +47,11 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
+    // Auth callback and reset-password routes: allow through (they handle their own auth)
+    if (pathname.startsWith('/auth/')) {
+        return supabaseResponse;
+    }
+
     // If logged in and on login page or root, redirect to /main
     // The paywall below will redirect to /pricing if no active subscription
     if (user && (pathname === '/login' || pathname === '/')) {

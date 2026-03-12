@@ -96,6 +96,18 @@
         "passwordMinLength": "Le mot de passe doit contenir au moins 6 caractères",
         "alreadyRegistered": "Cet email est déjà enregistré. Connectez-vous.",
         "accountCreated": "Compte créé ! Vérifiez votre email pour confirmer, puis connectez-vous.",
+        "forgotPassword": "Mot de passe oublié ?",
+        "forgotSubtitle": "Réinitialiser le mot de passe",
+        "fillEmail": "Veuillez entrer votre email",
+        "sendResetLink": "Envoyer le Lien de Réinitialisation",
+        "resetEmailSent": "Vérifiez votre email pour le lien de réinitialisation.",
+        "backToLogin": "← Retour à la Connexion",
+        "resetSubtitle": "Définir un nouveau mot de passe",
+        "newPasswordLabel": "Nouveau Mot de Passe :",
+        "confirmPasswordLabel": "Confirmer le Mot de Passe :",
+        "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
+        "passwordUpdated": "Mot de passe mis à jour ! Redirection...",
+        "updatePassword": "Mettre à Jour le Mot de Passe",
         "footer": "Propulsé par AI Sphere Automations"
     },
     "pricing": {

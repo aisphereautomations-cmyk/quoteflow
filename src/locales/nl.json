@@ -96,6 +96,18 @@
         "passwordMinLength": "Het wachtwoord moet minimaal 6 tekens bevatten",
         "alreadyRegistered": "Dit email is al geregistreerd. Log in.",
         "accountCreated": "Account aangemaakt! Controleer uw email ter bevestiging en log dan in.",
+        "forgotPassword": "Wachtwoord vergeten?",
+        "forgotSubtitle": "Wachtwoord herstellen",
+        "fillEmail": "Voer uw emailadres in",
+        "sendResetLink": "Herstelkoppeling Verzenden",
+        "resetEmailSent": "Controleer uw email voor de wachtwoord-herstelkoppeling.",
+        "backToLogin": "← Terug naar Inloggen",
+        "resetSubtitle": "Nieuw wachtwoord instellen",
+        "newPasswordLabel": "Nieuw Wachtwoord:",
+        "confirmPasswordLabel": "Wachtwoord Bevestigen:",
+        "passwordsDoNotMatch": "De wachtwoorden komen niet overeen",
+        "passwordUpdated": "Wachtwoord bijgewerkt! Doorverwijzen...",
+        "updatePassword": "Wachtwoord Bijwerken",
         "footer": "Aangedreven door AI Sphere Automations"
     },
     "pricing": {

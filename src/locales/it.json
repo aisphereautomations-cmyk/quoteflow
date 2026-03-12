@@ -96,6 +96,18 @@
         "passwordMinLength": "La password deve avere almeno 6 caratteri",
         "alreadyRegistered": "Questa email è già registrata. Effettua il login.",
         "accountCreated": "Account creato! Controlla la tua email per confermare, poi accedi.",
+        "forgotPassword": "Password dimenticata?",
+        "forgotSubtitle": "Reimposta la password",
+        "fillEmail": "Inserisci la tua email",
+        "sendResetLink": "Invia Link di Reimpostazione",
+        "resetEmailSent": "Controlla la tua email per il link di reimpostazione della password.",
+        "backToLogin": "← Torna al Login",
+        "resetSubtitle": "Imposta una nuova password",
+        "newPasswordLabel": "Nuova Password:",
+        "confirmPasswordLabel": "Conferma Password:",
+        "passwordsDoNotMatch": "Le password non corrispondono",
+        "passwordUpdated": "Password aggiornata! Reindirizzamento...",
+        "updatePassword": "Aggiorna Password",
         "footer": "Realizzato da AI Sphere Automations"
     },
     "pricing": {

@@ -96,6 +96,18 @@
         "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
         "alreadyRegistered": "Este email ya está registrado. Inicie sesión.",
         "accountCreated": "¡Cuenta creada! Revise su email para confirmar y luego inicie sesión.",
+        "forgotPassword": "¿Olvidó su contraseña?",
+        "forgotSubtitle": "Restablecer contraseña",
+        "fillEmail": "Por favor ingrese su email",
+        "sendResetLink": "Enviar Enlace de Restablecimiento",
+        "resetEmailSent": "Revise su email para el enlace de restablecimiento de contraseña.",
+        "backToLogin": "← Volver al Inicio de Sesión",
+        "resetSubtitle": "Establecer nueva contraseña",
+        "newPasswordLabel": "Nueva Contraseña:",
+        "confirmPasswordLabel": "Confirmar Contraseña:",
+        "passwordsDoNotMatch": "Las contraseñas no coinciden",
+        "passwordUpdated": "¡Contraseña actualizada! Redirigiendo...",
+        "updatePassword": "Actualizar Contraseña",
         "footer": "Desarrollado por AI Sphere Automations"
     },
     "pricing": {
