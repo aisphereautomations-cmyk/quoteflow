@@ -28,12 +28,47 @@
     align-items: center;
 }
 
+.serviceHeaderLeft {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
 .serviceLabel {
     font-size: var(--font-size-sm);
     font-weight: 600;
     color: var(--color-text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
+}
+
+.reorderBtns {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.reorderBtn {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--color-text-secondary);
+    font-size: 8px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 3px 6px;
+    border-radius: 3px;
+    transition: all var(--transition-base);
+}
+
+.reorderBtn:hover:not(:disabled) {
+    color: #a855f7;
+    border-color: rgba(168, 85, 247, 0.4);
+    background: rgba(168, 85, 247, 0.1);
+}
+
+.reorderBtn:disabled {
+    opacity: 0.25;
+    cursor: default;
 }
 
 .removeBtn {

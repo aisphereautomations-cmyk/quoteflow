@@ -16,7 +16,7 @@ function getServicesTotal(services: ServiceBlock[]): number {
 }
 
 export default function QuoteForm() {
-    const { quote, updateQuote, addService, removeService, updateService } = useQuote();
+    const { quote, updateQuote, addService, removeService, moveService, updateService } = useQuote();
     const { settings } = useSettings();
     const { t } = useTranslation();
     const [isBaseOverridden, setIsBaseOverridden] = useState(false);
@@ -53,7 +53,29 @@ export default function QuoteForm() {
             {quote.services.map((service, index) => (
                 <div key={service.id} className={styles.serviceBlock}>
                     <div className={styles.serviceHeader}>
-                        <span className={styles.serviceLabel}>{t('quoteForm.service')} {index + 1}</span>
+                        <div className={styles.serviceHeaderLeft}>
+                            {quote.services.length > 1 && (
+                                <div className={styles.reorderBtns}>
+                                    <button
+                                        className={styles.reorderBtn}
+                                        onClick={() => moveService(service.id, 'up')}
+                                        disabled={index === 0}
+                                        aria-label="Move service up"
+                                    >
+                                        ▲
+                                    </button>
+                                    <button
+                                        className={styles.reorderBtn}
+                                        onClick={() => moveService(service.id, 'down')}
+                                        disabled={index === quote.services.length - 1}
+                                        aria-label="Move service down"
+                                    >
+                                        ▼
+                                    </button>
+                                </div>
+                            )}
+                            <span className={styles.serviceLabel}>{t('quoteForm.service')} {index + 1}</span>
+                        </div>
                         {quote.services.length > 1 && (
                             <button
                                 className={styles.removeBtn}

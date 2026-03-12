@@ -39,6 +39,7 @@ interface QuoteContextType {
     updateQuote: (updates: Partial<QuoteData>) => void;
     addService: () => void;
     removeService: (id: string) => void;
+    moveService: (id: string, direction: 'up' | 'down') => void;
     updateService: (id: string, updates: Partial<ServiceBlock>) => void;
     saveQuote: (clientName?: string, clientEmail?: string, clientWhatsapp?: string, clientServiceTitle?: string) => Promise<void>;
     loadQuote: (id: string) => Promise<void>;
@@ -134,6 +135,18 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
             ...prev,
             services: prev.services.filter((s) => s.id !== id),
         }));
+    };
+
+    const moveService = (id: string, direction: 'up' | 'down') => {
+        setQuote((prev) => {
+            const idx = prev.services.findIndex((s) => s.id === id);
+            if (idx === -1) return prev;
+            const newIdx = direction === 'up' ? idx - 1 : idx + 1;
+            if (newIdx < 0 || newIdx >= prev.services.length) return prev;
+            const newServices = [...prev.services];
+            [newServices[idx], newServices[newIdx]] = [newServices[newIdx], newServices[idx]];
+            return { ...prev, services: newServices };
+        });
     };
 
     const updateService = (id: string, updates: Partial<ServiceBlock>) => {
@@ -277,7 +290,7 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
     return (
         <QuoteContext.Provider
             value={{
-                quote, currentQuoteId, updateQuote, addService, removeService, updateService,
+                quote, currentQuoteId, updateQuote, addService, removeService, moveService, updateService,
                 saveQuote, loadQuote, deleteQuote, newQuote,
                 savedQuotes, loadSavedQuotes,
                 isLoading, isSaving,
