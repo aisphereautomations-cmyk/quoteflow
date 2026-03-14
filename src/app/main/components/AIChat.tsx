@@ -11,15 +11,25 @@ export default function AIChat() {
         isLoading,
         error,
         pendingQuoteData,
+        sliders,
+        conversations,
+        currentConversationId,
         sendMessage,
         applyQuoteData,
         dismissQuoteData,
+        setSliders,
+        clearChat,
+        loadConversation,
+        deleteConversation,
+        togglePin,
     } = useChat();
     const { t } = useTranslation();
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [input, setInput] = useState('');
     const [isRecording, setIsRecording] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
+    const [showSliders, setShowSliders] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const recognitionRef = useRef<any>(null);
@@ -31,9 +41,7 @@ export default function AIChat() {
         }
     }, [messages, isLoading]);
 
-    const toggleExpand = () => {
-        setIsExpanded(!isExpanded);
-    };
+    const toggleExpand = () => setIsExpanded(!isExpanded);
 
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
@@ -49,8 +57,11 @@ export default function AIChat() {
         }
     };
 
-    const handleFillQuote = () => {
-        applyQuoteData();
+    const handleFillQuote = () => applyQuoteData();
+
+    const handleNewChat = () => {
+        clearChat();
+        setShowHistory(false);
     };
 
     /* ── Voice Input (Web Speech API) ── */
@@ -67,7 +78,6 @@ export default function AIChat() {
         const recognition = new SpeechRecognitionAPI();
         recognition.continuous = false;
         recognition.interimResults = false;
-        // Empty string = auto-detect language
         recognition.lang = '';
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,7 +85,6 @@ export default function AIChat() {
             const transcript = event.results[0][0].transcript;
             if (transcript.trim()) {
                 setInput(transcript);
-                // Auto-send after transcription
                 sendMessage(transcript.trim());
             }
             setIsRecording(false);
@@ -90,9 +99,7 @@ export default function AIChat() {
             }
         };
 
-        recognition.onend = () => {
-            setIsRecording(false);
-        };
+        recognition.onend = () => setIsRecording(false);
 
         recognitionRef.current = recognition;
         recognition.start();
@@ -107,21 +114,179 @@ export default function AIChat() {
     };
 
     const handleMicClick = () => {
-        if (isRecording) {
-            stopRecording();
-        } else {
-            startRecording();
-        }
+        isRecording ? stopRecording() : startRecording();
     };
+
+    /* ── Slider Labels ── */
+    const getSliderLabel = (value: number, lowLabel: string, highLabel: string) => {
+        if (value < 33) return lowLabel;
+        if (value > 66) return highLabel;
+        return 'Balanced';
+    };
+
+    /* ── Pinned & Recent split ── */
+    const pinned = conversations.filter(c => c.isPinned);
+    const recent = conversations.filter(c => !c.isPinned);
 
     return (
         <>
             <div className={`${styles.chatContainer} ${isExpanded ? styles.expanded : styles.collapsed}`}>
-                <div className={styles.chatHeader} onClick={toggleExpand}>
-                    <span>{t('aiChat.chatHeader')}</span>
-                    {isExpanded && <span>✕</span>}
+                {/* Header */}
+                <div className={styles.chatHeader}>
+                    <span onClick={toggleExpand}>{t('aiChat.chatHeader')}</span>
+                    <div className={styles.headerActions}>
+                        <button
+                            className={styles.headerBtn}
+                            onClick={() => { setShowSliders(!showSliders); setShowHistory(false); }}
+                            title="AI Preferences"
+                        >
+                            ⚙️
+                        </button>
+                        <button
+                            className={styles.headerBtn}
+                            onClick={() => { setShowHistory(!showHistory); setShowSliders(false); }}
+                            title="Chat History"
+                        >
+                            📋
+                        </button>
+                        <button
+                            className={styles.headerBtn}
+                            onClick={handleNewChat}
+                            title="New Chat"
+                        >
+                            ＋
+                        </button>
+                        {isExpanded && (
+                            <button className={styles.headerBtn} onClick={toggleExpand}>
+                                ✕
+                            </button>
+                        )}
+                    </div>
                 </div>
 
+                {/* Sliders Panel */}
+                {showSliders && (
+                    <div className={styles.slidersPanel}>
+                        <div className={styles.sliderRow}>
+                            <span className={styles.sliderIcon}>📝</span>
+                            <div className={styles.sliderControl}>
+                                <div className={styles.sliderLabels}>
+                                    <span>Simple</span>
+                                    <span className={styles.sliderCurrentLabel}>
+                                        {getSliderLabel(sliders.detail, 'Simple', 'Detailed')}
+                                    </span>
+                                    <span>Detailed</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={sliders.detail}
+                                    onChange={(e) => setSliders({ ...sliders, detail: Number(e.target.value) })}
+                                    className={styles.slider}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.sliderRow}>
+                            <span className={styles.sliderIcon}>💰</span>
+                            <div className={styles.sliderControl}>
+                                <div className={styles.sliderLabels}>
+                                    <span>Budget</span>
+                                    <span className={styles.sliderCurrentLabel}>
+                                        {getSliderLabel(sliders.market, 'Budget', 'Premium')}
+                                    </span>
+                                    <span>Premium</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={sliders.market}
+                                    onChange={(e) => setSliders({ ...sliders, market: Number(e.target.value) })}
+                                    className={styles.slider}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.sliderRow}>
+                            <span className={styles.sliderIcon}>🎯</span>
+                            <div className={styles.sliderControl}>
+                                <div className={styles.sliderLabels}>
+                                    <span>Casual</span>
+                                    <span className={styles.sliderCurrentLabel}>
+                                        {getSliderLabel(sliders.tone, 'Casual', 'Formal')}
+                                    </span>
+                                    <span>Formal</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    value={sliders.tone}
+                                    onChange={(e) => setSliders({ ...sliders, tone: Number(e.target.value) })}
+                                    className={styles.slider}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* History Panel */}
+                {showHistory && (
+                    <div className={styles.historyPanel}>
+                        {conversations.length === 0 ? (
+                            <p className={styles.historyEmpty}>No conversations yet</p>
+                        ) : (
+                            <>
+                                {pinned.length > 0 && (
+                                    <div className={styles.historySection}>
+                                        <p className={styles.historySectionTitle}>📌 Pinned</p>
+                                        {pinned.map(c => (
+                                            <div
+                                                key={c.id}
+                                                className={`${styles.historyItem} ${c.id === currentConversationId ? styles.historyItemActive : ''}`}
+                                            >
+                                                <span
+                                                    className={styles.historyItemTitle}
+                                                    onClick={() => { loadConversation(c.id); setShowHistory(false); }}
+                                                >
+                                                    {c.title}
+                                                </span>
+                                                <div className={styles.historyItemActions}>
+                                                    <button onClick={() => togglePin(c.id)} title="Unpin">📌</button>
+                                                    <button onClick={() => deleteConversation(c.id)} title="Delete">🗑</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                {recent.length > 0 && (
+                                    <div className={styles.historySection}>
+                                        <p className={styles.historySectionTitle}>Recent</p>
+                                        {recent.map(c => (
+                                            <div
+                                                key={c.id}
+                                                className={`${styles.historyItem} ${c.id === currentConversationId ? styles.historyItemActive : ''}`}
+                                            >
+                                                <span
+                                                    className={styles.historyItemTitle}
+                                                    onClick={() => { loadConversation(c.id); setShowHistory(false); }}
+                                                >
+                                                    {c.title}
+                                                </span>
+                                                <div className={styles.historyItemActions}>
+                                                    <button onClick={() => togglePin(c.id)} title="Pin">📍</button>
+                                                    <button onClick={() => deleteConversation(c.id)} title="Delete">🗑</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                )}
+
+                {/* Messages */}
                 <div className={styles.chatMessages}>
                     {messages.map((msg) => (
                         <div
@@ -138,23 +303,14 @@ export default function AIChat() {
                     )}
                     {error && <div className={styles.errorMessage}>{error}</div>}
 
-                    {/* Quote Ready Banner */}
                     {pendingQuoteData && (
                         <div className={styles.quoteReadyBanner}>
                             <span>{t('aiChat.quoteReady')}</span>
                             <div className={styles.quoteReadyActions}>
-                                <button
-                                    className={styles.fillQuoteSmallBtn}
-                                    onClick={handleFillQuote}
-                                >
+                                <button className={styles.fillQuoteSmallBtn} onClick={handleFillQuote}>
                                     {t('aiChat.apply')}
                                 </button>
-                                <button
-                                    className={styles.dismissBtn}
-                                    onClick={dismissQuoteData}
-                                >
-                                    ✕
-                                </button>
+                                <button className={styles.dismissBtn} onClick={dismissQuoteData}>✕</button>
                             </div>
                         </div>
                     )}
@@ -162,6 +318,7 @@ export default function AIChat() {
                     <div ref={messagesEndRef} />
                 </div>
 
+                {/* Input */}
                 <div className={styles.inputArea}>
                     <div className={styles.inputWrapper}>
                         <input
