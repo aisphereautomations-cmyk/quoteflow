@@ -76,6 +76,7 @@
         "apply": "Appliquer",
         "applyAiQuote": "✨ Appliquer le Devis IA",
         "fillQuoteWithAi": "Remplir le Devis avec le chat IA",
+        "chatFirstHint": "Discutez d'abord avec l'IA pour générer votre devis",
         "inputPlaceholder": "Discutons",
         "speechNotSupported": "La reconnaissance vocale n'est pas supportée dans ce navigateur. Essayez Chrome ou Safari.",
         "micDenied": "L'accès au microphone a été refusé. Autorisez l'accès au microphone dans les paramètres du navigateur."

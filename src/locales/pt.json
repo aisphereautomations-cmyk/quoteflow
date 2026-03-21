@@ -76,6 +76,7 @@
         "apply": "Aplicar",
         "applyAiQuote": "✨ Aplicar Orçamento IA",
         "fillQuoteWithAi": "Preencher Orçamento com chat IA",
+        "chatFirstHint": "Converse com a IA primeiro para gerar o orçamento",
         "inputPlaceholder": "Vamos Conversar",
         "speechNotSupported": "O reconhecimento de voz não é suportado neste navegador. Tente o Chrome ou Safari.",
         "micDenied": "O acesso ao microfone foi negado. Permita o acesso ao microfone nas definições do navegador."

@@ -23,16 +23,18 @@ export default function AIChat() {
         deleteConversation,
         togglePin,
     } = useChat();
-    const { t } = useTranslation();
+    const { t, locale } = useTranslation();
 
     const [isExpanded, setIsExpanded] = useState(false);
     const [input, setInput] = useState('');
     const [isRecording, setIsRecording] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
     const [showSliders, setShowSliders] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const recognitionRef = useRef<any>(null);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+    const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Auto-scroll to latest message
     useEffect(() => {
@@ -64,57 +66,93 @@ export default function AIChat() {
         setShowHistory(false);
     };
 
-    /* ── Voice Input (Web Speech API) ── */
-    const startRecording = () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const w = window as any;
-        const SpeechRecognitionAPI = w.SpeechRecognition || w.webkitSpeechRecognition;
+    /* ── Voice Input (MediaRecorder → OpenAI Whisper) ── */
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            audioChunksRef.current = [];
 
-        if (!SpeechRecognitionAPI) {
-            alert(t('aiChat.speechNotSupported'));
-            return;
+            const mediaRecorder = new MediaRecorder(stream, {
+                mimeType: MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                    ? 'audio/webm;codecs=opus'
+                    : 'audio/webm',
+            });
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = async () => {
+                // Stop all tracks so the browser releases the mic
+                stream.getTracks().forEach(track => track.stop());
+
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                audioChunksRef.current = [];
+
+                if (audioBlob.size < 100) return; // Too small, probably empty
+
+                // Send to Whisper API for transcription
+                setIsTranscribing(true);
+                try {
+                    const formData = new FormData();
+                    formData.append('file', audioBlob, 'audio.webm');
+                    // Pass user's language for better Whisper accuracy
+                    const whisperLang = locale.startsWith('pt') ? 'pt' : locale;
+                    formData.append('language', whisperLang);
+
+                    const res = await fetch('/api/transcribe', {
+                        method: 'POST',
+                        body: formData,
+                    });
+
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || data.error || 'Transcription failed');
+
+                    if (data.text && data.text.trim()) {
+                        // Populate input for review — user can edit before sending
+                        setInput(data.text.trim());
+                    }
+                } catch (err) {
+                    console.error('Transcription error:', err);
+                    alert(t('aiChat.speechNotSupported'));
+                } finally {
+                    setIsTranscribing(false);
+                }
+            };
+
+            mediaRecorderRef.current = mediaRecorder;
+            mediaRecorder.start();
+            setIsRecording(true);
+
+            // Auto-stop after 30 seconds to avoid huge files
+            recordingTimeoutRef.current = setTimeout(() => {
+                stopRecording();
+            }, 30000);
+        } catch (err) {
+            console.error('Microphone access error:', err);
+            alert(t('aiChat.micDenied'));
         }
-
-        const recognition = new SpeechRecognitionAPI();
-        recognition.continuous = false;
-        recognition.interimResults = false;
-        recognition.lang = '';
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        recognition.onresult = (event: any) => {
-            const transcript = event.results[0][0].transcript;
-            if (transcript.trim()) {
-                setInput(transcript);
-                sendMessage(transcript.trim());
-            }
-            setIsRecording(false);
-        };
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        recognition.onerror = (event: any) => {
-            console.error('Speech recognition error:', event.error);
-            setIsRecording(false);
-            if (event.error === 'not-allowed') {
-                alert(t('aiChat.micDenied'));
-            }
-        };
-
-        recognition.onend = () => setIsRecording(false);
-
-        recognitionRef.current = recognition;
-        recognition.start();
-        setIsRecording(true);
     };
 
     const stopRecording = () => {
-        if (recognitionRef.current) {
-            recognitionRef.current.stop();
-            setIsRecording(false);
+        if (recordingTimeoutRef.current) {
+            clearTimeout(recordingTimeoutRef.current);
+            recordingTimeoutRef.current = null;
         }
+        if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+            mediaRecorderRef.current.stop();
+        }
+        setIsRecording(false);
     };
 
     const handleMicClick = () => {
-        isRecording ? stopRecording() : startRecording();
+        if (isRecording) {
+            stopRecording();
+        } else if (!isTranscribing) {
+            startRecording();
+        }
     };
 
     /* ── Slider Labels ── */
@@ -341,24 +379,36 @@ export default function AIChat() {
                         </button>
                     </div>
                     <button
-                        className={`${styles.micBtn} ${isRecording ? styles.micRecording : ''}`}
+                        className={`${styles.micBtn} ${isRecording ? styles.micRecording : ''} ${isTranscribing ? styles.micTranscribing : ''}`}
                         onClick={handleMicClick}
-                        aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
+                        disabled={isTranscribing}
+                        aria-label={isRecording ? 'Stop recording' : isTranscribing ? 'Transcribing...' : 'Start voice input'}
                     >
-                        {isRecording ? '⏹' : '🎤'}
+                        {isRecording ? '⏹' : isTranscribing ? '⏳' : '🎤'}
                     </button>
                 </div>
             </div>
 
             {!isExpanded && (
                 <div className={styles.actionArea}>
+                    <div className={styles.actionMain}>
+                        <button
+                            className={`${styles.fillQuoteBtn} ${pendingQuoteData ? styles.fillQuoteBtnReady : styles.fillQuoteBtnDimmed}`}
+                            onClick={pendingQuoteData ? handleFillQuote : undefined}
+                            disabled={!pendingQuoteData}
+                        >
+                            {t('aiChat.fillQuoteWithAi')}
+                        </button>
+                        {!pendingQuoteData && (
+                            <p className={styles.actionHint}>{t('aiChat.chatFirstHint')}</p>
+                        )}
+                    </div>
                     <button
-                        className={`${styles.fillQuoteBtn} ${pendingQuoteData ? styles.fillQuoteBtnReady : ''}`}
-                        onClick={pendingQuoteData ? handleFillQuote : toggleExpand}
+                        className={styles.expandBtn}
+                        onClick={toggleExpand}
+                        aria-label="Expand chat"
                     >
-                        {pendingQuoteData
-                            ? t('aiChat.applyAiQuote')
-                            : t('aiChat.fillQuoteWithAi')}
+                        ⛶
                     </button>
                 </div>
             )}

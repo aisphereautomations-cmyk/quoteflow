@@ -327,13 +327,51 @@
 
 /* ── Action Area ── */
 .actionArea {
-    padding: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-md);
     background: var(--color-background);
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+}
+
+.actionMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.actionHint {
+    margin: 0.3rem 0 0 0;
+    font-size: 0.75rem;
+    color: #999;
     text-align: center;
+    opacity: 0.9;
+}
+
+.expandBtn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6b21a8 0%, #06b6d4 100%);
+    border: none;
+    color: white;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(107, 33, 168, 0.3);
+}
+
+.expandBtn:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 14px rgba(107, 33, 168, 0.4);
 }
 
 .fillQuoteBtn {
-    width: 100%;
+    flex: 1;
     padding: var(--spacing-md);
     background: linear-gradient(90deg, #6b21a8 0%, #06b6d4 100%);
     color: white;
@@ -379,6 +417,13 @@
 .micRecording {
     color: #dc2626 !important;
     animation: pulse 1s infinite;
+}
+
+.micTranscribing {
+    color: #6b21a8 !important;
+    animation: pulse 1.4s infinite;
+    opacity: 0.7;
+    cursor: wait !important;
 }
 
 @keyframes pulse {
@@ -442,7 +487,20 @@
     opacity: 1;
 }
 
-/* ── Fill Quote Button (ready state) ── */
+/* ── Fill Quote Button states ── */
+.fillQuoteBtnDimmed {
+    opacity: 0.4;
+    cursor: not-allowed !important;
+    background: linear-gradient(90deg, #555 0%, #777 100%) !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+.fillQuoteBtnDimmed:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
 .fillQuoteBtnReady {
     animation: glowPulse 2s infinite;
 }

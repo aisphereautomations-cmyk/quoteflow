@@ -76,6 +76,7 @@
         "apply": "Applica",
         "applyAiQuote": "✨ Applica Preventivo IA",
         "fillQuoteWithAi": "Compila Preventivo con chat IA",
+        "chatFirstHint": "Parla prima con l'IA per generare il tuo preventivo",
         "inputPlaceholder": "Parliamo",
         "speechNotSupported": "Il riconoscimento vocale non è supportato in questo browser. Prova Chrome o Safari.",
         "micDenied": "L'accesso al microfono è stato negato. Consenti l'accesso nelle impostazioni del browser."

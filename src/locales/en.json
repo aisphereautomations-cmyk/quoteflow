@@ -76,6 +76,7 @@
         "apply": "Apply",
         "applyAiQuote": "✨ Apply AI Quote",
         "fillQuoteWithAi": "Fill Quote with the AI chat",
+        "chatFirstHint": "Chat with the AI first to generate your quote",
         "inputPlaceholder": "Let's Chat",
         "speechNotSupported": "Speech recognition is not supported in this browser. Try Chrome or Safari.",
         "micDenied": "Microphone access was denied. Please allow microphone access in your browser settings."

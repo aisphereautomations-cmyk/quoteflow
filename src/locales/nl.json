@@ -76,6 +76,7 @@
         "apply": "Toepassen",
         "applyAiQuote": "✨ AI Offerte Toepassen",
         "fillQuoteWithAi": "Offerte invullen met AI chat",
+        "chatFirstHint": "Praat eerst met de AI om uw offerte te genereren",
         "inputPlaceholder": "Laten we chatten",
         "speechNotSupported": "Spraakherkenning wordt niet ondersteund in deze browser. Probeer Chrome of Safari.",
         "micDenied": "Microfoontoegang is geweigerd. Sta toegang toe in de browserinstellingen."

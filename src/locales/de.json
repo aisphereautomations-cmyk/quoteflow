@@ -76,6 +76,7 @@
         "apply": "Anwenden",
         "applyAiQuote": "✨ KI-Angebot Anwenden",
         "fillQuoteWithAi": "Angebot mit KI-Chat ausfüllen",
+        "chatFirstHint": "Sprechen Sie zuerst mit der KI, um Ihr Angebot zu erstellen",
         "inputPlaceholder": "Los geht's",
         "speechNotSupported": "Spracherkennung wird in diesem Browser nicht unterstützt. Versuchen Sie Chrome oder Safari.",
         "micDenied": "Mikrofonzugriff wurde verweigert. Erlauben Sie den Zugriff in den Browsereinstellungen."
