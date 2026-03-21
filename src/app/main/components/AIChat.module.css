@@ -15,7 +15,7 @@
 }
 
 .chatContainer.expanded {
-    height: 100vh;
+    height: var(--chat-vh, 100dvh);
     position: fixed;
     top: 0;
     left: 0;
@@ -163,11 +163,13 @@
     position: relative;
     display: flex;
     align-items: flex-end;
+    flex-wrap: nowrap;
     background: #2a2a2a;
     border: 1px solid #3a3a3a;
     border-radius: 16px;
     padding: 0.4rem 0.6rem;
     transition: border-color var(--transition-base);
+    overflow: hidden;
 }
 
 .expanded .inputWrapper {
@@ -363,7 +365,7 @@
     background: var(--color-background);
     display: flex;
     gap: var(--spacing-sm);
-    align-items: stretch;
+    align-items: center;
 }
 
 .actionMain {

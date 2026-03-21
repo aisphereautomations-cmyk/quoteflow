@@ -28,6 +28,40 @@ export default function AIChat() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const chatContainerRef = useRef<HTMLDivElement>(null);
+
+    // ── Keep expanded chat above mobile keyboard (visualViewport API) ──
+    useEffect(() => {
+        if (!isExpanded) return;
+
+        // Lock background scroll while fullscreen chat is open
+        document.body.style.overflow = 'hidden';
+
+        const vv = window.visualViewport;
+        if (!vv) return () => { document.body.style.overflow = ''; };
+
+        const syncHeight = () => {
+            // visualViewport.height = visible area excluding keyboard
+            const h = vv.height;
+            document.documentElement.style.setProperty('--chat-vh', `${h}px`);
+
+            // On iOS Safari the viewport may also shift; reset scroll
+            window.scrollTo(0, 0);
+        };
+
+        // Set initial value
+        syncHeight();
+
+        vv.addEventListener('resize', syncHeight);
+        vv.addEventListener('scroll', syncHeight);
+
+        return () => {
+            vv.removeEventListener('resize', syncHeight);
+            vv.removeEventListener('scroll', syncHeight);
+            document.documentElement.style.removeProperty('--chat-vh');
+            document.body.style.overflow = '';
+        };
+    }, [isExpanded]);
 
     // Auto-scroll to latest message (within chat only, not the page)
     useEffect(() => {
