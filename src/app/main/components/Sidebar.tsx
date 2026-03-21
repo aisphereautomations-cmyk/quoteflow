@@ -18,7 +18,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const router = useRouter();
     const supabase = createClient();
     const { t } = useTranslation();
-    const { saveQuote, newQuote, loadQuote, deleteQuote, savedQuotes, currentQuoteId } = useQuote();
+    const { saveQuote, newQuote, loadQuote, deleteQuote, renameQuote, savedQuotes, currentQuoteId } = useQuote();
     const { client, clearClient } = useClient();
     const {
         conversations,
@@ -29,6 +29,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         loadConversation,
         deleteConversation,
         togglePin,
+        renameConversation,
     } = useChat();
 
     // Inline rename state
@@ -150,9 +151,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                                 autoFocus
                                                                 className={styles.renameInput}
                                                                 defaultValue={c.title}
-                                                                onBlur={() => setEditingConvId(null)}
+                                                                onBlur={(e) => {
+                                                                    const val = e.target.value.trim();
+                                                                    if (val && val !== c.title) renameConversation(c.id, val);
+                                                                    setEditingConvId(null);
+                                                                }}
                                                                 onKeyDown={(e) => {
-                                                                    if (e.key === 'Enter' || e.key === 'Escape') {
+                                                                    if (e.key === 'Enter') {
+                                                                        (e.target as HTMLInputElement).blur();
+                                                                    }
+                                                                    if (e.key === 'Escape') {
                                                                         setEditingConvId(null);
                                                                     }
                                                                 }}
@@ -199,9 +207,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                                 autoFocus
                                                                 className={styles.renameInput}
                                                                 defaultValue={c.title}
-                                                                onBlur={() => setEditingConvId(null)}
+                                                                onBlur={(e) => {
+                                                                    const val = e.target.value.trim();
+                                                                    if (val && val !== c.title) renameConversation(c.id, val);
+                                                                    setEditingConvId(null);
+                                                                }}
                                                                 onKeyDown={(e) => {
-                                                                    if (e.key === 'Enter' || e.key === 'Escape') {
+                                                                    if (e.key === 'Enter') {
+                                                                        (e.target as HTMLInputElement).blur();
+                                                                    }
+                                                                    if (e.key === 'Escape') {
                                                                         setEditingConvId(null);
                                                                     }
                                                                 }}
@@ -275,9 +290,16 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                                                     autoFocus
                                                     className={styles.renameInput}
                                                     defaultValue={q.title}
-                                                    onBlur={() => setEditingQuoteId(null)}
+                                                    onBlur={(e) => {
+                                                        const val = e.target.value.trim();
+                                                        if (val && val !== q.title) renameQuote(q.id, val);
+                                                        setEditingQuoteId(null);
+                                                    }}
                                                     onKeyDown={(e) => {
-                                                        if (e.key === 'Enter' || e.key === 'Escape') {
+                                                        if (e.key === 'Enter') {
+                                                            (e.target as HTMLInputElement).blur();
+                                                        }
+                                                        if (e.key === 'Escape') {
                                                             setEditingQuoteId(null);
                                                         }
                                                     }}

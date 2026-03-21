@@ -44,6 +44,7 @@ interface QuoteContextType {
     saveQuote: (clientName?: string, clientEmail?: string, clientWhatsapp?: string, clientServiceTitle?: string) => Promise<void>;
     loadQuote: (id: string) => Promise<void>;
     deleteQuote: (id: string) => Promise<void>;
+    renameQuote: (id: string, newTitle: string) => Promise<void>;
     newQuote: () => void;
     savedQuotes: SavedQuote[];
     loadSavedQuotes: () => Promise<void>;
@@ -279,6 +280,21 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
         }
     }, [user, currentQuoteId, supabase, loadSavedQuotes]);
 
+    const renameQuote = useCallback(async (id: string, newTitle: string) => {
+        if (!user || !newTitle.trim()) return;
+        try {
+            const { error } = await supabase
+                .from('quotes')
+                .update({ title: newTitle.trim(), updated_at: new Date().toISOString() })
+                .eq('id', id)
+                .eq('user_id', user.id);
+            if (error) throw error;
+            await loadSavedQuotes();
+        } catch (err) {
+            console.error('Error renaming quote:', err);
+        }
+    }, [user, supabase, loadSavedQuotes]);
+
     const newQuote = () => {
         setQuote({
             ...defaultQuote,
@@ -291,7 +307,7 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
         <QuoteContext.Provider
             value={{
                 quote, currentQuoteId, updateQuote, addService, removeService, moveService, updateService,
-                saveQuote, loadQuote, deleteQuote, newQuote,
+                saveQuote, loadQuote, deleteQuote, renameQuote, newQuote,
                 savedQuotes, loadSavedQuotes,
                 isLoading, isSaving,
             }}

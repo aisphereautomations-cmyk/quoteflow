@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useChat } from '../context/ChatContext';
 import { useTranslation } from '../context/LanguageContext';
 import styles from './AIChat.module.css';
@@ -23,16 +23,31 @@ export default function AIChat() {
     const [isRecording, setIsRecording] = useState(false);
     const [isTranscribing, setIsTranscribing] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const messagesContainerRef = useRef<HTMLDivElement>(null);
+    const textareaRef = useRef<HTMLTextAreaElement>(null);
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-    // Auto-scroll to latest message
+    // Auto-scroll to latest message (within chat only, not the page)
     useEffect(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        const container = messagesContainerRef.current;
+        if (container) {
+            container.scrollTop = container.scrollHeight;
         }
     }, [messages, isLoading]);
+
+    // Auto-resize textarea
+    const resizeTextarea = useCallback(() => {
+        const el = textareaRef.current;
+        if (!el) return;
+        el.style.height = 'auto';
+        el.style.height = Math.min(el.scrollHeight, 160) + 'px';
+    }, []);
+
+    useEffect(() => {
+        resizeTextarea();
+    }, [input, resizeTextarea]);
 
     const toggleExpand = () => setIsExpanded(!isExpanded);
 
@@ -40,10 +55,13 @@ export default function AIChat() {
         if (!input.trim() || isLoading) return;
         const text = input;
         setInput('');
+        if (textareaRef.current) {
+            textareaRef.current.style.height = 'auto';
+        }
         await sendMessage(text);
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
+    const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             handleSend();
@@ -51,6 +69,8 @@ export default function AIChat() {
     };
 
     const handleFillQuote = () => applyQuoteData();
+
+    const handleNewChat = () => clearChat();
 
     /* ── Voice Input (MediaRecorder → OpenAI Whisper) ── */
     const startRecording = async () => {
@@ -71,20 +91,17 @@ export default function AIChat() {
             };
 
             mediaRecorder.onstop = async () => {
-                // Stop all tracks so the browser releases the mic
                 stream.getTracks().forEach(track => track.stop());
 
                 const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
                 audioChunksRef.current = [];
 
-                if (audioBlob.size < 100) return; // Too small, probably empty
+                if (audioBlob.size < 100) return;
 
-                // Send to Whisper API for transcription
                 setIsTranscribing(true);
                 try {
                     const formData = new FormData();
                     formData.append('file', audioBlob, 'audio.webm');
-                    // Pass user's language for better Whisper accuracy
                     const whisperLang = locale.startsWith('pt') ? 'pt' : locale;
                     formData.append('language', whisperLang);
 
@@ -97,7 +114,6 @@ export default function AIChat() {
                     if (!res.ok) throw new Error(data.message || data.error || 'Transcription failed');
 
                     if (data.text && data.text.trim()) {
-                        // Populate input for review — user can edit before sending
                         setInput(data.text.trim());
                     }
                 } catch (err) {
@@ -112,7 +128,6 @@ export default function AIChat() {
             mediaRecorder.start();
             setIsRecording(true);
 
-            // Auto-stop after 30 seconds to avoid huge files
             recordingTimeoutRef.current = setTimeout(() => {
                 stopRecording();
             }, 30000);
@@ -146,8 +161,17 @@ export default function AIChat() {
             <div className={`${styles.chatContainer} ${isExpanded ? styles.expanded : styles.collapsed}`}>
                 {/* Header */}
                 <div className={styles.chatHeader}>
-                    <span onClick={toggleExpand}>{t('aiChat.chatHeader')}</span>
+                    <span className={styles.headerTitle} onClick={toggleExpand}>
+                        {t('aiChat.chatHeader')}
+                    </span>
                     <div className={styles.headerActions}>
+                        <button
+                            className={styles.headerBtn}
+                            onClick={handleNewChat}
+                            title="New Chat"
+                        >
+                            ＋
+                        </button>
                         {isExpanded && (
                             <button className={styles.headerBtn} onClick={toggleExpand}>
                                 ✕
@@ -157,67 +181,82 @@ export default function AIChat() {
                 </div>
 
                 {/* Messages */}
-                <div className={styles.chatMessages}>
-                    {messages.map((msg) => (
-                        <div
-                            key={msg.id}
-                            className={`${styles.message} ${msg.role === 'assistant' ? styles.botMessage : styles.userMessage}`}
-                        >
-                            {msg.content}
-                        </div>
-                    ))}
-                    {isLoading && (
-                        <div className={`${styles.message} ${styles.botMessage}`}>
-                            <span className={styles.loadingDots}>{t('aiChat.thinking')}</span>
-                        </div>
-                    )}
-                    {error && <div className={styles.errorMessage}>{error}</div>}
-
-                    {pendingQuoteData && (
-                        <div className={styles.quoteReadyBanner}>
-                            <span>{t('aiChat.quoteReady')}</span>
-                            <div className={styles.quoteReadyActions}>
-                                <button className={styles.fillQuoteSmallBtn} onClick={handleFillQuote}>
-                                    {t('aiChat.apply')}
-                                </button>
-                                <button className={styles.dismissBtn} onClick={dismissQuoteData}>✕</button>
+                <div className={styles.chatMessages} ref={messagesContainerRef}>
+                    <div className={styles.messagesInner}>
+                        {messages.map((msg) => (
+                            <div
+                                key={msg.id}
+                                className={`${styles.messageRow} ${msg.role === 'assistant' ? styles.botRow : styles.userRow}`}
+                            >
+                                {msg.role === 'assistant' && (
+                                    <div className={`${styles.avatar} ${styles.botAvatar}`}>✨</div>
+                                )}
+                                <div className={`${styles.messageContent} ${msg.role === 'assistant' ? styles.botMessage : styles.userMessage}`}>
+                                    {msg.content}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        ))}
+                        {isLoading && (
+                            <div className={`${styles.messageRow} ${styles.botRow}`}>
+                                <div className={`${styles.avatar} ${styles.botAvatar}`}>✨</div>
+                                <div className={`${styles.messageContent} ${styles.botMessage}`}>
+                                    <span className={styles.loadingDots}>
+                                        <span></span><span></span><span></span>
+                                    </span>
+                                </div>
+                            </div>
+                        )}
+                        {error && <div className={styles.errorMessage}>{error}</div>}
 
-                    <div ref={messagesEndRef} />
+                        {pendingQuoteData && (
+                            <div className={styles.quoteReadyBanner}>
+                                <span>{t('aiChat.quoteReady')}</span>
+                                <div className={styles.quoteReadyActions}>
+                                    <button className={styles.fillQuoteSmallBtn} onClick={handleFillQuote}>
+                                        {t('aiChat.apply')}
+                                    </button>
+                                    <button className={styles.dismissBtn} onClick={dismissQuoteData}>✕</button>
+                                </div>
+                            </div>
+                        )}
+
+                        <div ref={messagesEndRef} />
+                    </div>
                 </div>
 
                 {/* Input */}
                 <div className={styles.inputArea}>
                     <div className={styles.inputWrapper}>
-                        <input
-                            type="text"
+                        <textarea
+                            ref={textareaRef}
                             placeholder={t('aiChat.inputPlaceholder')}
                             className={styles.chatInput}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
-                            onKeyDown={handleKeyPress}
+                            onKeyDown={handleKeyDown}
                             disabled={isLoading}
                             aria-label="Chat message"
+                            rows={2}
                         />
-                        <button
-                            className={styles.sendBtn}
-                            onClick={handleSend}
-                            disabled={isLoading || !input.trim()}
-                            aria-label="Send message"
-                        >
-                            ↑
-                        </button>
+                        <div className={styles.inputActions}>
+                            <button
+                                className={`${styles.micBtn} ${isRecording ? styles.micRecording : ''} ${isTranscribing ? styles.micTranscribing : ''}`}
+                                onClick={handleMicClick}
+                                disabled={isTranscribing}
+                                aria-label={isRecording ? 'Stop recording' : isTranscribing ? 'Transcribing...' : 'Start voice input'}
+                            >
+                                {isRecording ? '⏹' : isTranscribing ? '⏳' : '🎤'}
+                            </button>
+                            <button
+                                className={styles.sendBtn}
+                                onClick={handleSend}
+                                disabled={isLoading || !input.trim()}
+                                aria-label="Send message"
+                            >
+                                ↑
+                            </button>
+                        </div>
                     </div>
-                    <button
-                        className={`${styles.micBtn} ${isRecording ? styles.micRecording : ''} ${isTranscribing ? styles.micTranscribing : ''}`}
-                        onClick={handleMicClick}
-                        disabled={isTranscribing}
-                        aria-label={isRecording ? 'Stop recording' : isTranscribing ? 'Transcribing...' : 'Start voice input'}
-                    >
-                        {isRecording ? '⏹' : isTranscribing ? '⏳' : '🎤'}
-                    </button>
                 </div>
             </div>
 

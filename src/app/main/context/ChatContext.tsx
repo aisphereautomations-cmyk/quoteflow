@@ -52,6 +52,7 @@ interface ChatContextType {
     loadConversation: (id: string) => Promise<void>;
     deleteConversation: (id: string) => Promise<void>;
     togglePin: (id: string) => Promise<void>;
+    renameConversation: (id: string, newTitle: string) => Promise<void>;
     loadConversations: () => Promise<void>;
 }
 
@@ -219,6 +220,19 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         }
     }, [user, supabase, conversations, loadConversations]);
 
+    const renameConversation = useCallback(async (id: string, newTitle: string) => {
+        if (!user || !newTitle.trim()) return;
+        try {
+            await supabase
+                .from('chat_conversations')
+                .update({ title: newTitle.trim() })
+                .eq('id', id);
+            loadConversations();
+        } catch (err) {
+            console.error('Failed to rename conversation:', err);
+        }
+    }, [user, supabase, loadConversations]);
+
     // ── Core Chat ──
 
     const sendMessage = useCallback(async (text: string) => {
@@ -340,6 +354,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                 loadConversation,
                 deleteConversation,
                 togglePin,
+                renameConversation,
                 loadConversations,
             }}
         >
