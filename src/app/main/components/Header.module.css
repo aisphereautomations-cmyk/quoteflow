@@ -88,27 +88,27 @@
     border-radius: 50%;
 }
 
-.logoutBtn {
+.menuBtn {
     background: none;
     border: 1px solid transparent;
     border-radius: var(--radius-md);
     cursor: pointer;
     color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
+    font-size: 1.2rem;
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
+    justify-content: center;
     padding: var(--spacing-xs) var(--spacing-sm);
     transition: all var(--transition-base);
 }
 
-.logoutBtn:hover {
+.menuBtn:hover {
     color: var(--color-text-primary);
     border-color: var(--color-input-border);
     transform: scale(1.03);
 }
 
-.logoutBtn:active {
+.menuBtn:active {
     transform: scale(0.97);
 }
 

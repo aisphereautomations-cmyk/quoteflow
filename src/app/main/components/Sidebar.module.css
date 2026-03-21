@@ -1,0 +1,428 @@
+/* ── Overlay ── */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ── Sidebar Panel ── */
+.sidebar {
+    position: fixed;
+    top: 0;
+    right: -340px;
+    width: 320px;
+    max-width: 85vw;
+    height: 100%;
+    background: #111;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+}
+
+.sidebar.open {
+    right: 0;
+}
+
+/* ── Header ── */
+.sidebarHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 1.25rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebarTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #a855f7, #06b6d4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: all 0.15s;
+}
+
+.closeBtn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Content ── */
+.sidebarContent {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem 0;
+}
+
+/* ── Section ── */
+.section {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sectionHeader {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.85rem 1.25rem;
+    background: none;
+    border: none;
+    color: #ccc;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    font-family: inherit;
+    text-align: left;
+}
+
+.sectionHeader:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.chevron {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.sectionBody {
+    padding: 0 1rem 0.75rem;
+}
+
+/* ── New / Save Buttons ── */
+.newBtn {
+    width: 100%;
+    padding: 0.5rem;
+    background: rgba(107, 33, 168, 0.15);
+    border: 1px dashed rgba(107, 33, 168, 0.4);
+    border-radius: 8px;
+    color: #a855f7;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 0.5rem;
+    font-family: inherit;
+}
+
+.newBtn:hover {
+    background: rgba(107, 33, 168, 0.25);
+    border-color: #a855f7;
+}
+
+.quoteActions {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.quoteActions .newBtn {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.saveBtn {
+    flex: 1;
+    padding: 0.5rem;
+    background: rgba(6, 182, 212, 0.15);
+    border: 1px dashed rgba(6, 182, 212, 0.4);
+    border-radius: 8px;
+    color: #06b6d4;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.saveBtn:hover {
+    background: rgba(6, 182, 212, 0.25);
+    border-color: #06b6d4;
+}
+
+/* ── Sub Section ── */
+.subSection {
+    margin-bottom: 0.5rem;
+}
+
+.subTitle {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0.5rem 0 0.25rem 0.25rem;
+}
+
+/* ── List Items ── */
+.listItem {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: 8px;
+    transition: background 0.15s;
+    margin-bottom: 2px;
+}
+
+.listItem:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.listItem.active {
+    background: rgba(168, 85, 247, 0.12);
+    border-left: 3px solid #a855f7;
+}
+
+.itemTitle {
+    flex: 1;
+    font-size: 0.85rem;
+    color: #ddd;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    min-width: 0;
+}
+
+.itemTitle:hover {
+    color: #fff;
+}
+
+.quoteItemContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    cursor: pointer;
+}
+
+.itemMeta {
+    font-size: 0.72rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+.itemActions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+    opacity: 0.4;
+    transition: opacity 0.15s;
+}
+
+.listItem:hover .itemActions {
+    opacity: 1;
+}
+
+.itemActions button {
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.itemActions button:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.deleteBtn {
+    background: none;
+    border: none;
+    font-size: 0.8rem;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    opacity: 0.4;
+}
+
+.listItem:hover .deleteBtn {
+    opacity: 1;
+}
+
+.deleteBtn:hover {
+    background: rgba(239, 68, 68, 0.15) !important;
+}
+
+.deleteBtnX {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 7px;
+    border-radius: 6px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+
+.listItem:hover .deleteBtnX {
+    opacity: 1;
+}
+
+.deleteBtnX:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    transform: scale(1.1);
+}
+
+/* ── Rename Input ── */
+.renameInput {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid #a855f7;
+    border-radius: 6px;
+    color: #fff;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.85rem;
+    font-family: inherit;
+    outline: none;
+}
+
+/* ── Empty Text ── */
+.emptyText {
+    font-size: 0.8rem;
+    color: #555;
+    text-align: center;
+    padding: 1rem 0;
+    margin: 0;
+}
+
+/* ── Sliders ── */
+.sliderRow {
+    margin-bottom: 1rem;
+}
+
+.sliderLabel {
+    font-size: 0.82rem;
+    color: #ccc;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.35rem;
+}
+
+.sliderControl {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sliderEnds {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.68rem;
+    color: #666;
+}
+
+.sliderCurrent {
+    color: #a855f7;
+    font-weight: 600;
+    font-size: 0.72rem;
+}
+
+.slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #333 0%, #6b21a8 50%, #06b6d4 100%);
+    outline: none;
+    cursor: pointer;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #a855f7;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #a855f7;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+}
+
+/* ── Settings Button ── */
+.settingsBtn {
+    width: 100%;
+    padding: 0.85rem 1.25rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: #ccc;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: background 0.15s;
+    font-family: inherit;
+}
+
+.settingsBtn:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* ── Footer (Logout) ── */
+.sidebarFooter {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logoutBtn {
+    width: 100%;
+    padding: 0.7rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    color: #ef4444;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.logoutBtn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.4);
+}
