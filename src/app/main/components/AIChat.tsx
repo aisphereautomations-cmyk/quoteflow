@@ -295,8 +295,8 @@ export default function AIChat() {
             </div>
 
             {!isExpanded && (
-                <div className={styles.actionArea}>
-                    <div className={styles.actionMain}>
+                <>
+                    <div className={styles.actionArea}>
                         <button
                             className={`${styles.fillQuoteBtn} ${pendingQuoteData ? styles.fillQuoteBtnReady : styles.fillQuoteBtnDimmed}`}
                             onClick={pendingQuoteData ? handleFillQuote : undefined}
@@ -304,18 +304,18 @@ export default function AIChat() {
                         >
                             {t('aiChat.fillQuoteWithAi')}
                         </button>
-                        {!pendingQuoteData && (
-                            <p className={styles.actionHint}>{t('aiChat.chatFirstHint')}</p>
-                        )}
+                        <button
+                            className={styles.expandBtn}
+                            onClick={toggleExpand}
+                            aria-label="Expand chat"
+                        >
+                            ⛶
+                        </button>
                     </div>
-                    <button
-                        className={styles.expandBtn}
-                        onClick={toggleExpand}
-                        aria-label="Expand chat"
-                    >
-                        ⛶
-                    </button>
-                </div>
+                    {!pendingQuoteData && (
+                        <p className={styles.actionHint}>{t('aiChat.chatFirstHint')}</p>
+                    )}
+                </>
             )}
         </>
     );
