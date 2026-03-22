@@ -252,22 +252,6 @@ export default function PDFPreview() {
                             )}
                         </div>
                     </div>
-
-                    {/* Gallery Photos (after footer — at the very end) */}
-                    {quote.galleryPhotos.length > 0 && (
-                        <div className={styles.galleryArea}>
-                            <div className={styles.galleryPdfGrid}>
-                                {quote.galleryPhotos.map((photo) => (
-                                    <div key={photo.id} className={styles.galleryPdfItem}>
-                                        <img src={photo.url} alt={photo.caption || ''} />
-                                        {photo.caption && (
-                                            <p className={styles.galleryPdfCaption}>{photo.caption}</p>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
                 </div>
             </div>
 

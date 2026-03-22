@@ -26,7 +26,6 @@ export default function QuoteForm() {
         quote, updateQuote,
         addService, addPhotoBlock, removeBlock, moveBlock,
         updateService, updatePhotoBlock,
-        addGalleryPhoto, removeGalleryPhoto, updateGalleryPhoto,
     } = useQuote();
     const { settings } = useSettings();
     const { t } = useTranslation();
@@ -34,21 +33,16 @@ export default function QuoteForm() {
 
     // Crop modal state
     const [cropSrc, setCropSrc] = useState<string | null>(null);
-    const [cropTarget, setCropTarget] = useState<{ blockId?: string; gallery?: boolean } | null>(null);
+    const [cropTarget, setCropTarget] = useState<{ blockId: string } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const galleryFileInputRef = useRef<HTMLInputElement>(null);
 
-    /** Add processed image to the target block/gallery */
+    /** Add processed image to the target block */
     const addImageToTarget = (dataUrl: string) => {
         if (!cropTarget) return;
 
-        if (cropTarget.gallery) {
-            addGalleryPhoto(dataUrl);
-        } else if (cropTarget.blockId) {
-            const block = quote.services.find(b => b.id === cropTarget.blockId);
-            if (block && block.type === 'photo') {
-                updatePhotoBlock(block.id, { images: [...block.images, dataUrl] });
-            }
+        const block = quote.services.find(b => b.id === cropTarget.blockId);
+        if (block && block.type === 'photo') {
+            updatePhotoBlock(block.id, { images: [...block.images, dataUrl] });
         }
         setCropSrc(null);
         setCropTarget(null);
@@ -59,7 +53,7 @@ export default function QuoteForm() {
         setCropTarget(null);
     };
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, target: { blockId?: string; gallery?: boolean }) => {
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, target: { blockId: string }) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -420,7 +414,7 @@ export default function QuoteForm() {
                 />
             )}
 
-            {/* Hidden file inputs */}
+            {/* Hidden file input */}
             <input
                 ref={fileInputRef}
                 type="file"
@@ -429,13 +423,6 @@ export default function QuoteForm() {
                 onChange={(e) => {
                     if (cropTarget) handleFileSelect(e, cropTarget);
                 }}
-            />
-            <input
-                ref={galleryFileInputRef}
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                style={{ display: 'none' }}
-                onChange={(e) => handleFileSelect(e, { gallery: true })}
             />
 
             <div className={styles.formContainer}>
@@ -533,40 +520,13 @@ export default function QuoteForm() {
                     />
                 </div>
 
-                {/* Gallery Photos (end of quote) */}
-                <div className={styles.gallerySection}>
-                    <h2 className={styles.sectionTitle}>📸 {t('quoteForm.photoGallery')}</h2>
-                    <p className={styles.galleryHint}>{t('quoteForm.galleryHint')}</p>
-
-                    <div className={styles.galleryGrid}>
-                        {quote.galleryPhotos.map((photo) => (
-                            <div key={photo.id} className={styles.galleryItem}>
-                                <img src={photo.url} alt={photo.caption || 'Gallery photo'} />
-                                <input
-                                    type="text"
-                                    placeholder={t('quoteForm.captionPlaceholder')}
-                                    className={styles.galleryCaptionInput}
-                                    value={photo.caption}
-                                    onChange={(e) => updateGalleryPhoto(photo.id, { caption: e.target.value })}
-                                />
-                                <button
-                                    className={styles.galleryRemoveBtn}
-                                    onClick={() => removeGalleryPhoto(photo.id)}
-                                    aria-label="Remove gallery photo"
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-
-                    <button
-                        className={styles.addPhotoBlockBtn}
-                        onClick={() => galleryFileInputRef.current?.click()}
-                    >
-                        + {t('quoteForm.addGalleryPhoto')}
-                    </button>
-                </div>
+                {/* Add Photo Block after footer */}
+                <button
+                    className={styles.addPhotoBlockBtn}
+                    onClick={addPhotoBlock}
+                >
+                    📷 {t('quoteForm.addPhotoBlock')}
+                </button>
             </div>
         </>
     );
