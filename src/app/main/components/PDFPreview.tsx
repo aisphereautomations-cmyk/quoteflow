@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useQuote } from '../context/QuoteContext';
+import { useQuote, type ServiceBlock, type PhotoBlock } from '../context/QuoteContext';
 import { useSettings } from '../context/SettingsContext';
 import { usePDF } from '../context/PDFContext';
 import { useTranslation } from '../context/LanguageContext';
@@ -55,15 +55,97 @@ export default function PDFPreview() {
         if (blob) downloadPDF(blob, 'quote.pdf');
     };
 
-    // Only show services that have some content filled in
-    const filledServices = quote.services.filter(
-        (s) => s.title || s.description || s.fixedPrice || (s.quantity && s.unitPrice)
-    );
+    // Only show service blocks that have some content filled in
+    const filledBlocks = quote.services.filter((b) => {
+        if (b.type === 'photo') return b.images.length > 0;
+        return b.title || b.description || b.fixedPrice || (b.quantity && b.unitPrice);
+    });
 
     const getUnitLabel = (mode: string) => {
         if (mode === 'sqm') return 'm²';
         if (mode === 'hour') return 'hr';
         return '';
+    };
+
+    /* ── Render a service block in the PDF ─── */
+    const renderServiceBlock = (service: ServiceBlock) => {
+        let priceDisplay = '';
+        if (service.pricingMode === 'fixed') {
+            if (service.fixedPrice) {
+                priceDisplay = `${parseFloat(service.fixedPrice).toFixed(2)} ${settings.currency}`;
+            }
+        } else if (service.quantity && service.unitPrice) {
+            const unit = getUnitLabel(service.pricingMode);
+            const total = (
+                parseFloat(service.quantity) *
+                parseFloat(service.unitPrice)
+            ).toFixed(2);
+            priceDisplay = `${total} ${settings.currency} (${service.quantity} ${unit})`;
+        }
+
+        return (
+            <div key={service.id} className={styles.serviceItem}>
+                <div className={styles.serviceRow}>
+                    {service.title && (
+                        <span className={styles.serviceTitle}>
+                            {service.title}
+                        </span>
+                    )}
+                    {priceDisplay && (
+                        <span className={styles.servicePrice}>
+                            {priceDisplay}
+                        </span>
+                    )}
+                </div>
+                {service.description && (
+                    <p className={styles.serviceDescription}>
+                        {service.description}
+                    </p>
+                )}
+            </div>
+        );
+    };
+
+    /* ── Render a photo block in the PDF ─── */
+    const renderPhotoBlock = (block: PhotoBlock) => {
+        const layoutClass =
+            block.layout === 'side' ? styles.photoLayoutSide :
+            block.layout === 'grid' ? styles.photoLayoutGrid :
+            styles.photoLayoutFull;
+
+        const widthPercent = block.imageSize || 100;
+        const align = block.alignment || 'center';
+
+        const marginStyle: React.CSSProperties = { width: `${widthPercent}%` };
+        if (widthPercent < 100) {
+            if (align === 'center') {
+                marginStyle.marginLeft = 'auto';
+                marginStyle.marginRight = 'auto';
+            } else if (align === 'right') {
+                marginStyle.marginLeft = 'auto';
+                marginStyle.marginRight = '0';
+            } else {
+                marginStyle.marginLeft = '0';
+                marginStyle.marginRight = 'auto';
+            }
+        }
+
+        return (
+            <div
+                key={block.id}
+                className={styles.photoBlockPdf}
+                style={marginStyle}
+            >
+                <div className={`${styles.photoBlockImages} ${layoutClass}`}>
+                    {block.images.map((img, i) => (
+                        <img key={i} src={img} alt="" className={styles.photoBlockImg} />
+                    ))}
+                </div>
+                {block.caption && (
+                    <p className={styles.photoBlockCaption}>{block.caption}</p>
+                )}
+            </div>
+        );
     };
 
     return (
@@ -122,45 +204,11 @@ export default function PDFPreview() {
                         {settings.quoteDescription}
                     </div>
 
-                    {/* Services — only show filled ones */}
+                    {/* Services & Photo Blocks — rendered in order */}
                     <div className={styles.servicesArea}>
-                        {filledServices.map((service) => {
-                            let priceDisplay = '';
-
-                            if (service.pricingMode === 'fixed') {
-                                if (service.fixedPrice) {
-                                    priceDisplay = `${parseFloat(service.fixedPrice).toFixed(2)} ${settings.currency}`;
-                                }
-                            } else if (service.quantity && service.unitPrice) {
-                                const unit = getUnitLabel(service.pricingMode);
-                                const total = (
-                                    parseFloat(service.quantity) *
-                                    parseFloat(service.unitPrice)
-                                ).toFixed(2);
-                                priceDisplay = `${total} ${settings.currency} (${service.quantity} ${unit})`;
-                            }
-
-                            return (
-                                <div key={service.id} className={styles.serviceItem}>
-                                    <div className={styles.serviceRow}>
-                                        {service.title && (
-                                            <span className={styles.serviceTitle}>
-                                                {service.title}
-                                            </span>
-                                        )}
-                                        {priceDisplay && (
-                                            <span className={styles.servicePrice}>
-                                                {priceDisplay}
-                                            </span>
-                                        )}
-                                    </div>
-                                    {service.description && (
-                                        <p className={styles.serviceDescription}>
-                                            {service.description}
-                                        </p>
-                                    )}
-                                </div>
-                            );
+                        {filledBlocks.map((block) => {
+                            if (block.type === 'photo') return renderPhotoBlock(block);
+                            return renderServiceBlock(block);
                         })}
                     </div>
 
@@ -204,6 +252,22 @@ export default function PDFPreview() {
                             )}
                         </div>
                     </div>
+
+                    {/* Gallery Photos (after footer — at the very end) */}
+                    {quote.galleryPhotos.length > 0 && (
+                        <div className={styles.galleryArea}>
+                            <div className={styles.galleryPdfGrid}>
+                                {quote.galleryPhotos.map((photo) => (
+                                    <div key={photo.id} className={styles.galleryPdfItem}>
+                                        <img src={photo.url} alt={photo.caption || ''} />
+                                        {photo.caption && (
+                                            <p className={styles.galleryPdfCaption}>{photo.caption}</p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
