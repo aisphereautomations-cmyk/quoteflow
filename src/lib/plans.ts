@@ -1,6 +1,12 @@
 export type PlanId = 'starter' | 'pro' | 'enterprise';
 export type BillingCycle = 'monthly' | 'yearly';
 
+export interface SupportChannels {
+    email: string;
+    whatsapp?: string;
+    phone?: string;
+}
+
 export interface PlanConfig {
     id: PlanId;
     name: string;
@@ -9,13 +15,19 @@ export interface PlanConfig {
     currency: string;
     features: {
         aiTokensPerMonth: number;
+        aiModelTier: string;
         savedQuotes: number;
         storageGB: number;
         quoteDownloads: number | 'unlimited';
-        support: string;
+        support: SupportChannels;
+        supportLabel: string;
     };
-    highlight?: boolean; // For "Most Popular" badge
+    highlight?: boolean;
 }
+
+const SUPPORT_EMAIL = 'aisphereautomations@gmail.com';
+const SUPPORT_WHATSAPP = '+351920636021';
+const SUPPORT_PHONE = '+351920636021';
 
 export const PLANS: PlanConfig[] = [
     {
@@ -26,10 +38,12 @@ export const PLANS: PlanConfig[] = [
         currency: '€',
         features: {
             aiTokensPerMonth: 800_000,
+            aiModelTier: 'GPT-4o (limited) + GPT-4o-mini',
             savedQuotes: 15,
             storageGB: 1,
             quoteDownloads: 1_000,
-            support: 'Basic email support',
+            support: { email: SUPPORT_EMAIL },
+            supportLabel: 'Email support',
         },
     },
     {
@@ -41,10 +55,12 @@ export const PLANS: PlanConfig[] = [
         highlight: true,
         features: {
             aiTokensPerMonth: 1_600_000,
+            aiModelTier: 'GPT-4o (unlimited)',
             savedQuotes: 50,
             storageGB: 5,
             quoteDownloads: 5_000,
-            support: 'Priority support',
+            support: { email: SUPPORT_EMAIL, whatsapp: SUPPORT_WHATSAPP },
+            supportLabel: 'Email + WhatsApp support',
         },
     },
     {
@@ -55,10 +71,12 @@ export const PLANS: PlanConfig[] = [
         currency: '€',
         features: {
             aiTokensPerMonth: 3_200_000,
+            aiModelTier: 'GPT-4o (unlimited, extended)',
             savedQuotes: 200,
             storageGB: 20,
             quoteDownloads: Infinity,
-            support: 'Dedicated support',
+            support: { email: SUPPORT_EMAIL, whatsapp: SUPPORT_WHATSAPP, phone: SUPPORT_PHONE },
+            supportLabel: 'Email + WhatsApp + Phone support',
         },
     },
 ];

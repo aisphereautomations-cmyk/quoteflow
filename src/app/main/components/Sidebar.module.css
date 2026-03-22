@@ -427,3 +427,116 @@
     background: rgba(239, 68, 68, 0.2);
     border-color: rgba(239, 68, 68, 0.4);
 }
+
+/* ── Upgrade Button ── */
+.upgradeBtn {
+    width: 100%;
+    padding: 0.7rem 1.25rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: #a855f7;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.upgradeBtn:hover {
+    background: rgba(168, 85, 247, 0.08);
+    color: #c084fc;
+}
+
+.upgradeBtn svg {
+    flex-shrink: 0;
+}
+
+/* ── Help Button ── */
+.helpWrapper {
+    position: relative;
+}
+
+.helpBtn {
+    width: 100%;
+    padding: 0.6rem 1.25rem;
+    background: none;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: #888;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+    font-family: inherit;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.helpBtn:hover {
+    color: #bbb;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.helpBtn svg {
+    flex-shrink: 0;
+}
+
+/* ── Help Popover ── */
+.helpPopover {
+    position: absolute;
+    bottom: 100%;
+    left: 1rem;
+    right: 1rem;
+    background: #1a1a1a;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    padding: 0.75rem;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
+    animation: fadeIn 0.15s ease;
+    z-index: 10;
+}
+
+.helpPopoverHeader {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #999;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.helpChannels {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.helpChannel {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.5rem;
+    border-radius: 6px;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 0.8rem;
+    transition: background 0.15s;
+}
+
+.helpChannel:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+.helpChannel svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}
+

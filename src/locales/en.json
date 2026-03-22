@@ -94,6 +94,7 @@
     },
     "aiChat": {
         "chatHeader": "Chat with AI To Help you Quote",
+        "welcomeMessage": "Hey! What are we quoting today? Tell me about the job and I'll help you build a professional quote with the right pricing.",
         "thinking": "Thinking...",
         "quoteReady": "✨ Quote ready to fill!",
         "apply": "Apply",
@@ -110,6 +111,8 @@
         "quotes": "Quotes",
         "aiPreferences": "AI Preferences",
         "settings": "Settings",
+        "upgrade": "Upgrade Plan",
+        "help": "Help",
         "logout": "Log out",
         "newChat": "New Chat",
         "newQuote": "New Quote",

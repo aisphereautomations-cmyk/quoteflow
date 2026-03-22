@@ -94,6 +94,7 @@
     },
     "aiChat": {
         "chatHeader": "Chat met AI voor Offertes",
+        "welcomeMessage": "Hallo! Wat gaan we vandaag offreren? Vertel me over het werk en ik help je een professionele offerte te maken met de juiste prijzen.",
         "thinking": "Aan het denken...",
         "quoteReady": "✨ Offerte klaar!",
         "apply": "Toepassen",
@@ -110,6 +111,8 @@
         "quotes": "Offertes",
         "aiPreferences": "AI Voorkeuren",
         "settings": "Instellingen",
+        "upgrade": "Plan Upgraden",
+        "help": "Hulp",
         "logout": "Uitloggen",
         "newChat": "Nieuw Gesprek",
         "newQuote": "Nieuwe Offerte",

@@ -94,6 +94,7 @@
     },
     "aiChat": {
         "chatHeader": "Discutez avec l'IA pour vos Devis",
+        "welcomeMessage": "Bonjour ! Quel devis allons-nous préparer aujourd'hui ? Parlez-moi du travail et je vous aiderai à créer un devis professionnel avec les bons prix.",
         "thinking": "Réflexion...",
         "quoteReady": "✨ Devis prêt !",
         "apply": "Appliquer",
@@ -110,6 +111,8 @@
         "quotes": "Devis",
         "aiPreferences": "Préférences IA",
         "settings": "Paramètres",
+        "upgrade": "Améliorer le Plan",
+        "help": "Aide",
         "logout": "Déconnexion",
         "newChat": "Nouvelle Conversation",
         "newQuote": "Nouveau Devis",

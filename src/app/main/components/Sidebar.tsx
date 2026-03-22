@@ -7,6 +7,8 @@ import { useQuote } from '../context/QuoteContext';
 import { useClient } from '../context/ClientContext';
 import { useChat } from '../context/ChatContext';
 import { useTranslation } from '../context/LanguageContext';
+import { useSubscription } from '@/app/context/SubscriptionContext';
+import { getPlan } from '@/lib/plans';
 import styles from './Sidebar.module.css';
 
 interface SidebarProps {
@@ -418,6 +420,12 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <button className={styles.settingsBtn} onClick={handleOpenSettings}>
                         {t('sidebar.settings')}
                     </button>
+
+                    {/* ── Upgrade (visible for starter/pro) ── */}
+                    <UpgradeButton />
+
+                    {/* ── Help ── */}
+                    <HelpButton />
                 </div>
 
                 {/* Logout at bottom */}
@@ -428,5 +436,82 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </div>
             </div>
         </>
+    );
+}
+
+/* ── Upgrade Button Component ── */
+function UpgradeButton() {
+    const { subscription } = useSubscription();
+    const { t } = useTranslation();
+    const router = useRouter();
+
+    // Only show for starter and pro plans
+    const plan = subscription?.plan;
+    if (!plan || plan === 'enterprise') return null;
+
+    return (
+        <button
+            className={styles.upgradeBtn}
+            onClick={() => router.push('/pricing')}
+        >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 19V5" />
+                <path d="m5 12 7-7 7 7" />
+            </svg>
+            {t('sidebar.upgrade')}
+        </button>
+    );
+}
+
+/* ── Help Button Component ── */
+function HelpButton() {
+    const { subscription } = useSubscription();
+    const { t } = useTranslation();
+    const [showPopover, setShowPopover] = useState(false);
+
+    const planId = subscription?.plan || 'starter';
+    const plan = getPlan(planId);
+    const support = plan.features.support;
+
+    return (
+        <div className={styles.helpWrapper}>
+            <button
+                className={styles.helpBtn}
+                onClick={() => setShowPopover(!showPopover)}
+            >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                {t('sidebar.help')}
+            </button>
+
+            {showPopover && (
+                <div className={styles.helpPopover}>
+                    <div className={styles.helpPopoverHeader}>
+                        {t('sidebar.help')} — {plan.name}
+                    </div>
+                    <div className={styles.helpChannels}>
+                        <a href={`mailto:${support.email}`} className={styles.helpChannel}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" /></svg>
+                            Email
+                        </a>
+                        {support.whatsapp && (
+                            <a href={`https://wa.me/${support.whatsapp.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className={styles.helpChannel}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" /><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.553 4.117 1.521 5.853L0 24l6.335-1.492A11.924 11.924 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75c-1.884 0-3.672-.499-5.25-1.417l-.375-.225-3.896.918.975-3.792-.246-.39A9.704 9.704 0 012.25 12 9.75 9.75 0 0112 2.25 9.75 9.75 0 0121.75 12 9.75 9.75 0 0112 21.75z" /></svg>
+                                WhatsApp
+                            </a>
+                        )}
+                        {support.phone && (
+                            <a href={`tel:${support.phone}`} className={styles.helpChannel}>
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+                                {support.phone}
+                            </a>
+                        )}
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

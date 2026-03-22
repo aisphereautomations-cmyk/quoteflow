@@ -16,6 +16,7 @@ import { QuoteProvider } from './context/QuoteContext';
 import { ClientProvider } from './context/ClientContext';
 import { PDFProvider } from './context/PDFContext';
 import { ChatProvider } from './context/ChatContext';
+import { SubscriptionProvider } from '@/app/context/SubscriptionContext';
 
 const showAIChat = process.env.NEXT_PUBLIC_ENABLE_AI_CHAT === 'true';
 
@@ -43,15 +44,17 @@ export default function MainPage() {
         <AuthProvider>
             <SettingsProvider>
                 <LanguageProvider>
-                    <QuoteProvider>
-                        <ClientProvider>
-                            <PDFProvider>
-                                <ChatProvider>
-                                    <MainContent />
-                                </ChatProvider>
-                            </PDFProvider>
-                        </ClientProvider>
-                    </QuoteProvider>
+                    <SubscriptionProvider>
+                        <QuoteProvider>
+                            <ClientProvider>
+                                <PDFProvider>
+                                    <ChatProvider>
+                                        <MainContent />
+                                    </ChatProvider>
+                                </PDFProvider>
+                            </ClientProvider>
+                        </QuoteProvider>
+                    </SubscriptionProvider>
                 </LanguageProvider>
             </SettingsProvider>
         </AuthProvider>

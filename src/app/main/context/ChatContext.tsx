@@ -1,9 +1,10 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useCallback, useEffect, useMemo, ReactNode } from 'react';
 import { useQuote, type QuoteData, type ServiceBlock } from './QuoteContext';
 import { useSettings } from './SettingsContext';
 import { useAuth } from './AuthContext';
+import { useTranslation } from './LanguageContext';
 import { createClient } from '@/lib/supabase-browser';
 
 export interface ChatMessage {
@@ -14,6 +15,7 @@ export interface ChatMessage {
 }
 
 export interface PendingQuoteData {
+    mode?: 'replace' | 'append';
     services: Partial<ServiceBlock>[];
     baseValue?: string;
     estimatedTime?: string;
@@ -60,26 +62,37 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 const DEFAULT_SLIDERS: SliderPreferences = { detail: 50, market: 50, tone: 50 };
 
-const WELCOME_MESSAGE: ChatMessage = {
-    id: 'welcome',
-    role: 'assistant',
-    content: 'Hey! What are we quoting today? Tell me about the job and I\'ll help you build a professional quote with the right pricing.',
-    timestamp: Date.now(),
-};
-
 export function ChatProvider({ children }: { children: ReactNode }) {
     const { updateQuote, quote } = useQuote();
     const { settings } = useSettings();
     const { user } = useAuth();
+    const { t } = useTranslation();
     const supabase = createClient();
 
-    const [messages, setMessages] = useState<ChatMessage[]>([WELCOME_MESSAGE]);
+    const welcomeMessage = useMemo<ChatMessage>(() => ({
+        id: 'welcome',
+        role: 'assistant',
+        content: t('aiChat.welcomeMessage'),
+        timestamp: Date.now(),
+    }), [t]);
+
+    const [messages, setMessages] = useState<ChatMessage[]>([welcomeMessage]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [pendingQuoteData, setPendingQuoteData] = useState<PendingQuoteData | null>(null);
     const [sliders, setSliders] = useState<SliderPreferences>(DEFAULT_SLIDERS);
     const [conversations, setConversations] = useState<ChatConversation[]>([]);
     const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+
+    // Sync welcome message when locale changes
+    useEffect(() => {
+        setMessages(prev => {
+            if (prev.length === 1 && prev[0].id.startsWith('welcome')) {
+                return [{ ...prev[0], content: t('aiChat.welcomeMessage') }];
+            }
+            return prev;
+        });
+    }, [t]);
 
     // Load slider preferences from localStorage
     useEffect(() => {
@@ -180,7 +193,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                     content: m.content,
                     timestamp: m.timestamp || Date.now(),
                 }));
-                setMessages(loaded.length > 0 ? loaded : [WELCOME_MESSAGE]);
+                setMessages(loaded.length > 0 ? loaded : [welcomeMessage]);
                 setCurrentConversationId(id);
                 setPendingQuoteData(null);
                 setError(null);
@@ -195,7 +208,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         try {
             await supabase.from('chat_conversations').delete().eq('id', id);
             if (currentConversationId === id) {
-                setMessages([{ ...WELCOME_MESSAGE, id: `welcome-${Date.now()}`, timestamp: Date.now() }]);
+                setMessages([{ ...welcomeMessage, id: `welcome-${Date.now()}`, timestamp: Date.now() }]);
                 setCurrentConversationId(null);
                 setPendingQuoteData(null);
             }
@@ -276,7 +289,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             const assistantMsg: ChatMessage = {
                 id: `assistant-${Date.now()}`,
                 role: 'assistant',
-                content: data.message || 'I\'ve prepared the quote data for you. Click "Fill Quote" to apply it!',
+                content: data.message || 'Something went wrong — please try again.',
                 timestamp: Date.now(),
             };
 
@@ -309,18 +322,38 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             fixedPrice: svc.fixedPrice || '',
         }));
 
-        const updates: Partial<QuoteData> = {
-            services: newServices.length > 0 ? newServices : quote.services,
-        };
+        const isAppend = pendingQuoteData.mode === 'append';
 
-        if (pendingQuoteData.baseValue) updates.baseValue = pendingQuoteData.baseValue;
+        const updates: Partial<QuoteData> = {};
+
+        if (newServices.length > 0) {
+            if (isAppend) {
+                // Append: add new services to existing ones
+                updates.services = [...quote.services, ...newServices];
+            } else {
+                // Replace: swap all services
+                updates.services = newServices;
+            }
+        }
+
+        // For append mode, only update footer fields if explicitly provided
+        if (pendingQuoteData.baseValue) {
+            if (isAppend && quote.baseValue) {
+                // When appending, sum the base values
+                const existing = parseFloat(quote.baseValue) || 0;
+                const added = parseFloat(pendingQuoteData.baseValue) || 0;
+                updates.baseValue = (existing + added).toFixed(2);
+            } else {
+                updates.baseValue = pendingQuoteData.baseValue;
+            }
+        }
         if (pendingQuoteData.estimatedTime) updates.estimatedTime = pendingQuoteData.estimatedTime;
         if (pendingQuoteData.expirationDate) updates.expirationDate = pendingQuoteData.expirationDate;
         if (pendingQuoteData.paymentConditions) updates.paymentConditions = pendingQuoteData.paymentConditions;
 
         updateQuote(updates);
         setPendingQuoteData(null);
-    }, [pendingQuoteData, quote.services, updateQuote]);
+    }, [pendingQuoteData, quote.services, quote.baseValue, updateQuote]);
 
     const dismissQuoteData = useCallback(() => {
         setPendingQuoteData(null);
@@ -328,14 +361,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     const clearChat = useCallback(() => {
         setMessages([{
-            ...WELCOME_MESSAGE,
+            ...welcomeMessage,
             id: `welcome-${Date.now()}`,
             timestamp: Date.now(),
         }]);
         setCurrentConversationId(null);
         setPendingQuoteData(null);
         setError(null);
-    }, []);
+    }, [welcomeMessage]);
 
     return (
         <ChatContext.Provider

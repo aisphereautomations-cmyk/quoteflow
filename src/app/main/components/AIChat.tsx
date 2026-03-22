@@ -1,9 +1,31 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { useChat } from '../context/ChatContext';
 import { useTranslation } from '../context/LanguageContext';
 import styles from './AIChat.module.css';
+
+/* ── SVG Icons ── */
+const MicIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" />
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        <line x1="12" y1="19" x2="12" y2="22" />
+    </svg>
+);
+
+const StopIcon = () => (
+    <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+        <rect x="4" y="4" width="16" height="16" rx="2" />
+    </svg>
+);
+
+const SpinnerIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+    </svg>
+);
 
 export default function AIChat() {
     const {
@@ -28,7 +50,6 @@ export default function AIChat() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const chatContainerRef = useRef<HTMLDivElement>(null);
 
     // ── Keep expanded chat above mobile keyboard (visualViewport API) ──
     useEffect(() => {
@@ -226,7 +247,11 @@ export default function AIChat() {
                                     <div className={`${styles.avatar} ${styles.botAvatar}`}>✨</div>
                                 )}
                                 <div className={`${styles.messageContent} ${msg.role === 'assistant' ? styles.botMessage : styles.userMessage}`}>
-                                    {msg.content}
+                                    {msg.role === 'assistant' ? (
+                                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                    ) : (
+                                        msg.content
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -279,7 +304,7 @@ export default function AIChat() {
                                 disabled={isTranscribing}
                                 aria-label={isRecording ? 'Stop recording' : isTranscribing ? 'Transcribing...' : 'Start voice input'}
                             >
-                                {isRecording ? '⏹' : isTranscribing ? '⏳' : '🎤'}
+                                {isRecording ? <StopIcon /> : isTranscribing ? <SpinnerIcon /> : <MicIcon />}
                             </button>
                             <button
                                 className={styles.sendBtn}

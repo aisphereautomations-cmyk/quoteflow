@@ -179,6 +179,10 @@ export default function PricingPage() {
                                 </li>
                                 <li>
                                     <span className={styles.featureCheck}>✓</span>
+                                    {plan.features.aiModelTier}
+                                </li>
+                                <li>
+                                    <span className={styles.featureCheck}>✓</span>
                                     {formatFeatureValue(plan.features.savedQuotes)} saved quotes
                                 </li>
                                 <li>
@@ -191,7 +195,7 @@ export default function PricingPage() {
                                 </li>
                                 <li>
                                     <span className={styles.featureCheck}>✓</span>
-                                    {plan.features.support}
+                                    {plan.features.supportLabel}
                                 </li>
                             </ul>
 

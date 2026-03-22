@@ -94,6 +94,7 @@
     },
     "aiChat": {
         "chatHeader": "Chatten Sie mit der KI für Angebote",
+        "welcomeMessage": "Hallo! Was möchten wir heute anbieten? Erzählen Sie mir von der Arbeit und ich helfe Ihnen, ein professionelles Angebot mit den richtigen Preisen zu erstellen.",
         "thinking": "Denkt nach...",
         "quoteReady": "✨ Angebot bereit!",
         "apply": "Anwenden",
@@ -110,6 +111,8 @@
         "quotes": "Angebote",
         "aiPreferences": "KI-Einstellungen",
         "settings": "Einstellungen",
+        "upgrade": "Plan Upgraden",
+        "help": "Hilfe",
         "logout": "Abmelden",
         "newChat": "Neues Gespräch",
         "newQuote": "Neues Angebot",

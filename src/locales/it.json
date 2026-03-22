@@ -94,6 +94,7 @@
     },
     "aiChat": {
         "chatHeader": "Chatta con l'IA per i Preventivi",
+        "welcomeMessage": "Ciao! Cosa preventivamo oggi? Parlami del lavoro e ti aiuterò a creare un preventivo professionale con i prezzi giusti.",
         "thinking": "Sto pensando...",
         "quoteReady": "✨ Preventivo pronto!",
         "apply": "Applica",
@@ -110,6 +111,8 @@
         "quotes": "Preventivi",
         "aiPreferences": "Preferenze IA",
         "settings": "Impostazioni",
+        "upgrade": "Aggiorna Piano",
+        "help": "Aiuto",
         "logout": "Esci",
         "newChat": "Nuova Conversazione",
         "newQuote": "Nuovo Preventivo",

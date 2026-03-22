@@ -94,6 +94,7 @@
     },
     "aiChat": {
         "chatHeader": "Converse com IA para fazer Orçamentos",
+        "welcomeMessage": "Olá! O que vamos orçar hoje? Me conte sobre o serviço e eu ajudo a montar um orçamento profissional com os preços certos.",
         "thinking": "Pensando...",
         "quoteReady": "✨ Orçamento pronto!",
         "apply": "Aplicar",
@@ -110,6 +111,8 @@
         "quotes": "Orçamentos",
         "aiPreferences": "Preferências IA",
         "settings": "Configurações",
+        "upgrade": "Atualizar Plano",
+        "help": "Ajuda",
         "logout": "Sair",
         "newChat": "Nova Conversa",
         "newQuote": "Novo Orçamento",
