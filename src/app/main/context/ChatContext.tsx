@@ -299,6 +299,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         if (!pendingQuoteData) return;
 
         const newServices: ServiceBlock[] = (pendingQuoteData.services || []).map((svc) => ({
+            type: 'service' as const,
             id: crypto.randomUUID(),
             title: svc.title || '',
             description: svc.description || '',
