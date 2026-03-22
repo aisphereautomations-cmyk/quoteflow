@@ -7,11 +7,18 @@ import { useAuth } from './AuthContext';
 import { useTranslation } from './LanguageContext';
 import { createClient } from '@/lib/supabase-browser';
 
+export interface ChatAttachment {
+    dataUrl: string;
+    type: 'photo' | 'doc';
+    name: string;
+}
+
 export interface ChatMessage {
     id: string;
     role: 'user' | 'assistant';
     content: string;
     timestamp: number;
+    attachments?: ChatAttachment[];
 }
 
 export interface PendingQuoteData {
@@ -46,7 +53,7 @@ interface ChatContextType {
     sliders: SliderPreferences;
     conversations: ChatConversation[];
     currentConversationId: string | null;
-    sendMessage: (text: string) => Promise<void>;
+    sendMessage: (text: string, files?: File[]) => Promise<void>;
     applyQuoteData: () => void;
     clearChat: () => void;
     dismissQuoteData: () => void;
@@ -84,6 +91,43 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     const [conversations, setConversations] = useState<ChatConversation[]>([]);
     const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
 
+    // Compress image to max 1024px and quality 0.8
+    const compressImage = useCallback((file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const MAX_SIZE = 1024;
+                    let { width, height } = img;
+                    if (width > MAX_SIZE || height > MAX_SIZE) {
+                        const ratio = Math.min(MAX_SIZE / width, MAX_SIZE / height);
+                        width = Math.round(width * ratio);
+                        height = Math.round(height * ratio);
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d')!;
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.8));
+                };
+                img.onerror = reject;
+                img.src = e.target?.result as string;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }, []);
+
+    const fileToBase64 = useCallback((file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }, []);
     // Sync welcome message when locale changes
     useEffect(() => {
         setMessages(prev => {
@@ -248,14 +292,31 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
     // ── Core Chat ──
 
-    const sendMessage = useCallback(async (text: string) => {
-        if (!text.trim() || isLoading) return;
+    const sendMessage = useCallback(async (text: string, files?: File[]) => {
+        if ((!text.trim() && (!files || files.length === 0)) || isLoading) return;
+
+        // Process attachments
+        let chatAttachments: ChatAttachment[] = [];
+        if (files && files.length > 0) {
+            chatAttachments = await Promise.all(
+                files.map(async (file) => {
+                    const isImage = file.type.startsWith('image/');
+                    const dataUrl = isImage ? await compressImage(file) : await fileToBase64(file);
+                    return {
+                        dataUrl,
+                        type: (isImage ? 'photo' : 'doc') as 'photo' | 'doc',
+                        name: file.name,
+                    };
+                })
+            );
+        }
 
         const userMsg: ChatMessage = {
             id: `user-${Date.now()}`,
             role: 'user',
-            content: text.trim(),
+            content: text.trim() || (chatAttachments.length > 0 ? `[${chatAttachments.map(a => a.name).join(', ')}]` : ''),
             timestamp: Date.now(),
+            attachments: chatAttachments.length > 0 ? chatAttachments : undefined,
         };
 
         const newMessages = [...messages, userMsg];
@@ -280,10 +341,27 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                         sliderMarket: sliders.market,
                         sliderTone: sliders.tone,
                     },
+                    attachments: chatAttachments.length > 0 ? chatAttachments : undefined,
                 }),
             });
 
             const data = await res.json();
+
+            // Handle media limit errors with inline chat message
+            if (res.status === 403 && data.error === 'media_limit') {
+                const limitMsg: ChatMessage = {
+                    id: `system-limit-${Date.now()}`,
+                    role: 'assistant',
+                    content: data.mediaType === 'photo'
+                        ? `📷 Limite de fotos atingido (${data.used}/${data.limit} este mês). Faz upgrade do teu plano para enviar mais fotos.`
+                        : `📄 Limite de documentos atingido (${data.used}/${data.limit} este mês). Faz upgrade do teu plano para enviar mais documentos.`,
+                    timestamp: Date.now(),
+                };
+                setMessages([...newMessages, limitMsg]);
+                setIsLoading(false);
+                return;
+            }
+
             if (!res.ok) throw new Error(data.message || data.error || 'Failed to get response');
 
             const assistantMsg: ChatMessage = {
@@ -306,7 +384,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         } finally {
             setIsLoading(false);
         }
-    }, [messages, settings, sliders, isLoading, saveCurrentChat]);
+    }, [messages, settings, sliders, isLoading, saveCurrentChat, compressImage, fileToBase64]);
 
     const applyQuoteData = useCallback(() => {
         if (!pendingQuoteData) return;

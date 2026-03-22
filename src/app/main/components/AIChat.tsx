@@ -27,6 +27,12 @@ const SpinnerIcon = () => (
     </svg>
 );
 
+const PaperclipIcon = () => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+    </svg>
+);
+
 export default function AIChat() {
     const {
         messages,
@@ -50,6 +56,9 @@ export default function AIChat() {
     const mediaRecorderRef = useRef<MediaRecorder | null>(null);
     const audioChunksRef = useRef<Blob[]>([]);
     const recordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+    const [attachPreviews, setAttachPreviews] = useState<{url: string; name: string; type: string}[]>([]);
 
     // ── Keep expanded chat above mobile keyboard (visualViewport API) ──
     useEffect(() => {
@@ -107,13 +116,16 @@ export default function AIChat() {
     const toggleExpand = () => setIsExpanded(!isExpanded);
 
     const handleSend = async () => {
-        if (!input.trim() || isLoading) return;
+        if ((!input.trim() && attachedFiles.length === 0) || isLoading) return;
         const text = input;
+        const files = attachedFiles.length > 0 ? [...attachedFiles] : undefined;
         setInput('');
+        setAttachedFiles([]);
+        setAttachPreviews([]);
         if (textareaRef.current) {
             textareaRef.current.style.height = 'auto';
         }
-        await sendMessage(text);
+        await sendMessage(text, files);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -121,6 +133,37 @@ export default function AIChat() {
             e.preventDefault();
             handleSend();
         }
+    };
+
+    const handleAttach = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFilesSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
+
+        const newFiles = [...attachedFiles, ...files].slice(0, 5); // Max 5 files per message
+        setAttachedFiles(newFiles);
+
+        // Generate previews
+        const previews = newFiles.map(f => ({
+            url: f.type.startsWith('image/') ? URL.createObjectURL(f) : '',
+            name: f.name,
+            type: f.type,
+        }));
+        setAttachPreviews(previews);
+
+        // Reset input so same file can be selected again
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const removeAttachment = (index: number) => {
+        const newFiles = attachedFiles.filter((_, i) => i !== index);
+        setAttachedFiles(newFiles);
+        // Revoke old ObjectURL
+        if (attachPreviews[index]?.url) URL.revokeObjectURL(attachPreviews[index].url);
+        setAttachPreviews(attachPreviews.filter((_, i) => i !== index));
     };
 
     const handleFillQuote = () => applyQuoteData();
@@ -247,6 +290,20 @@ export default function AIChat() {
                                     <div className={`${styles.avatar} ${styles.botAvatar}`}>✨</div>
                                 )}
                                 <div className={`${styles.messageContent} ${msg.role === 'assistant' ? styles.botMessage : styles.userMessage}`}>
+                                    {msg.role === 'user' && msg.attachments && msg.attachments.length > 0 && (
+                                        <div className={styles.msgAttachments}>
+                                            {msg.attachments.map((att, i) => (
+                                                att.type === 'photo' ? (
+                                                    <img key={i} src={att.dataUrl} alt={att.name} className={styles.msgAttachImg} />
+                                                ) : (
+                                                    <div key={i} className={styles.msgAttachDoc}>
+                                                        <span className={styles.docIcon}>📄</span>
+                                                        <span className={styles.docName}>{att.name}</span>
+                                                    </div>
+                                                )
+                                            ))}
+                                        </div>
+                                    )}
                                     {msg.role === 'assistant' ? (
                                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                                     ) : (
@@ -285,6 +342,24 @@ export default function AIChat() {
 
                 {/* Input */}
                 <div className={styles.inputArea}>
+                    {/* Attachment preview strip */}
+                    {attachPreviews.length > 0 && (
+                        <div className={styles.attachPreview}>
+                            {attachPreviews.map((p, i) => (
+                                <div key={i} className={styles.attachPreviewItem}>
+                                    {p.type.startsWith('image/') ? (
+                                        <img src={p.url} alt={p.name} className={styles.attachThumb} />
+                                    ) : (
+                                        <div className={styles.attachDocThumb}>
+                                            <span>📄</span>
+                                            <span className={styles.attachDocName}>{p.name.length > 12 ? p.name.slice(0, 10) + '…' : p.name}</span>
+                                        </div>
+                                    )}
+                                    <button className={styles.attachRemove} onClick={() => removeAttachment(i)}>✕</button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                     <div className={styles.inputWrapper}>
                         <textarea
                             ref={textareaRef}
@@ -297,7 +372,24 @@ export default function AIChat() {
                             aria-label="Chat message"
                             rows={2}
                         />
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*,.pdf"
+                            multiple
+                            style={{ display: 'none' }}
+                            onChange={handleFilesSelected}
+                        />
                         <div className={styles.inputActions}>
+                            <button
+                                className={styles.attachBtn}
+                                onClick={handleAttach}
+                                disabled={isLoading}
+                                aria-label="Attach files"
+                                title={t('aiChat.attachFile') || 'Attach photo or document'}
+                            >
+                                <PaperclipIcon />
+                            </button>
                             <button
                                 className={`${styles.micBtn} ${isRecording ? styles.micRecording : ''} ${isTranscribing ? styles.micTranscribing : ''}`}
                                 onClick={handleMicClick}
@@ -309,7 +401,7 @@ export default function AIChat() {
                             <button
                                 className={styles.sendBtn}
                                 onClick={handleSend}
-                                disabled={isLoading || !input.trim()}
+                                disabled={isLoading || (!input.trim() && attachedFiles.length === 0)}
                                 aria-label="Send message"
                             >
                                 ↑

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { createClient } from '@/lib/supabase-server';
+import { getPlan } from '@/lib/plans';
+import type { PlanId } from '@/lib/plans';
 
 /* ── System Prompt Builder ── */
 function buildSystemPrompt(settings?: {
@@ -312,7 +314,7 @@ export async function POST(request: NextRequest) {
             }, { status: 503 });
         }
 
-        const { messages, settings } = await request.json() as {
+        const { messages, settings, attachments } = await request.json() as {
             messages: { role: 'user' | 'assistant'; content: string }[];
             settings?: {
                 currency?: string;
@@ -321,6 +323,7 @@ export async function POST(request: NextRequest) {
                 sliderMarket?: number;
                 sliderTone?: number;
             };
+            attachments?: { dataUrl: string; type: 'photo' | 'doc'; name?: string }[];
         };
 
         if (!messages || messages.length === 0) {
@@ -331,11 +334,14 @@ export async function POST(request: NextRequest) {
         let planConfig = DEFAULT_CONFIG;
         let subscriptionId: string | null = null;
         let currentTokensUsed = 0;
+        let userPlan: PlanId = 'starter';
+        let photoUploadsUsed = 0;
+        let docUploadsUsed = 0;
 
         try {
             const { data: sub } = await supabase
                 .from('subscriptions')
-                .select('id, plan, ai_tokens_used, ai_tokens_reset_at')
+                .select('id, plan, ai_tokens_used, ai_tokens_reset_at, photo_uploads_used, doc_uploads_used, media_usage_reset_at')
                 .eq('user_id', user.id)
                 .in('status', ['active', 'trial'])
                 .order('created_at', { ascending: false })
@@ -344,6 +350,7 @@ export async function POST(request: NextRequest) {
 
             if (sub) {
                 subscriptionId = sub.id;
+                userPlan = (sub.plan as PlanId) || 'starter';
                 const config = PLAN_CONFIGS[sub.plan as string];
                 if (config) {
                     planConfig = { ...config };
@@ -371,14 +378,101 @@ export async function POST(request: NextRequest) {
                         planConfig.model = planConfig.fallbackModel;
                     }
                 }
+
+                // Track media usage with monthly reset
+                const mediaResetAt = sub.media_usage_reset_at ? new Date(sub.media_usage_reset_at) : null;
+                if (!mediaResetAt || mediaResetAt < startOfMonth) {
+                    photoUploadsUsed = 0;
+                    docUploadsUsed = 0;
+                    await supabase
+                        .from('subscriptions')
+                        .update({
+                            photo_uploads_used: 0,
+                            doc_uploads_used: 0,
+                            media_usage_reset_at: now.toISOString(),
+                        })
+                        .eq('id', sub.id);
+                } else {
+                    photoUploadsUsed = sub.photo_uploads_used || 0;
+                    docUploadsUsed = sub.doc_uploads_used || 0;
+                }
             }
         } catch (err) {
             // If subscription lookup fails, continue with default config
             console.error('Subscription lookup error:', err);
         }
 
+        // ── Check media upload limits ──
+        const incomingPhotos = attachments?.filter(a => a.type === 'photo').length || 0;
+        const incomingDocs = attachments?.filter(a => a.type === 'doc').length || 0;
+
+        if (incomingPhotos > 0 || incomingDocs > 0) {
+            const planLimits = getPlan(userPlan).features.mediaLimits;
+
+            if (incomingPhotos > 0 && (photoUploadsUsed + incomingPhotos) > planLimits.photoUploadsPerMonth) {
+                const remaining = Math.max(0, planLimits.photoUploadsPerMonth - photoUploadsUsed);
+                return NextResponse.json({
+                    error: 'media_limit',
+                    mediaType: 'photo',
+                    used: photoUploadsUsed,
+                    limit: planLimits.photoUploadsPerMonth,
+                    remaining,
+                    message: `Photo upload limit reached (${photoUploadsUsed}/${planLimits.photoUploadsPerMonth}). Upgrade your plan for more.`,
+                }, { status: 403 });
+            }
+
+            if (incomingDocs > 0 && (docUploadsUsed + incomingDocs) > planLimits.docUploadsPerMonth) {
+                const remaining = Math.max(0, planLimits.docUploadsPerMonth - docUploadsUsed);
+                return NextResponse.json({
+                    error: 'media_limit',
+                    mediaType: 'doc',
+                    used: docUploadsUsed,
+                    limit: planLimits.docUploadsPerMonth,
+                    remaining,
+                    message: `Document upload limit reached (${docUploadsUsed}/${planLimits.docUploadsPerMonth}). Upgrade your plan for more.`,
+                }, { status: 403 });
+            }
+        }
+
+        // ── Build messages with Vision support ──
         const systemPrompt = buildSystemPrompt(settings);
         const openai = new OpenAI({ apiKey });
+
+        // Convert last user message to multimodal format if attachments present
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const formattedMessages: any[] = messages.map((msg, idx) => {
+            // Only add images to the last user message
+            if (idx === messages.length - 1 && msg.role === 'user' && attachments && attachments.length > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const contentParts: any[] = [
+                    { type: 'text', text: msg.content },
+                ];
+
+                for (const att of attachments) {
+                    if (att.type === 'photo') {
+                        contentParts.push({
+                            type: 'image_url',
+                            image_url: {
+                                url: att.dataUrl,
+                                detail: 'high',
+                            },
+                        });
+                    } else if (att.type === 'doc') {
+                        // For PDFs, the client should have converted pages to images
+                        contentParts.push({
+                            type: 'image_url',
+                            image_url: {
+                                url: att.dataUrl,
+                                detail: 'high',
+                            },
+                        });
+                    }
+                }
+
+                return { role: msg.role, content: contentParts };
+            }
+            return msg;
+        });
 
         // Adjust maxTokens based on detail slider (override plan defaults if slider demands more)
         const detailValue = settings?.sliderDetail ?? 50;
@@ -393,7 +487,7 @@ export async function POST(request: NextRequest) {
             model: planConfig.model,
             messages: [
                 { role: 'system', content: systemPrompt },
-                ...messages,
+                ...formattedMessages,
             ],
             tools: [FILL_QUOTE_TOOL],
             tool_choice: 'auto',
@@ -482,9 +576,33 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        // ── Track media uploads ──
+        if (subscriptionId && (incomingPhotos > 0 || incomingDocs > 0)) {
+            try {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const updatePayload: any = {};
+                if (incomingPhotos > 0) {
+                    updatePayload.photo_uploads_used = photoUploadsUsed + incomingPhotos;
+                }
+                if (incomingDocs > 0) {
+                    updatePayload.doc_uploads_used = docUploadsUsed + incomingDocs;
+                }
+                await supabase
+                    .from('subscriptions')
+                    .update(updatePayload)
+                    .eq('id', subscriptionId);
+            } catch (err) {
+                console.error('Failed to update media usage:', err);
+            }
+        }
+
         return NextResponse.json({
             message: responseText,
             quoteData,
+            mediaUsage: {
+                photoUploadsUsed: photoUploadsUsed + incomingPhotos,
+                docUploadsUsed: docUploadsUsed + incomingDocs,
+            },
         });
     } catch (err) {
         console.error('Chat API error:', err);

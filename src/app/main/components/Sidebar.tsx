@@ -20,6 +20,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
     const router = useRouter();
     const supabase = createClient();
     const { t } = useTranslation();
+    const { subscription } = useSubscription();
     const { saveQuote, newQuote, loadQuote, deleteQuote, renameQuote, savedQuotes, currentQuoteId } = useQuote();
     const { client, clearClient } = useClient();
     const {
@@ -420,6 +421,39 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     <button className={styles.settingsBtn} onClick={handleOpenSettings}>
                         {t('sidebar.settings')}
                     </button>
+
+                    {/* ── 📊 Media Usage ── */}
+                    {subscription && (() => {
+                        const planConfig = getPlan(subscription.plan);
+                        const ml = planConfig.features.mediaLimits;
+                        const photoUsed = subscription.mediaUsage?.photoUploadsUsed || 0;
+                        const docUsed = subscription.mediaUsage?.docUploadsUsed || 0;
+                        const photoPct = Math.min(100, Math.round((photoUsed / ml.photoUploadsPerMonth) * 100));
+                        const docPct = Math.min(100, Math.round((docUsed / ml.docUploadsPerMonth) * 100));
+                        return (
+                            <div className={styles.usageSection}>
+                                <span className={styles.usageTitle}>{t('sidebar.mediaUsage')}</span>
+                                <div className={styles.usageRow}>
+                                    <span className={styles.usageLabel}>📷 {photoUsed}/{ml.photoUploadsPerMonth}</span>
+                                    <div className={styles.usageBar}>
+                                        <div
+                                            className={`${styles.usageBarFill} ${photoPct >= 90 ? styles.usageBarDanger : ''}`}
+                                            style={{ width: `${photoPct}%` }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className={styles.usageRow}>
+                                    <span className={styles.usageLabel}>📄 {docUsed}/{ml.docUploadsPerMonth}</span>
+                                    <div className={styles.usageBar}>
+                                        <div
+                                            className={`${styles.usageBarFill} ${docPct >= 90 ? styles.usageBarDanger : ''}`}
+                                            style={{ width: `${docPct}%` }}
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        );
+                    })()}
 
                     {/* ── Upgrade (visible for starter/pro) ── */}
                     <UpgradeButton />
