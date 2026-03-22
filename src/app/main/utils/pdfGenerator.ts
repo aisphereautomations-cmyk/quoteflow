@@ -105,10 +105,10 @@ export async function generateQuotePDF(
     // Description bar
     h += 29; // CSS: height 29px
 
-    // Services area
-    const filledServices = quote.services.filter(
-        (s) => s.title || s.description || s.fixedPrice || (s.quantity && s.unitPrice),
-    );
+    // Services area — only process service blocks (skip photo blocks)
+    const filledServices = quote.services
+        .filter((s): s is import('../context/QuoteContext').ServiceBlock => s.type === 'service')
+        .filter((s) => s.title || s.description || s.fixedPrice || (s.quantity && s.unitPrice));
     if (filledServices.length > 0) {
         h += 30; // top padding of servicesArea
         for (const svc of filledServices) {
