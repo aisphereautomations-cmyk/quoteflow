@@ -257,11 +257,10 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
         try {
             // Find the first service block title for the quote title
             const firstService = quote.services.find((b): b is ServiceBlock => b.type === 'service');
-            const quoteRow = {
+            const baseRow = {
                 user_id: user.id,
                 title: firstService?.title || 'Untitled Quote',
                 services: JSON.stringify(quote.services),
-                gallery_photos: JSON.stringify(quote.footerBlocks || []),
                 base_value: parseFloat(quote.baseValue) || 0,
                 vat_override: quote.vatOverride,
                 estimated_time: quote.estimatedTime,
@@ -274,24 +273,40 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
                 updated_at: new Date().toISOString(),
             };
 
-            if (currentQuoteId) {
-                // Update existing quote
-                const { error } = await supabase
-                    .from('quotes')
-                    .update(quoteRow)
-                    .eq('id', currentQuoteId);
+            // Try saving with gallery_photos first; if column doesn't exist, retry without it
+            const quoteRow = {
+                ...baseRow,
+                gallery_photos: JSON.stringify(quote.footerBlocks || []),
+            };
 
-                if (error) throw error;
-            } else {
-                // Insert new quote
-                const { data, error } = await supabase
-                    .from('quotes')
-                    .insert(quoteRow)
-                    .select('id')
-                    .single();
+            const doSave = async (row: typeof quoteRow | typeof baseRow) => {
+                if (currentQuoteId) {
+                    const { error } = await supabase
+                        .from('quotes')
+                        .update(row)
+                        .eq('id', currentQuoteId);
+                    if (error) throw error;
+                } else {
+                    const { data, error } = await supabase
+                        .from('quotes')
+                        .insert(row)
+                        .select('id')
+                        .single();
+                    if (error) throw error;
+                    if (data) setCurrentQuoteId(data.id);
+                }
+            };
 
-                if (error) throw error;
-                if (data) setCurrentQuoteId(data.id);
+            try {
+                await doSave(quoteRow);
+            } catch (err: any) {
+                // If gallery_photos column doesn't exist, retry without it
+                if (err?.code === 'PGRST204' || err?.message?.includes('gallery_photos')) {
+                    console.warn('gallery_photos column not found, saving without it');
+                    await doSave(baseRow);
+                } else {
+                    throw err;
+                }
             }
 
             // Refresh the saved quotes list
@@ -337,7 +352,8 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
                     if (Array.isArray(rawGallery)) footerBlocks = rawGallery.map((b: any) => ({ imageSize: 100, alignment: 'center', type: 'photo', ...b })) as PhotoBlock[];
                 } catch { /* ignore */ }
 
-                setQuote({
+                // Deep clone to prevent reference mutation when user edits without saving
+                const loadedQuote: QuoteData = JSON.parse(JSON.stringify({
                     services: services.length > 0 ? services : [createEmptyService()],
                     footerBlocks,
                     baseValue: data.base_value?.toString() || '',
@@ -345,7 +361,9 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
                     estimatedTime: data.estimated_time || '',
                     expirationDate: data.expiration_date || '',
                     paymentConditions: data.payment_conditions || '',
-                });
+                }));
+
+                setQuote(loadedQuote);
                 setCurrentQuoteId(data.id);
             }
         } catch (err) {
