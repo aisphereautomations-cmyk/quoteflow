@@ -57,7 +57,7 @@
 .closeBtn {
     background: none;
     border: none;
-    color: #888;
+    color: #aaa;
     font-size: 1.2rem;
     cursor: pointer;
     padding: 4px 8px;
@@ -90,7 +90,7 @@
     padding: 0.85rem 1.25rem;
     background: none;
     border: none;
-    color: #ccc;
+    color: #f0f0f0;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
@@ -105,7 +105,7 @@
 
 .chevron {
     font-size: 0.75rem;
-    color: #666;
+    color: #aaa;
 }
 
 .sectionBody {
@@ -171,7 +171,7 @@
 .subTitle {
     font-size: 0.7rem;
     font-weight: 600;
-    color: #666;
+    color: #aaa;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0.5rem 0 0.25rem 0.25rem;
@@ -200,7 +200,7 @@
 .itemTitle {
     flex: 1;
     font-size: 0.85rem;
-    color: #ddd;
+    color: #eee;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -222,7 +222,7 @@
 
 .itemMeta {
     font-size: 0.72rem;
-    color: #666;
+    color: #aaa;
     margin-top: 2px;
 }
 
@@ -230,7 +230,7 @@
     display: flex;
     gap: 2px;
     flex-shrink: 0;
-    opacity: 0.4;
+    opacity: 0.7;
     transition: opacity 0.15s;
 }
 
@@ -246,6 +246,7 @@
     padding: 4px 6px;
     border-radius: 6px;
     transition: background 0.15s;
+    color: #a855f7;
 }
 
 .itemActions button:hover {
@@ -261,7 +262,7 @@
     border-radius: 6px;
     transition: all 0.15s;
     flex-shrink: 0;
-    opacity: 0.4;
+    opacity: 0.7;
 }
 
 .listItem:hover .deleteBtn {
@@ -283,7 +284,7 @@
     border-radius: 6px;
     transition: all 0.15s;
     flex-shrink: 0;
-    opacity: 0.7;
+    opacity: 0.85;
 }
 
 .listItem:hover .deleteBtnX {
@@ -311,7 +312,7 @@
 /* ── Empty Text ── */
 .emptyText {
     font-size: 0.8rem;
-    color: #555;
+    color: #999;
     text-align: center;
     padding: 1rem 0;
     margin: 0;
@@ -340,7 +341,7 @@
     display: flex;
     justify-content: space-between;
     font-size: 0.68rem;
-    color: #666;
+    color: #999;
 }
 
 .sliderCurrent {
@@ -389,7 +390,7 @@
     background: none;
     border: none;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    color: #ccc;
+    color: #f0f0f0;
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;

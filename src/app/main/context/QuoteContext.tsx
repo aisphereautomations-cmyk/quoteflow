@@ -39,7 +39,7 @@ export interface GalleryPhoto {
 
 export interface QuoteData {
     services: QuoteBlock[];
-    galleryPhotos: GalleryPhoto[];
+    footerBlocks: PhotoBlock[];
     baseValue: string;
     vatOverride: string;
     estimatedTime: string;
@@ -65,9 +65,9 @@ interface QuoteContextType {
     moveBlock: (id: string, direction: 'up' | 'down') => void;
     updateService: (id: string, updates: Partial<ServiceBlock>) => void;
     updatePhotoBlock: (id: string, updates: Partial<Omit<PhotoBlock, 'type' | 'id'>>) => void;
-    addGalleryPhoto: (url: string) => void;
-    removeGalleryPhoto: (id: string) => void;
-    updateGalleryPhoto: (id: string, updates: Partial<Omit<GalleryPhoto, 'id'>>) => void;
+    addFooterBlock: () => void;
+    removeFooterBlock: (id: string) => void;
+    updateFooterBlock: (id: string, updates: Partial<Omit<PhotoBlock, 'type' | 'id'>>) => void;
     saveQuote: (clientName?: string, clientEmail?: string, clientWhatsapp?: string, clientServiceTitle?: string) => Promise<void>;
     loadQuote: (id: string) => Promise<void>;
     deleteQuote: (id: string) => Promise<void>;
@@ -112,7 +112,7 @@ function normalizeBlock(block: any): QuoteBlock {
 
 const defaultQuote: QuoteData = {
     services: [createEmptyService()],
-    galleryPhotos: [],
+    footerBlocks: [],
     baseValue: '',
     vatOverride: '',
     estimatedTime: '',
@@ -222,25 +222,25 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
         }));
     };
 
-    const addGalleryPhoto = (url: string) => {
+    const addFooterBlock = () => {
         setQuote((prev) => ({
             ...prev,
-            galleryPhotos: [...prev.galleryPhotos, { id: crypto.randomUUID(), url, caption: '' }],
+            footerBlocks: [...prev.footerBlocks, createEmptyPhotoBlock()],
         }));
     };
 
-    const removeGalleryPhoto = (id: string) => {
+    const removeFooterBlock = (id: string) => {
         setQuote((prev) => ({
             ...prev,
-            galleryPhotos: prev.galleryPhotos.filter((p) => p.id !== id),
+            footerBlocks: prev.footerBlocks.filter((b) => b.id !== id),
         }));
     };
 
-    const updateGalleryPhoto = (id: string, updates: Partial<Omit<GalleryPhoto, 'id'>>) => {
+    const updateFooterBlock = (id: string, updates: Partial<Omit<PhotoBlock, 'type' | 'id'>>) => {
         setQuote((prev) => ({
             ...prev,
-            galleryPhotos: prev.galleryPhotos.map((p) =>
-                p.id === id ? { ...p, ...updates } : p
+            footerBlocks: prev.footerBlocks.map((b) =>
+                b.id === id ? { ...b, ...updates } : b
             ),
         }));
     };
@@ -261,7 +261,7 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
                 user_id: user.id,
                 title: firstService?.title || 'Untitled Quote',
                 services: JSON.stringify(quote.services),
-                gallery_photos: JSON.stringify(quote.galleryPhotos || []),
+                gallery_photos: JSON.stringify(quote.footerBlocks || []),
                 base_value: parseFloat(quote.baseValue) || 0,
                 vat_override: quote.vatOverride,
                 estimated_time: quote.estimatedTime,
@@ -329,17 +329,17 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
                     services = [createEmptyService()];
                 }
 
-                let galleryPhotos: GalleryPhoto[] = [];
+                let footerBlocks: PhotoBlock[] = [];
                 try {
                     const rawGallery = typeof data.gallery_photos === 'string'
                         ? JSON.parse(data.gallery_photos)
                         : data.gallery_photos;
-                    if (Array.isArray(rawGallery)) galleryPhotos = rawGallery;
+                    if (Array.isArray(rawGallery)) footerBlocks = rawGallery.map((b: any) => ({ imageSize: 100, alignment: 'center', type: 'photo', ...b })) as PhotoBlock[];
                 } catch { /* ignore */ }
 
                 setQuote({
                     services: services.length > 0 ? services : [createEmptyService()],
-                    galleryPhotos,
+                    footerBlocks,
                     baseValue: data.base_value?.toString() || '',
                     vatOverride: data.vat_override || '',
                     estimatedTime: data.estimated_time || '',
@@ -369,7 +369,7 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
 
             // If we deleted the currently active quote, clear the form
             if (id === currentQuoteId) {
-                setQuote({ ...defaultQuote, services: [createEmptyService()], galleryPhotos: [] });
+                setQuote({ ...defaultQuote, services: [createEmptyService()], footerBlocks: [] });
                 setCurrentQuoteId(null);
             }
 
@@ -398,7 +398,7 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
         setQuote({
             ...defaultQuote,
             services: [createEmptyService()],
-            galleryPhotos: [],
+            footerBlocks: [],
         });
         setCurrentQuoteId(null);
     };
@@ -409,7 +409,7 @@ export function QuoteProvider({ children }: { children: ReactNode }) {
                 quote, currentQuoteId, updateQuote,
                 addService, addPhotoBlock, removeBlock, moveBlock,
                 updateService, updatePhotoBlock,
-                addGalleryPhoto, removeGalleryPhoto, updateGalleryPhoto,
+                addFooterBlock, removeFooterBlock, updateFooterBlock,
                 saveQuote, loadQuote, deleteQuote, renameQuote, newQuote,
                 savedQuotes, loadSavedQuotes,
                 isLoading, isSaving,

@@ -26,6 +26,7 @@ export default function QuoteForm() {
         quote, updateQuote,
         addService, addPhotoBlock, removeBlock, moveBlock,
         updateService, updatePhotoBlock,
+        addFooterBlock, removeFooterBlock, updateFooterBlock,
     } = useQuote();
     const { settings } = useSettings();
     const { t } = useTranslation();
@@ -33,16 +34,23 @@ export default function QuoteForm() {
 
     // Crop modal state
     const [cropSrc, setCropSrc] = useState<string | null>(null);
-    const [cropTarget, setCropTarget] = useState<{ blockId: string } | null>(null);
+    const [cropTarget, setCropTarget] = useState<{ blockId: string; footer?: boolean } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     /** Add processed image to the target block */
     const addImageToTarget = (dataUrl: string) => {
         if (!cropTarget) return;
 
-        const block = quote.services.find(b => b.id === cropTarget.blockId);
-        if (block && block.type === 'photo') {
-            updatePhotoBlock(block.id, { images: [...block.images, dataUrl] });
+        if (cropTarget.footer) {
+            const block = quote.footerBlocks.find(b => b.id === cropTarget.blockId);
+            if (block) {
+                updateFooterBlock(block.id, { images: [...block.images, dataUrl] });
+            }
+        } else {
+            const block = quote.services.find(b => b.id === cropTarget.blockId);
+            if (block && block.type === 'photo') {
+                updatePhotoBlock(block.id, { images: [...block.images, dataUrl] });
+            }
         }
         setCropSrc(null);
         setCropTarget(null);
@@ -53,7 +61,7 @@ export default function QuoteForm() {
         setCropTarget(null);
     };
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, target: { blockId: string }) => {
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, target: { blockId: string; footer?: boolean }) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -520,11 +528,91 @@ export default function QuoteForm() {
                     />
                 </div>
 
-                {/* Add Photo Block after footer */}
-                <button
-                    className={styles.addPhotoBlockBtn}
-                    onClick={addPhotoBlock}
-                >
+                {/* Footer Photo Blocks */}
+                {quote.footerBlocks.map((block, idx) => (
+                    <div key={block.id} className={styles.photoBlock} style={{ marginTop: 'var(--spacing-md)' }}>
+                        <div className={styles.serviceHeader}>
+                            <div className={styles.serviceHeaderLeft}>
+                                {idx > 0 && (
+                                    <button className={styles.moveBtn} onClick={() => {
+                                        const newBlocks = [...quote.footerBlocks];
+                                        [newBlocks[idx - 1], newBlocks[idx]] = [newBlocks[idx], newBlocks[idx - 1]];
+                                        updateQuote({ footerBlocks: newBlocks });
+                                    }}>▲</button>
+                                )}
+                                {idx < quote.footerBlocks.length - 1 && (
+                                    <button className={styles.moveBtn} onClick={() => {
+                                        const newBlocks = [...quote.footerBlocks];
+                                        [newBlocks[idx], newBlocks[idx + 1]] = [newBlocks[idx + 1], newBlocks[idx]];
+                                        updateQuote({ footerBlocks: newBlocks });
+                                    }}>▼</button>
+                                )}
+                                <span className={styles.serviceLabel}>📷 {t('quoteForm.photoBlock')}</span>
+                            </div>
+                            <button
+                                className={styles.removeBtn}
+                                onClick={() => removeFooterBlock(block.id)}
+                                aria-label="Remove photo block"
+                            >✕</button>
+                        </div>
+
+                        {/* Layout */}
+                        <div className={styles.pricingModeRow}>
+                            <label className={styles.metricLabel}>{t('quoteForm.layout')}</label>
+                            <div className={styles.pricingModeOptions}>
+                                <button type="button" className={`${styles.pricingModeBtn} ${block.layout === 'full' ? styles.pricingModeBtnActive : ''}`} onClick={() => updateFooterBlock(block.id, { layout: 'full' })}>{t('quoteForm.layoutFull')}</button>
+                                <button type="button" className={`${styles.pricingModeBtn} ${block.layout === 'side' ? styles.pricingModeBtnActive : ''}`} onClick={() => updateFooterBlock(block.id, { layout: 'side' })}>{t('quoteForm.layout2Grid')}</button>
+                                <button type="button" className={`${styles.pricingModeBtn} ${block.layout === 'grid' ? styles.pricingModeBtnActive : ''}`} onClick={() => updateFooterBlock(block.id, { layout: 'grid' })}>{t('quoteForm.layout3Grid')}</button>
+                            </div>
+                        </div>
+
+                        {/* Size Slider */}
+                        <div className={styles.sizeSliderRow}>
+                            <label className={styles.metricLabel}>{t('quoteForm.imageSize')} {block.imageSize}%</label>
+                            <input type="range" min={10} max={100} step={1} value={block.imageSize} onChange={(e) => updateFooterBlock(block.id, { imageSize: Number(e.target.value) })} className={styles.sizeSlider} />
+                        </div>
+
+                        {/* Alignment */}
+                        <div className={styles.pricingModeRow}>
+                            <label className={styles.metricLabel}>{t('quoteForm.alignment')}</label>
+                            <div className={styles.pricingModeOptions}>
+                                <button type="button" className={`${styles.pricingModeBtn} ${block.alignment === 'left' ? styles.pricingModeBtnActive : ''}`} onClick={() => updateFooterBlock(block.id, { alignment: 'left' })} aria-label="Align left">
+                                    <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor"><rect x="0" y="0" width="18" height="2" rx="1"/><rect x="0" y="4" width="12" height="2" rx="1"/><rect x="0" y="8" width="16" height="2" rx="1"/><rect x="0" y="12" width="10" height="2" rx="1"/></svg>
+                                </button>
+                                <button type="button" className={`${styles.pricingModeBtn} ${block.alignment === 'center' ? styles.pricingModeBtnActive : ''}`} onClick={() => updateFooterBlock(block.id, { alignment: 'center' })} aria-label="Align center">
+                                    <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor"><rect x="0" y="0" width="18" height="2" rx="1"/><rect x="3" y="4" width="12" height="2" rx="1"/><rect x="1" y="8" width="16" height="2" rx="1"/><rect x="4" y="12" width="10" height="2" rx="1"/></svg>
+                                </button>
+                                <button type="button" className={`${styles.pricingModeBtn} ${block.alignment === 'right' ? styles.pricingModeBtnActive : ''}`} onClick={() => updateFooterBlock(block.id, { alignment: 'right' })} aria-label="Align right">
+                                    <svg width="18" height="14" viewBox="0 0 18 14" fill="currentColor"><rect x="0" y="0" width="18" height="2" rx="1"/><rect x="6" y="4" width="12" height="2" rx="1"/><rect x="2" y="8" width="16" height="2" rx="1"/><rect x="8" y="12" width="10" height="2" rx="1"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Photo Thumbnails */}
+                        <div className={styles.photoThumbnails}>
+                            {block.images.map((img, imgIdx) => (
+                                <div key={imgIdx} className={styles.photoThumb}>
+                                    <img src={img} alt={`Photo ${imgIdx + 1}`} />
+                                    <button className={styles.photoRemoveBtn} onClick={() => {
+                                        const newImages = block.images.filter((_, i) => i !== imgIdx);
+                                        updateFooterBlock(block.id, { images: newImages });
+                                    }} aria-label="Remove photo">✕</button>
+                                </div>
+                            ))}
+                            {block.images.length < 3 && (
+                                <button className={styles.photoAddBtn} onClick={() => {
+                                    setCropTarget({ blockId: block.id, footer: true });
+                                    fileInputRef.current?.click();
+                                }}>+ {t('quoteForm.addPhoto')}</button>
+                            )}
+                        </div>
+
+                        {/* Caption */}
+                        <input type="text" placeholder={t('quoteForm.captionPlaceholder')} className={styles.input} value={block.caption} onChange={(e) => updateFooterBlock(block.id, { caption: e.target.value })} />
+                    </div>
+                ))}
+
+                <button className={styles.addPhotoBlockBtn} onClick={addFooterBlock}>
                     📷 {t('quoteForm.addPhotoBlock')}
                 </button>
             </div>

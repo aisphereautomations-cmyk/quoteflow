@@ -124,7 +124,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             className={styles.sectionHeader}
                             onClick={() => setShowConversations(!showConversations)}
                         >
-                            <span>💬 {t('sidebar.conversations')}</span>
+                            <span>{t('sidebar.conversations')}</span>
                             <span className={styles.chevron}>{showConversations ? '▾' : '▸'}</span>
                         </button>
 
@@ -262,7 +262,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             className={styles.sectionHeader}
                             onClick={() => setShowQuotes(!showQuotes)}
                         >
-                            <span>📄 {t('sidebar.quotes')}</span>
+                            <span>{t('sidebar.quotes')}</span>
                             <span className={styles.chevron}>{showQuotes ? '▾' : '▸'}</span>
                         </button>
 
@@ -344,7 +344,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                             className={styles.sectionHeader}
                             onClick={() => setShowPreferences(!showPreferences)}
                         >
-                            <span>🎛️ {t('sidebar.aiPreferences')}</span>
+                            <span>{t('sidebar.aiPreferences')}</span>
                             <span className={styles.chevron}>{showPreferences ? '▾' : '▸'}</span>
                         </button>
 
@@ -416,14 +416,14 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                     {/* ── ⚙️ Settings ── */}
                     <button className={styles.settingsBtn} onClick={handleOpenSettings}>
-                        ⚙️ {t('sidebar.settings')}
+                        {t('sidebar.settings')}
                     </button>
                 </div>
 
                 {/* Logout at bottom */}
                 <div className={styles.sidebarFooter}>
                     <button className={styles.logoutBtn} onClick={handleLogout}>
-                        🚪 {t('sidebar.logout')}
+                        {t('sidebar.logout')}
                     </button>
                 </div>
             </div>

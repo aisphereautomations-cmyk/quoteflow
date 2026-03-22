@@ -252,6 +252,13 @@ export default function PDFPreview() {
                             )}
                         </div>
                     </div>
+
+                    {/* Footer Photo Blocks (after footer — at the very end) */}
+                    {quote.footerBlocks.length > 0 && (
+                        <div className={styles.servicesArea}>
+                            {quote.footerBlocks.map((block) => renderPhotoBlock(block))}
+                        </div>
+                    )}
                 </div>
             </div>
 
