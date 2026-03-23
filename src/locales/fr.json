@@ -48,7 +48,8 @@
     },
     "pdfPreview": {
         "sectionTitle": "Aperçu PDF",
-        "downloadPdf": "Télécharger PDF"
+        "downloadPdf": "Télécharger PDF",
+        "fileName": "Nom du Fichier"
     },
     "actionButtons": {
         "predefinedMessage": "Message prédéfini",
@@ -90,7 +91,18 @@
         "zoom": "Zoom",
         "confirm": "Confirmer",
         "uploadValidation": "Veuillez télécharger une image PNG, JPG, SVG ou WebP.",
-        "language": "Langue :"
+        "language": "Langue :",
+        "headerExtraLines": "Lignes Supplémentaires en En-tête",
+        "headerExtraLinesHint": "Ajoutez des lignes au en-tête du PDF (ex : SIRET, adresse, n° licence).",
+        "extraLinePlaceholder": "ex : SIRET : 123 456 789 00012",
+        "addLine": "Ajouter une ligne",
+        "fileNamePattern": "Modèle de Nom de Fichier",
+        "currentCounter": "Compteur actuel",
+        "resetCounter": "Réinitialiser",
+        "fileNamePreview": "Aperçu",
+        "customPricing": "Liste de Prix Personnalisée",
+        "customPricingHint": "Définissez vos prix pour que l'IA les utilise lors du devis.",
+        "customPricingPlaceholder": "ex :\nPeinture intérieure : 8€/m²\nPeinture extérieure : 12€/m²\nMain d'œuvre (générale) : 25€/heure"
     },
     "aiChat": {
         "chatHeader": "Discutez avec l'IA pour vos Devis",
@@ -103,7 +115,9 @@
         "chatFirstHint": "Discutez d'abord avec l'IA pour générer votre devis",
         "inputPlaceholder": "Discutons",
         "speechNotSupported": "La reconnaissance vocale n'est pas supportée dans ce navigateur. Essayez Chrome ou Safari.",
-        "micDenied": "L'accès au microphone a été refusé. Autorisez l'accès au microphone dans les paramètres du navigateur."
+        "micDenied": "L'accès au microphone a été refusé. Autorisez l'accès au microphone dans les paramètres du navigateur.",
+        "attachFile": "Joindre photo ou document",
+        "aiDisclaimer": "Vérifiez toujours les valeurs. L'IA peut faire des erreurs."
     },
     "sidebar": {
         "menu": "Menu",
@@ -165,7 +179,8 @@
         "passwordsDoNotMatch": "Les mots de passe ne correspondent pas",
         "passwordUpdated": "Mot de passe mis à jour ! Redirection...",
         "updatePassword": "Mettre à Jour le Mot de Passe",
-        "footer": "Propulsé par AI Sphere Automations"
+        "footer": "Propulsé par AI Sphere Automations",
+        "privacyPolicy": "Politique de Confidentialité"
     },
     "pricing": {
         "chooseYourPlan": "Choisissez votre Plan",
@@ -199,5 +214,15 @@
         "subscriptionActive": "Votre abonnement est actif. Commencez à créer des devis professionnels.",
         "startQuoting": "Commencer →",
         "autoRedirect": "Redirection automatique dans 5 secondes..."
+    },
+    "notepad": {
+        "title": "Bloc-notes",
+        "newNote": "Nouveau",
+        "placeholder": "Commencez à écrire votre note...",
+        "sendToChat": "Envoyer au Chat",
+        "back": "Retour",
+        "noNotes": "Aucune note. Appuyez sur + pour en créer une.",
+        "untitled": "Note Sans Titre",
+        "noteLimitReached": "Limite de notes atteinte. Passez à un plan supérieur."
     }
 }

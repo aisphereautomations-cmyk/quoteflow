@@ -464,6 +464,18 @@
     opacity: 0.9;
 }
 
+.hintGroup {
+    text-align: center;
+}
+
+.aiDisclaimer {
+    margin: 0.2rem 0 0 0;
+    font-size: 0.68rem;
+    color: #b0b0b0;
+    text-align: center;
+    opacity: 0.8;
+}
+
 .expandBtn {
     width: 44px;
     height: 44px;

@@ -281,6 +281,7 @@ export default function LoginPage() {
 
                 <footer className={styles.footer}>
                     {t('login.footer')}
+                    <a href="/privacy" className={styles.privacyLink}>{t('login.privacyPolicy')}</a>
                 </footer>
             </div>
         </div>

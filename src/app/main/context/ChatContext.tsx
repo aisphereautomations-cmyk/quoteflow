@@ -311,10 +311,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
             );
         }
 
+        // Strip internal notepad prefix from displayed message
+        const NOTEPAD_PREFIX = /^\[NOTEPAD[^\]]*\]\n\n/;
+        const displayText = text.trim().replace(NOTEPAD_PREFIX, '');
+
         const userMsg: ChatMessage = {
             id: `user-${Date.now()}`,
             role: 'user',
-            content: text.trim() || (chatAttachments.length > 0 ? `[${chatAttachments.map(a => a.name).join(', ')}]` : ''),
+            content: displayText || (chatAttachments.length > 0 ? `[${chatAttachments.map(a => a.name).join(', ')}]` : ''),
             timestamp: Date.now(),
             attachments: chatAttachments.length > 0 ? chatAttachments : undefined,
         };
@@ -325,9 +329,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
         setError(null);
 
         try {
+            // For API, use original text (with notepad prefix intact) for the last message
             const apiMessages = newMessages
                 .filter(m => !m.id.startsWith('welcome'))
-                .map(({ role, content }) => ({ role, content }));
+                .map(({ role, content }, idx, arr) => {
+                    // Replace the last user message content with the full original text
+                    if (idx === arr.length - 1 && role === 'user') {
+                        return { role, content: text.trim() };
+                    }
+                    return { role, content };
+                });
 
             const res = await fetch('/api/chat', {
                 method: 'POST',
@@ -340,6 +351,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                         sliderDetail: sliders.detail,
                         sliderMarket: sliders.market,
                         sliderTone: sliders.tone,
+                        customPricing: settings.customPricing || undefined,
                     },
                     attachments: chatAttachments.length > 0 ? chatAttachments : undefined,
                 }),

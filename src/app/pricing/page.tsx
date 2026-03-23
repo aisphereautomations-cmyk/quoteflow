@@ -195,6 +195,18 @@ export default function PricingPage() {
                                 </li>
                                 <li>
                                     <span className={styles.featureCheck}>✓</span>
+                                    {formatFeatureValue(plan.features.mediaLimits.maxNotes)} notes (notepad)
+                                </li>
+                                <li>
+                                    <span className={styles.featureCheck}>✓</span>
+                                    {plan.features.mediaLimits.voiceMinutesPerMonth} min voice notes/month
+                                </li>
+                                <li>
+                                    <span className={styles.featureCheck}>✓</span>
+                                    Create quotes from your notes
+                                </li>
+                                <li>
+                                    <span className={styles.featureCheck}>✓</span>
                                     {plan.features.supportLabel}
                                 </li>
                             </ul>

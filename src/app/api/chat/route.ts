@@ -11,6 +11,7 @@ function buildSystemPrompt(settings?: {
     sliderDetail?: number;
     sliderMarket?: number;
     sliderTone?: number;
+    customPricing?: string;
 }) {
     const detailLevel = (settings?.sliderDetail ?? 50) > 66 ? 'detailed' : (settings?.sliderDetail ?? 50) < 33 ? 'minimal' : 'moderate';
     const marketLevel = (settings?.sliderMarket ?? 50) > 66 ? 'premium/high-end' : (settings?.sliderMarket ?? 50) < 33 ? 'budget/economical' : 'mid-range';
@@ -180,11 +181,21 @@ IMPORTANT:
 - NEVER ask more than ONE question per response, and only if truly essential
 - When suggesting prices, briefly explain your reasoning in the chat message
 
+NOTEPAD MESSAGES:
+When a user message starts with [NOTEPAD → ...], it means the user sent notes from their notepad.
+You MUST call fill_quote IMMEDIATELY with a complete quote based on those notes.
+Do NOT just describe prices in text — you MUST use the fill_quote tool so the user can apply the quote.
+
 
 USER CONTEXT:
 - Currency: ${settings?.currency || '€'}
 - Tax country: ${settings?.taxCountry || 'uk'}
-Use this context to give location-appropriate pricing suggestions.`;
+USE this context to give location-appropriate pricing suggestions.
+
+${settings?.customPricing ? `USER'S CUSTOM PRICE LIST:
+${settings.customPricing}
+
+IMPORTANT: ALWAYS use these prices when the service matches. These are the user's actual business prices. Override your general market knowledge with these specific prices.` : ''}`;
 }
 
 /* ── Fill Quote Tool Definition ── */
@@ -279,12 +290,12 @@ const PLAN_CONFIGS: Record<string, PlanConfig> = {
         fallbackModel: 'gpt-4o-mini',
     },
     pro: {
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         maxTokens: 4096,
         monthlyBudgetTokens: Infinity,
     },
     enterprise: {
-        model: 'gpt-4o',
+        model: 'gpt-4o-mini',
         maxTokens: 8192,
         monthlyBudgetTokens: Infinity,
     },
@@ -322,6 +333,7 @@ export async function POST(request: NextRequest) {
                 sliderDetail?: number;
                 sliderMarket?: number;
                 sliderTone?: number;
+                customPricing?: string;
             };
             attachments?: { dataUrl: string; type: 'photo' | 'doc'; name?: string }[];
         };
@@ -474,20 +486,32 @@ export async function POST(request: NextRequest) {
             return msg;
         });
 
-        // Adjust maxTokens based on detail slider (override plan defaults if slider demands more)
+        // Adjust maxTokens and model based on detail slider
         const detailValue = settings?.sliderDetail ?? 50;
         let effectiveMaxTokens = planConfig.maxTokens;
+        let effectiveModel = planConfig.model;
+
         if (detailValue > 66) {
             effectiveMaxTokens = Math.max(effectiveMaxTokens, 8192);
+            // Pro/Enterprise: upgrade to GPT-4o for detailed mode
+            if (userPlan === 'pro' || userPlan === 'enterprise') {
+                effectiveModel = 'gpt-4o';
+            }
         } else if (detailValue < 33) {
             effectiveMaxTokens = Math.min(effectiveMaxTokens, 1500);
         }
 
+        // Limit conversation history to last 8 messages to reduce token costs
+        const MAX_HISTORY = 8;
+        const trimmedMessages = formattedMessages.length > MAX_HISTORY
+            ? formattedMessages.slice(-MAX_HISTORY)
+            : formattedMessages;
+
         const completion = await openai.chat.completions.create({
-            model: planConfig.model,
+            model: effectiveModel,
             messages: [
                 { role: 'system', content: systemPrompt },
-                ...formattedMessages,
+                ...trimmedMessages,
             ],
             tools: [FILL_QUOTE_TOOL],
             tool_choice: 'auto',
@@ -516,47 +540,16 @@ export async function POST(request: NextRequest) {
                     console.error('Failed to parse fill_quote arguments');
                 }
 
-                // If the model returned no text alongside the tool call, 
-                // send the tool result back to get a proper text explanation
+                // If the model returned no text alongside the tool call,
+                // build a local message instead of making a costly 2nd API call
                 if (!responseText && quoteData) {
-                    try {
-                        const followUp = await openai.chat.completions.create({
-                            model: planConfig.model,
-                            messages: [
-                                { role: 'system', content: systemPrompt },
-                                ...messages,
-                                // The assistant's response with the tool call
-                                {
-                                    role: 'assistant',
-                                    content: null,
-                                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                                    tool_calls: assistantMessage.tool_calls.map((tc: any) => ({
-                                        id: tc.id,
-                                        type: 'function' as const,
-                                        function: { name: tc.function.name, arguments: tc.function.arguments },
-                                    })),
-                                },
-                                // The tool result confirming success
-                                {
-                                    role: 'tool',
-                                    tool_call_id: fillCall.id,
-                                    content: JSON.stringify({
-                                        success: true,
-                                        message: 'Quote data accepted and saved. Now write your FULL chat response to the user. This MUST include: detailed cost breakdown with calculations, material specifications, what you assumed, and offer to customize. Write a LONG, comprehensive response. Use plain text only, no markdown.',
-                                    }),
-                                },
-                            ],
-                            max_tokens: effectiveMaxTokens,
-                            temperature: 0.7,
-                        });
-
-                        responseText = followUp.choices[0]?.message?.content || '';
-                        totalTokensUsed += followUp.usage?.total_tokens || 0;
-                    } catch (err) {
-                        console.error('Follow-up API call failed:', err);
-                        // Fallback: construct a basic message from the quote data
-                        const serviceCount = quoteData.services?.length || 0;
-                        responseText = `Preparei um orçamento com ${serviceCount} itens. O botão "Preencher Orçamento" já está disponível para aplicar os dados.`;
+                    const serviceCount = quoteData.services?.length || 0;
+                    const baseVal = quoteData.baseValue ? parseFloat(quoteData.baseValue) : 0;
+                    const currency = settings?.currency || '€';
+                    if (baseVal > 0) {
+                        responseText = `Preparei um orçamento com ${serviceCount} ${serviceCount === 1 ? 'item' : 'itens'} — total de ${currency} ${baseVal.toFixed(2)}. Clica em "Preencher Orçamento" para aplicar. Se quiseres ajustar algo, é só dizer!`;
+                    } else {
+                        responseText = `Preparei um orçamento com ${serviceCount} ${serviceCount === 1 ? 'item' : 'itens'}. Clica em "Preencher Orçamento" para aplicar os dados.`;
                     }
                 }
             }

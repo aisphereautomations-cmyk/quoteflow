@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase-server';
 import OpenAI from 'openai';
+import { getPlan, type PlanId } from '@/lib/plans';
 
 export async function POST(request: NextRequest) {
     try {
@@ -17,6 +18,46 @@ export async function POST(request: NextRequest) {
                 error: 'AI not configured',
                 message: 'The AI assistant is not yet configured. Please add your OpenAI API key.',
             }, { status: 503 });
+        }
+
+        // ── Check voice minute quota ──
+        const { data: sub } = await supabase
+            .from('subscriptions')
+            .select('plan')
+            .eq('user_id', user.id)
+            .single();
+
+        const planId = (sub?.plan || 'starter') as PlanId;
+        const plan = getPlan(planId);
+        const maxMinutes = plan.features.mediaLimits.voiceMinutesPerMonth;
+
+        // Get or initialize usage tracking
+        const { data: settings } = await supabase
+            .from('user_settings')
+            .select('voice_minutes_used, voice_minutes_reset')
+            .eq('user_id', user.id)
+            .single();
+
+        let minutesUsed = settings?.voice_minutes_used || 0;
+        const lastReset = settings?.voice_minutes_reset
+            ? new Date(settings.voice_minutes_reset)
+            : null;
+
+        // Monthly reset: if last reset was in a different month, reset counter
+        const now = new Date();
+        if (!lastReset || lastReset.getMonth() !== now.getMonth() || lastReset.getFullYear() !== now.getFullYear()) {
+            minutesUsed = 0;
+            await supabase
+                .from('user_settings')
+                .update({ voice_minutes_used: 0, voice_minutes_reset: now.toISOString() })
+                .eq('user_id', user.id);
+        }
+
+        if (minutesUsed >= maxMinutes) {
+            return NextResponse.json({
+                error: 'Voice quota exceeded',
+                message: `You have used all ${maxMinutes} minutes of voice transcription this month. Upgrade your plan for more.`,
+            }, { status: 429 });
         }
 
         const formData = await request.formData();
@@ -39,6 +80,14 @@ export async function POST(request: NextRequest) {
             file,
             ...(language ? { language } : {}),
         });
+
+        // ── Track usage: estimate duration from file size (webm ~6KB/s at opus) ──
+        const estimatedSeconds = Math.max(1, Math.ceil(audioFile.size / 6000));
+        const estimatedMinutes = Math.ceil(estimatedSeconds / 60);
+        await supabase
+            .from('user_settings')
+            .update({ voice_minutes_used: minutesUsed + estimatedMinutes })
+            .eq('user_id', user.id);
 
         return NextResponse.json({ text: transcription.text });
     } catch (err) {

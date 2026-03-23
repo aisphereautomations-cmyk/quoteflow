@@ -52,6 +52,16 @@ function getUnitLabel(mode: string) {
     return '';
 }
 
+/** Generate a filename from a pattern + counter */
+export function generateFileName(pattern: string, counter: number): string {
+    const padded = String(counter).padStart(3, '0');
+    if (pattern.includes('{n}')) {
+        return pattern.replace('{n}', padded);
+    }
+    // If no {n} placeholder, append _counter to the pattern
+    return `${pattern}_${padded}`;
+}
+
 /*
  * ═══════════════════════════════════════════════════════
  *  generateQuotePDF
@@ -99,7 +109,8 @@ export async function generateQuotePDF(
     const hdrTextH = (settings.companyName ? 36 : 0) + // 22px font + 14px margin-bottom
         (settings.phone ? 16 : 0) +
         (settings.email ? 16 : 0) +
-        (settings.website ? 16 : 0);
+        (settings.website ? 16 : 0) +
+        ((settings.headerExtraLines?.filter(l => l.trim()).length || 0) * 16);
     h += Math.max(hdrTextH, logoH) + 28; // 28 = bottom padding of header
 
     // Description bar
@@ -172,6 +183,13 @@ export async function generateQuotePDF(
     if (settings.phone) { pdf.text(settings.phone, PAD, ty + 14); ty += 17; }
     if (settings.email) { pdf.text(settings.email, PAD, ty + 14); ty += 17; }
     if (settings.website) { pdf.text(settings.website, PAD, ty + 14); ty += 17; }
+    if (settings.headerExtraLines) {
+        for (const line of settings.headerExtraLines) {
+            if (line.trim()) {
+                pdf.text(line, PAD, ty + 14); ty += 17;
+            }
+        }
+    }
 
     y = headerTop + Math.max(ty - headerTop, logoH) + 28;
 

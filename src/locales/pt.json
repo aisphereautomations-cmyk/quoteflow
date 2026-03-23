@@ -48,7 +48,8 @@
     },
     "pdfPreview": {
         "sectionTitle": "Pré-visualização PDF",
-        "downloadPdf": "Descarregar PDF"
+        "downloadPdf": "Descarregar PDF",
+        "fileName": "Nome do Ficheiro"
     },
     "actionButtons": {
         "predefinedMessage": "Mensagem predefinida",
@@ -90,7 +91,18 @@
         "zoom": "Zoom",
         "confirm": "Confirmar",
         "uploadValidation": "Por favor carregue uma imagem PNG, JPG, SVG ou WebP.",
-        "language": "Idioma:"
+        "language": "Idioma:",
+        "headerExtraLines": "Linhas Extra no Cabeçalho",
+        "headerExtraLinesHint": "Adicione linhas extra ao cabeçalho do PDF (ex: NIF, morada, nº de licença).",
+        "extraLinePlaceholder": "ex: NIF: 123456789",
+        "addLine": "Adicionar linha",
+        "fileNamePattern": "Padrão do Nome do Ficheiro",
+        "currentCounter": "Contador atual",
+        "resetCounter": "Repor",
+        "fileNamePreview": "Pré-visualização",
+        "customPricing": "Tabela de Preços Personalizada",
+        "customPricingHint": "Defina os seus preços para que a IA os utilize ao orçamentar.",
+        "customPricingPlaceholder": "ex:\nPintura interior: €8/m²\nPintura exterior: €12/m²\nMão de obra (geral): €25/hora"
     },
     "aiChat": {
         "chatHeader": "Converse com IA para fazer Orçamentos",
@@ -104,7 +116,8 @@
         "inputPlaceholder": "Vamos Conversar",
         "speechNotSupported": "O reconhecimento de voz não é suportado neste navegador. Tente o Chrome ou Safari.",
         "micDenied": "O acesso ao microfone foi negado. Permita o acesso ao microfone nas definições do navegador.",
-        "attachFile": "Anexar foto ou documento"
+        "attachFile": "Anexar foto ou documento",
+        "aiDisclaimer": "Verifique sempre os orçamentos. A IA pode cometer erros."
     },
     "sidebar": {
         "menu": "Menu",
@@ -167,7 +180,8 @@
         "passwordsDoNotMatch": "As palavras-passe não coincidem",
         "passwordUpdated": "Palavra-passe atualizada! A redirecionar...",
         "updatePassword": "Atualizar Palavra-passe",
-        "footer": "Desenvolvido por AI Sphere Automations"
+        "footer": "Desenvolvido por AI Sphere Automations",
+        "privacyPolicy": "Política de Privacidade"
     },
     "pricing": {
         "chooseYourPlan": "Escolha o seu Plano",
@@ -201,5 +215,15 @@
         "subscriptionActive": "A sua subscrição está agora ativa. Comece a criar orçamentos profissionais.",
         "startQuoting": "Começar a Orçamentar →",
         "autoRedirect": "Redirecionamento automático em 5 segundos..."
+    },
+    "notepad": {
+        "title": "Bloco de Notas",
+        "newNote": "Nova",
+        "placeholder": "Comece a escrever a sua nota...",
+        "sendToChat": "Enviar para o Chat",
+        "back": "Voltar",
+        "noNotes": "Sem notas ainda. Toque + para criar uma.",
+        "untitled": "Nota Sem Título",
+        "noteLimitReached": "Limite de notas atingido. Faça upgrade para criar mais."
     }
 }

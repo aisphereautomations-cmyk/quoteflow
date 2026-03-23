@@ -111,6 +111,10 @@ export default function SettingsDrawer() {
     const [localQuoteDescription, setLocalQuoteDescription] = useState(settings.quoteDescription);
     const [localTaxCountry, setLocalTaxCountry] = useState(settings.taxCountry);
     const [localLanguage, setLocalLanguage] = useState(settings.language);
+    const [localHeaderExtraLines, setLocalHeaderExtraLines] = useState<string[]>(settings.headerExtraLines);
+    const [localFileNamePattern, setLocalFileNamePattern] = useState(settings.fileNamePattern);
+    const [localQuoteCounter, setLocalQuoteCounter] = useState(settings.quoteCounter);
+    const [localCustomPricing, setLocalCustomPricing] = useState(settings.customPricing);
 
     const handleOpen = () => {
         // Sync local state from context when opening
@@ -127,6 +131,10 @@ export default function SettingsDrawer() {
         setLocalQuoteDescription(settings.quoteDescription);
         setLocalTaxCountry(settings.taxCountry);
         setLocalLanguage(settings.language);
+        setLocalHeaderExtraLines([...(settings.headerExtraLines || [])]);
+        setLocalFileNamePattern(settings.fileNamePattern);
+        setLocalQuoteCounter(settings.quoteCounter);
+        setLocalCustomPricing(settings.customPricing);
         setIsOpen(true);
     };
 
@@ -145,6 +153,10 @@ export default function SettingsDrawer() {
             quoteDescription: localQuoteDescription,
             taxCountry: localTaxCountry,
             language: localLanguage,
+            headerExtraLines: localHeaderExtraLines.filter(l => l.trim() !== ''),
+            fileNamePattern: localFileNamePattern,
+            quoteCounter: localQuoteCounter,
+            customPricing: localCustomPricing,
         };
 
         // Update context state for immediate UI reflection
@@ -410,6 +422,101 @@ export default function SettingsDrawer() {
                                     {t('settings.none')}
                                 </label>
                             </div>
+                        </div>
+                    </div>
+
+                    {/* ── Extra Header Lines ── */}
+                    <div className={styles.section}>
+                        <h3 className="shared-subsection-title">{t('settings.headerExtraLines')}</h3>
+                        <p className={styles.sectionHint}>{t('settings.headerExtraLinesHint')}</p>
+                        <div className={styles.extraLinesWrapper}>
+                            {localHeaderExtraLines.map((line, i) => (
+                                <div key={i} className={styles.extraLineRow}>
+                                    <input
+                                        type="text"
+                                        value={line}
+                                        onChange={(e) => {
+                                            const updated = [...localHeaderExtraLines];
+                                            updated[i] = e.target.value;
+                                            setLocalHeaderExtraLines(updated);
+                                        }}
+                                        className={ClientInfoStyles.inputField}
+                                        placeholder={t('settings.extraLinePlaceholder')}
+                                    />
+                                    <button
+                                        type="button"
+                                        className={styles.removeLineBtn}
+                                        onClick={() => setLocalHeaderExtraLines(localHeaderExtraLines.filter((_, j) => j !== i))}
+                                        aria-label="Remove line"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    </button>
+                                </div>
+                            ))}
+                            {localHeaderExtraLines.length < 5 && (
+                                <button
+                                    type="button"
+                                    className={styles.addLineBtn}
+                                    onClick={() => setLocalHeaderExtraLines([...localHeaderExtraLines, ''])}
+                                >
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                    {t('settings.addLine')}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* ── File Name Pattern + Counter ── */}
+                    <div className={styles.section}>
+                        <h3 className="shared-subsection-title">{t('settings.fileNamePattern')}</h3>
+                        <div className={styles.fileNameRow}>
+                            <input
+                                type="text"
+                                value={localFileNamePattern}
+                                onChange={(e) => setLocalFileNamePattern(e.target.value)}
+                                className={ClientInfoStyles.inputField}
+                                placeholder="Quote_{n}"
+                            />
+                        </div>
+                        <div className={styles.counterRow}>
+                            <span className={styles.counterLabel}>{t('settings.currentCounter')}:</span>
+                            <input
+                                type="number"
+                                min={1}
+                                value={localQuoteCounter}
+                                onChange={(e) => setLocalQuoteCounter(Math.max(1, parseInt(e.target.value) || 1))}
+                                className={styles.counterInput}
+                            />
+                            <button
+                                type="button"
+                                className={styles.resetCounterBtn}
+                                onClick={() => setLocalQuoteCounter(1)}
+                            >
+                                {t('settings.resetCounter')}
+                            </button>
+                        </div>
+                        <p className={styles.sectionHint}>
+                            {t('settings.fileNamePreview')}: <strong>{
+                                localFileNamePattern.includes('{n}')
+                                    ? localFileNamePattern.replace('{n}', String(localQuoteCounter).padStart(3, '0'))
+                                    : `${localFileNamePattern}_${String(localQuoteCounter).padStart(3, '0')}`
+                            }.pdf</strong>
+                        </p>
+                    </div>
+
+                    {/* ── Custom Pricing ── */}
+                    <div className={styles.section}>
+                        <h3 className="shared-subsection-title">{t('settings.customPricing')}</h3>
+                        <p className={styles.sectionHint}>{t('settings.customPricingHint')}</p>
+                        <div className={styles.messageGroup}>
+                            <textarea
+                                id="settings-pricing"
+                                className="shared-textarea"
+                                placeholder={t('settings.customPricingPlaceholder')}
+                                value={localCustomPricing}
+                                onChange={(e) => setLocalCustomPricing(e.target.value)}
+                                rows={5}
+                            />
                         </div>
                     </div>
 

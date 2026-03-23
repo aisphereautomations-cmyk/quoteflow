@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSettings } from '../context/SettingsContext';
 import { useTranslation } from '../context/LanguageContext';
 import { usePDF } from '../context/PDFContext';
-import { downloadPDF } from '../utils/pdfGenerator';
+import { downloadPDF, generateFileName } from '../utils/pdfGenerator';
 import styles from './ActionButtons.module.css';
 
 export default function ActionButtons() {
@@ -24,7 +24,8 @@ export default function ActionButtons() {
         fallbackAction: () => void,
     ) {
         try {
-            const file = new File([blob], 'quote.pdf', { type: 'application/pdf' });
+            const pdfName = `${generateFileName(settings.fileNamePattern || 'Quote_{n}', settings.quoteCounter || 1)}.pdf`;
+            const file = new File([blob], pdfName, { type: 'application/pdf' });
 
             // Check if Web Share with files is supported
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -42,7 +43,7 @@ export default function ActionButtons() {
         }
 
         // Fallback: download PDF + open the appropriate link
-        downloadPDF(blob, 'quote.pdf');
+        downloadPDF(blob, `${generateFileName(settings.fileNamePattern || 'Quote_{n}', settings.quoteCounter || 1)}.pdf`);
         fallbackAction();
     }
 

@@ -48,7 +48,8 @@
     },
     "pdfPreview": {
         "sectionTitle": "Anteprima PDF",
-        "downloadPdf": "Scarica PDF"
+        "downloadPdf": "Scarica PDF",
+        "fileName": "Nome del File"
     },
     "actionButtons": {
         "predefinedMessage": "Messaggio predefinito",
@@ -90,7 +91,18 @@
         "zoom": "Zoom",
         "confirm": "Conferma",
         "uploadValidation": "Carica un'immagine PNG, JPG, SVG o WebP.",
-        "language": "Lingua:"
+        "language": "Lingua:",
+        "headerExtraLines": "Righe Extra nell'Intestazione",
+        "headerExtraLinesHint": "Aggiungi righe extra all'intestazione del PDF (es: P.IVA, indirizzo, n. licenza).",
+        "extraLinePlaceholder": "es: P.IVA: IT12345678901",
+        "addLine": "Aggiungi riga",
+        "fileNamePattern": "Modello Nome File",
+        "currentCounter": "Contatore attuale",
+        "resetCounter": "Ripristina",
+        "fileNamePreview": "Anteprima",
+        "customPricing": "Listino Prezzi Personalizzato",
+        "customPricingHint": "Definisci i tuoi prezzi affinché l'IA li utilizzi nei preventivi.",
+        "customPricingPlaceholder": "es:\nPittura interna: €8/m²\nPittura esterna: €12/m²\nManodopera (generale): €25/ora"
     },
     "aiChat": {
         "chatHeader": "Chatta con l'IA per i Preventivi",
@@ -103,7 +115,9 @@
         "chatFirstHint": "Parla prima con l'IA per generare il tuo preventivo",
         "inputPlaceholder": "Parliamo",
         "speechNotSupported": "Il riconoscimento vocale non è supportato in questo browser. Prova Chrome o Safari.",
-        "micDenied": "L'accesso al microfono è stato negato. Consenti l'accesso nelle impostazioni del browser."
+        "micDenied": "L'accesso al microfono è stato negato. Consenti l'accesso nelle impostazioni del browser.",
+        "attachFile": "Allega foto o documento",
+        "aiDisclaimer": "Controlla sempre i valori. L'IA può commettere errori."
     },
     "sidebar": {
         "menu": "Menu",
@@ -165,7 +179,8 @@
         "passwordsDoNotMatch": "Le password non corrispondono",
         "passwordUpdated": "Password aggiornata! Reindirizzamento...",
         "updatePassword": "Aggiorna Password",
-        "footer": "Realizzato da AI Sphere Automations"
+        "footer": "Realizzato da AI Sphere Automations",
+        "privacyPolicy": "Informativa sulla Privacy"
     },
     "pricing": {
         "chooseYourPlan": "Scegli il tuo Piano",
@@ -199,5 +214,15 @@
         "subscriptionActive": "Il tuo abbonamento è attivo. Inizia subito a creare preventivi professionali.",
         "startQuoting": "Inizia a Preventivare →",
         "autoRedirect": "Reindirizzamento automatico in 5 secondi..."
+    },
+    "notepad": {
+        "title": "Blocco Note",
+        "newNote": "Nuova",
+        "placeholder": "Inizia a scrivere la tua nota...",
+        "sendToChat": "Invia alla Chat",
+        "back": "Indietro",
+        "noNotes": "Nessuna nota. Tocca + per crearne una.",
+        "untitled": "Nota Senza Titolo",
+        "noteLimitReached": "Limite note raggiunto. Aggiorna il tuo piano per di più."
     }
 }

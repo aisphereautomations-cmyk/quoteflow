@@ -18,6 +18,10 @@ export interface SettingsData {
     quoteDescription: string;
     taxCountry: string;
     language: string;
+    headerExtraLines: string[];
+    fileNamePattern: string;
+    quoteCounter: number;
+    customPricing: string;
 }
 
 interface SettingsContextType {
@@ -42,6 +46,10 @@ const defaultSettings: SettingsData = {
     quoteDescription: 'Quote Description',
     taxCountry: 'uk',
     language: 'en',
+    headerExtraLines: [],
+    fileNamePattern: 'Quote_{n}',
+    quoteCounter: 1,
+    customPricing: '',
 };
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
@@ -77,6 +85,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
                 if (data) {
                     const lang = data.language || 'en';
+                    // Parse headerExtraLines from JSON if stored as string
+                    let extraLines: string[] = [];
+                    try {
+                        const raw = data.header_extra_lines;
+                        if (Array.isArray(raw)) extraLines = raw;
+                        else if (typeof raw === 'string' && raw) extraLines = JSON.parse(raw);
+                    } catch { /* ignore */ }
                     setSettings({
                         companyName: data.company_name || '',
                         email: data.email || '',
@@ -91,6 +106,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                         quoteDescription: data.quote_description || 'Quote Description',
                         taxCountry: data.tax_country || 'uk',
                         language: lang,
+                        headerExtraLines: extraLines,
+                        fileNamePattern: data.file_name_pattern || 'Quote_{n}',
+                        quoteCounter: data.quote_counter ?? 1,
+                        customPricing: data.custom_pricing || '',
                     });
                     try { localStorage.setItem('quoteflow_language', lang); } catch { /* ignore */ }
                 }
@@ -170,6 +189,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
                     quote_description: data.quoteDescription,
                     tax_country: data.taxCountry,
                     language: data.language,
+                    header_extra_lines: JSON.stringify(data.headerExtraLines || []),
+                    file_name_pattern: data.fileNamePattern || 'Quote_{n}',
+                    quote_counter: data.quoteCounter ?? 1,
+                    custom_pricing: data.customPricing || '',
                     updated_at: new Date().toISOString(),
                 }, {
                     onConflict: 'user_id',

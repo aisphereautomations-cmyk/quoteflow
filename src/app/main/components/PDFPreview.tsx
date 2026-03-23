@@ -6,6 +6,7 @@ import { useSettings } from '../context/SettingsContext';
 import { usePDF } from '../context/PDFContext';
 import { useTranslation } from '../context/LanguageContext';
 import { downloadPDF } from '../utils/pdfGenerator';
+import { generateFileName } from '../utils/pdfGenerator';
 import { getTaxLabels } from '../utils/taxLabels';
 import styles from './PDFPreview.module.css';
 
@@ -20,6 +21,11 @@ export default function PDFPreview() {
     const localPageRef = useRef<HTMLDivElement>(null);
     const [scale, setScale] = useState(1);
     const [scaledH, setScaledH] = useState<number | undefined>(undefined);
+
+    // Per-quote editable filename — initialized from Settings default
+    const defaultFileName = generateFileName(settings.fileNamePattern || 'Quote_{n}', settings.quoteCounter || 1);
+    const [customFileName, setCustomFileName] = useState(defaultFileName);
+    useEffect(() => { setCustomFileName(defaultFileName); }, [defaultFileName]);
 
     // Register the local page ref into the shared PDF context
     useEffect(() => {
@@ -52,7 +58,8 @@ export default function PDFPreview() {
 
     const handleDownload = async () => {
         const blob = await capturePDF();
-        if (blob) downloadPDF(blob, 'quote.pdf');
+        const fileName = customFileName || defaultFileName;
+        if (blob) downloadPDF(blob, `${fileName}.pdf`);
     };
 
     // Only show service blocks that have some content filled in
@@ -184,6 +191,13 @@ export default function PDFPreview() {
                                     {settings.website}
                                 </p>
                             )}
+                            {settings.headerExtraLines?.map((line, i) => (
+                                line.trim() && (
+                                    <p key={i} className={styles.companyDetail}>
+                                        {line}
+                                    </p>
+                                )
+                            ))}
                         </div>
                         {settings.logoUrl && (
                             <div className={styles.logoArea}>
@@ -263,6 +277,20 @@ export default function PDFPreview() {
             </div>
 
             <button className={styles.downloadBtn} onClick={handleDownload}>{t('pdfPreview.downloadPdf')}</button>
+
+            <div className={styles.fileNameGroup}>
+                <label className={styles.fileNameLabel}>{t('pdfPreview.fileName')}</label>
+                <input
+                    type="text"
+                    className={styles.fileNameInput}
+                    value={customFileName}
+                    onChange={(e) => setCustomFileName(e.target.value)}
+                    placeholder={defaultFileName}
+                />
+                <p className={styles.fileNameHint}>
+                    {t('actionButtons.defaultSetInSettings')}
+                </p>
+            </div>
         </div>
     );
 }

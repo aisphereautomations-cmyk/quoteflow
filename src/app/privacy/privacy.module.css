@@ -1,0 +1,97 @@
+.privacyContainer {
+    min-height: 100vh;
+    background: #000;
+    color: #e5e7eb;
+    padding: 2rem 1.5rem 4rem;
+    font-family: inherit;
+}
+
+.privacyInner {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.backLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #a78bfa;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 2rem;
+    transition: color 0.2s;
+}
+
+.backLink:hover {
+    color: #c4b5fd;
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.lastUpdated {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 2.5rem;
+}
+
+.section {
+    margin-bottom: 2rem;
+}
+
+.sectionTitle {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sectionContent {
+    font-size: 0.92rem;
+    line-height: 1.7;
+    color: #d1d5db;
+}
+
+.sectionContent p {
+    margin-bottom: 0.75rem;
+}
+
+.sectionContent ul {
+    margin: 0.5rem 0 0.75rem 1.25rem;
+    list-style: disc;
+}
+
+.sectionContent li {
+    margin-bottom: 0.4rem;
+}
+
+.sectionContent strong {
+    color: #fff;
+    font-weight: 600;
+}
+
+.sectionContent a {
+    color: #a78bfa;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.sectionContent a:hover {
+    color: #c4b5fd;
+}
+
+.footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: center;
+    font-size: 0.8rem;
+    color: #6b7280;
+}

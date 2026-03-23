@@ -4,6 +4,7 @@ import { useState } from 'react';
 import styles from './page.module.css';
 import Header from './components/Header';
 import AIChat from './components/AIChat';
+import Notepad from './components/Notepad';
 import Sidebar from './components/Sidebar';
 import QuoteForm from './components/QuoteForm';
 import PDFPreview from './components/PDFPreview';
@@ -26,6 +27,7 @@ function MainContent() {
     return (
         <main className={styles.mainContainer}>
             <Header onOpenSidebar={() => setSidebarOpen(true)} />
+            {showAIChat && <Notepad />}
             {showAIChat && <AIChat />}
             <QuoteForm />
             <PDFPreview />

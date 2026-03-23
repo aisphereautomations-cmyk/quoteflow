@@ -10,6 +10,8 @@ export interface SupportChannels {
 export interface MediaLimits {
     photoUploadsPerMonth: number;
     docUploadsPerMonth: number;
+    voiceMinutesPerMonth: number;
+    maxNotes: number;
 }
 
 export interface PlanConfig {
@@ -48,7 +50,7 @@ export const PLANS: PlanConfig[] = [
             savedQuotes: 15,
             storageGB: 1,
             quoteDownloads: 1_000,
-            mediaLimits: { photoUploadsPerMonth: 15, docUploadsPerMonth: 5 },
+            mediaLimits: { photoUploadsPerMonth: 15, docUploadsPerMonth: 5, voiceMinutesPerMonth: 60, maxNotes: 25 },
             support: { email: SUPPORT_EMAIL },
             supportLabel: 'Email support',
         },
@@ -66,7 +68,7 @@ export const PLANS: PlanConfig[] = [
             savedQuotes: 50,
             storageGB: 5,
             quoteDownloads: 5_000,
-            mediaLimits: { photoUploadsPerMonth: 200, docUploadsPerMonth: 80 },
+            mediaLimits: { photoUploadsPerMonth: 200, docUploadsPerMonth: 80, voiceMinutesPerMonth: 120, maxNotes: 100 },
             support: { email: SUPPORT_EMAIL, whatsapp: SUPPORT_WHATSAPP },
             supportLabel: 'Email + WhatsApp support',
         },
@@ -83,7 +85,7 @@ export const PLANS: PlanConfig[] = [
             savedQuotes: 200,
             storageGB: 20,
             quoteDownloads: Infinity,
-            mediaLimits: { photoUploadsPerMonth: 500, docUploadsPerMonth: 200 },
+            mediaLimits: { photoUploadsPerMonth: 500, docUploadsPerMonth: 200, voiceMinutesPerMonth: 240, maxNotes: 500 },
             support: { email: SUPPORT_EMAIL, whatsapp: SUPPORT_WHATSAPP, phone: SUPPORT_PHONE },
             supportLabel: 'Email + WhatsApp + Phone support',
         },

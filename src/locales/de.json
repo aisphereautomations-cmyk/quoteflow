@@ -90,7 +90,18 @@
         "zoom": "Zoom",
         "confirm": "Bestätigen",
         "uploadValidation": "Bitte laden Sie ein PNG-, JPG-, SVG- oder WebP-Bild hoch.",
-        "language": "Sprache:"
+        "language": "Sprache:",
+        "headerExtraLines": "Zusätzliche Kopfzeilen",
+        "headerExtraLinesHint": "Fügen Sie zusätzliche Zeilen zur PDF-Kopfzeile hinzu (z.B. Steuernummer, Adresse, Lizenznummer).",
+        "extraLinePlaceholder": "z.B. USt-IdNr.: DE123456789",
+        "addLine": "Zeile hinzufügen",
+        "fileNamePattern": "Dateinamen-Muster",
+        "currentCounter": "Aktueller Zähler",
+        "resetCounter": "Zurücksetzen",
+        "fileNamePreview": "Vorschau",
+        "customPricing": "Individuelle Preisliste",
+        "customPricingHint": "Definieren Sie Ihre Preise, damit die KI sie beim Angebot verwendet.",
+        "customPricingPlaceholder": "z.B.\nInnenanstrich: 8€/m²\nAußenanstrich: 12€/m²\nArbeitskraft (allgemein): 25€/Stunde"
     },
     "aiChat": {
         "chatHeader": "Chatten Sie mit der KI für Angebote",
@@ -103,7 +114,9 @@
         "chatFirstHint": "Sprechen Sie zuerst mit der KI, um Ihr Angebot zu erstellen",
         "inputPlaceholder": "Los geht's",
         "speechNotSupported": "Spracherkennung wird in diesem Browser nicht unterstützt. Versuchen Sie Chrome oder Safari.",
-        "micDenied": "Mikrofonzugriff wurde verweigert. Erlauben Sie den Zugriff in den Browsereinstellungen."
+        "micDenied": "Mikrofonzugriff wurde verweigert. Erlauben Sie den Zugriff in den Browsereinstellungen.",
+        "attachFile": "Foto oder Dokument anhängen",
+        "aiDisclaimer": "Überprüfen Sie immer die Werte. KI kann Fehler machen."
     },
     "sidebar": {
         "menu": "Menü",
@@ -165,7 +178,8 @@
         "passwordsDoNotMatch": "Die Passwörter stimmen nicht überein",
         "passwordUpdated": "Passwort aktualisiert! Weiterleitung...",
         "updatePassword": "Passwort Aktualisieren",
-        "footer": "Betrieben von AI Sphere Automations"
+        "footer": "Betrieben von AI Sphere Automations",
+        "privacyPolicy": "Datenschutzrichtlinie"
     },
     "pricing": {
         "chooseYourPlan": "Wählen Sie Ihren Plan",
@@ -199,5 +213,15 @@
         "subscriptionActive": "Ihr Abonnement ist jetzt aktiv. Erstellen Sie sofort professionelle Angebote.",
         "startQuoting": "Jetzt Starten →",
         "autoRedirect": "Automatische Weiterleitung in 5 Sekunden..."
+    },
+    "notepad": {
+        "title": "Notizblock",
+        "newNote": "Neue",
+        "placeholder": "Beginnen Sie mit Ihrer Notiz...",
+        "sendToChat": "An Chat senden",
+        "back": "Zurück",
+        "noNotes": "Noch keine Notizen. Tippen Sie + um eine zu erstellen.",
+        "untitled": "Notiz Ohne Titel",
+        "noteLimitReached": "Notizlimit erreicht. Upgraden Sie Ihren Plan für mehr."
     }
 }

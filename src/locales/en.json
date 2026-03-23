@@ -48,7 +48,8 @@
     },
     "pdfPreview": {
         "sectionTitle": "PDF Preview",
-        "downloadPdf": "Download PDF"
+        "downloadPdf": "Download PDF",
+        "fileName": "File Name"
     },
     "actionButtons": {
         "predefinedMessage": "Pre-defined message",
@@ -90,7 +91,18 @@
         "zoom": "Zoom",
         "confirm": "Confirm",
         "uploadValidation": "Please upload a PNG, JPG, SVG, or WebP image.",
-        "language": "Language:"
+        "language": "Language:",
+        "headerExtraLines": "Extra Header Lines",
+        "headerExtraLinesHint": "Add extra lines to the PDF header (e.g. Tax ID, address, license number).",
+        "extraLinePlaceholder": "e.g. NIF: 123456789",
+        "addLine": "Add line",
+        "fileNamePattern": "File Name Pattern",
+        "currentCounter": "Current counter",
+        "resetCounter": "Reset",
+        "fileNamePreview": "Preview",
+        "customPricing": "Custom Price List",
+        "customPricingHint": "Define your prices so the AI uses them when quoting.",
+        "customPricingPlaceholder": "e.g.\nInterior painting: €8/m²\nExterior painting: €12/m²\nLabor (general): €25/hour"
     },
     "aiChat": {
         "chatHeader": "Chat with AI To Help you Quote",
@@ -104,7 +116,8 @@
         "inputPlaceholder": "Let's Chat",
         "speechNotSupported": "Speech recognition is not supported in this browser. Try Chrome or Safari.",
         "micDenied": "Microphone access was denied. Please allow microphone access in your browser settings.",
-        "attachFile": "Attach photo or document"
+        "attachFile": "Attach photo or document",
+        "aiDisclaimer": "Always check the quotes. AI can make mistakes."
     },
     "sidebar": {
         "menu": "Menu",
@@ -167,7 +180,8 @@
         "passwordsDoNotMatch": "Passwords do not match",
         "passwordUpdated": "Password updated! Redirecting...",
         "updatePassword": "Update Password",
-        "footer": "Powered by AI Sphere Automations"
+        "footer": "Powered by AI Sphere Automations",
+        "privacyPolicy": "Privacy Policy"
     },
     "pricing": {
         "chooseYourPlan": "Choose Your Plan",
@@ -201,5 +215,15 @@
         "subscriptionActive": "Your subscription is now active. Start creating professional quotes right away.",
         "startQuoting": "Start Quoting →",
         "autoRedirect": "Redirecting automatically in 5 seconds..."
+    },
+    "notepad": {
+        "title": "Notepad",
+        "newNote": "New",
+        "placeholder": "Start writing your note...",
+        "sendToChat": "Send to Chat",
+        "back": "Back",
+        "noNotes": "No notes yet. Tap + to create one.",
+        "untitled": "Untitled Note",
+        "noteLimitReached": "Note limit reached. Upgrade your plan for more."
     }
 }

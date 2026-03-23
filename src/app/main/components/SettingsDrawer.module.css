@@ -446,3 +446,118 @@
     display: flex;
     gap: 0.75rem;
 }
+
+/* ── Extra Header Lines ── */
+.sectionHint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.4;
+}
+
+.extraLinesWrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.extraLineRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.extraLineRow input {
+    flex: 1;
+}
+
+.removeLineBtn {
+    background: transparent;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: var(--radius-md);
+    color: #ef4444;
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-base);
+    flex-shrink: 0;
+}
+
+.removeLineBtn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+}
+
+.addLineBtn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+    background: transparent;
+    border: 1px dashed rgba(255, 255, 255, 0.2);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.addLineBtn:hover {
+    border-color: rgba(168, 85, 247, 0.4);
+    color: var(--color-text-primary);
+    background: rgba(168, 85, 247, 0.06);
+}
+
+/* ── File Name Pattern + Counter ── */
+.fileNameRow {
+    margin-bottom: var(--spacing-sm);
+}
+
+.counterRow {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-xs);
+}
+
+.counterLabel {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+}
+
+.counterInput {
+    width: 70px;
+    padding: 4px 8px;
+    background: transparent;
+    border: 1px solid var(--color-input-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+    text-align: center;
+    outline: none;
+}
+
+.counterInput:focus {
+    border-color: #6b21a8;
+    box-shadow: 0 0 0 3px var(--color-focus-glow);
+}
+
+.resetCounterBtn {
+    padding: 4px 12px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-xs);
+    cursor: pointer;
+    transition: all var(--transition-base);
+}
+
+.resetCounterBtn:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: var(--color-text-primary);
+}

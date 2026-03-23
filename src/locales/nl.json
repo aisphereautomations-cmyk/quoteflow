@@ -90,7 +90,18 @@
         "zoom": "Zoom",
         "confirm": "Bevestigen",
         "uploadValidation": "Upload een PNG-, JPG-, SVG- of WebP-afbeelding.",
-        "language": "Taal:"
+        "language": "Taal:",
+        "headerExtraLines": "Extra Koptekstregels",
+        "headerExtraLinesHint": "Voeg extra regels toe aan de PDF-koptekst (bijv. BTW-nummer, adres, licentienummer).",
+        "extraLinePlaceholder": "bijv. BTW: NL123456789B01",
+        "addLine": "Regel toevoegen",
+        "fileNamePattern": "Bestandsnaam Patroon",
+        "currentCounter": "Huidige teller",
+        "resetCounter": "Resetten",
+        "fileNamePreview": "Voorbeeld",
+        "customPricing": "Aangepaste Prijslijst",
+        "customPricingHint": "Definieer uw prijzen zodat de AI ze gebruikt bij het offreren.",
+        "customPricingPlaceholder": "bijv.\nBinnenschilderwerk: €8/m²\nBuitenschilderwerk: €12/m²\nArbeid (algemeen): €25/uur"
     },
     "aiChat": {
         "chatHeader": "Chat met AI voor Offertes",
@@ -103,7 +114,9 @@
         "chatFirstHint": "Praat eerst met de AI om uw offerte te genereren",
         "inputPlaceholder": "Laten we chatten",
         "speechNotSupported": "Spraakherkenning wordt niet ondersteund in deze browser. Probeer Chrome of Safari.",
-        "micDenied": "Microfoontoegang is geweigerd. Sta toegang toe in de browserinstellingen."
+        "micDenied": "Microfoontoegang is geweigerd. Sta toegang toe in de browserinstellingen.",
+        "attachFile": "Foto of document bijvoegen",
+        "aiDisclaimer": "Controleer altijd de waarden. AI kan fouten maken."
     },
     "sidebar": {
         "menu": "Menu",
@@ -165,7 +178,8 @@
         "passwordsDoNotMatch": "De wachtwoorden komen niet overeen",
         "passwordUpdated": "Wachtwoord bijgewerkt! Doorverwijzen...",
         "updatePassword": "Wachtwoord Bijwerken",
-        "footer": "Aangedreven door AI Sphere Automations"
+        "footer": "Aangedreven door AI Sphere Automations",
+        "privacyPolicy": "Privacybeleid"
     },
     "pricing": {
         "chooseYourPlan": "Kies uw Plan",
@@ -199,5 +213,15 @@
         "subscriptionActive": "Uw abonnement is nu actief. Begin direct met professionele offertes.",
         "startQuoting": "Begin met Offreren →",
         "autoRedirect": "Automatische doorverwijzing over 5 seconden..."
+    },
+    "notepad": {
+        "title": "Notitieboek",
+        "newNote": "Nieuw",
+        "placeholder": "Begin met het schrijven van uw notitie...",
+        "sendToChat": "Naar Chat sturen",
+        "back": "Terug",
+        "noNotes": "Nog geen notities. Tik op + om er een te maken.",
+        "untitled": "Notitie Zonder Titel",
+        "noteLimitReached": "Notitielimiet bereikt. Upgrade uw plan voor meer."
     }
 }
