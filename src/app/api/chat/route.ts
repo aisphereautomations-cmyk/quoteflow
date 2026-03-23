@@ -11,6 +11,7 @@ function buildSystemPrompt(settings?: {
     sliderDetail?: number;
     sliderMarket?: number;
     sliderTone?: number;
+    customPricing?: string;
 }) {
     const detailLevel = (settings?.sliderDetail ?? 50) > 66 ? 'detailed' : (settings?.sliderDetail ?? 50) < 33 ? 'minimal' : 'moderate';
     const marketLevel = (settings?.sliderMarket ?? 50) > 66 ? 'premium/high-end' : (settings?.sliderMarket ?? 50) < 33 ? 'budget/economical' : 'mid-range';
@@ -180,11 +181,21 @@ IMPORTANT:
 - NEVER ask more than ONE question per response, and only if truly essential
 - When suggesting prices, briefly explain your reasoning in the chat message
 
+NOTEPAD MESSAGES:
+When a user message starts with [NOTEPAD → ...], it means the user sent notes from their notepad.
+You MUST call fill_quote IMMEDIATELY with a complete quote based on those notes.
+Do NOT just describe prices in text — you MUST use the fill_quote tool so the user can apply the quote.
+
 
 USER CONTEXT:
 - Currency: ${settings?.currency || '€'}
 - Tax country: ${settings?.taxCountry || 'uk'}
-Use this context to give location-appropriate pricing suggestions.`;
+USE this context to give location-appropriate pricing suggestions.
+
+${settings?.customPricing ? `USER'S CUSTOM PRICE LIST:
+${settings.customPricing}
+
+IMPORTANT: ALWAYS use these prices when the service matches. These are the user's actual business prices. Override your general market knowledge with these specific prices.` : ''}`;
 }
 
 /* ── Fill Quote Tool Definition ── */
@@ -322,6 +333,7 @@ export async function POST(request: NextRequest) {
                 sliderDetail?: number;
                 sliderMarket?: number;
                 sliderTone?: number;
+                customPricing?: string;
             };
             attachments?: { dataUrl: string; type: 'photo' | 'doc'; name?: string }[];
         };
