@@ -5,6 +5,7 @@ import ImageCropper from './ImageCropper';
 import { useQuote, PricingMode, ServiceBlock, PhotoBlock, type QuoteBlock } from '../context/QuoteContext';
 import { useSettings } from '../context/SettingsContext';
 import { useTranslation } from '../context/LanguageContext';
+import { formatPrice } from '../utils/formatPrice';
 import styles from './QuoteForm.module.css';
 
 /* ── Service total calculation (only service blocks) ─────── */
@@ -202,7 +203,7 @@ export default function QuoteForm() {
                     </div>
                     {service.fixedPrice && (
                         <div className={styles.calculatedPrice}>
-                            {parseFloat(service.fixedPrice).toFixed(2)} {settings.currency}
+                            {formatPrice(parseFloat(service.fixedPrice), settings.taxCountry)} {settings.currency}
                         </div>
                     )}
                 </div>
@@ -243,10 +244,11 @@ export default function QuoteForm() {
                     {service.quantity && service.unitPrice && (
                         <div className={styles.calculatedPrice}>
                             {service.quantity} {pricingModeLabels[service.pricingMode].unit} –{' '}
-                            {(
+                            {formatPrice(
                                 parseFloat(service.quantity) *
-                                parseFloat(service.unitPrice)
-                            ).toFixed(2)}{' '}
+                                parseFloat(service.unitPrice),
+                                settings.taxCountry
+                            )}{' '}
                             {settings.currency}
                         </div>
                     )}
@@ -495,7 +497,7 @@ export default function QuoteForm() {
                             %
                         </span>
                         <span className={styles.totalValue}>
-                            {totalValue.toFixed(2)} {settings.currency}
+                            {formatPrice(totalValue, settings.taxCountry)} {settings.currency}
                         </span>
                     </div>
                 </div>

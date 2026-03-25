@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import type { SettingsData } from '../context/SettingsContext';
 import type { QuoteData } from '../context/QuoteContext';
+import { formatPrice } from './formatPrice';
 
 export interface ClientData {
     clientName: string;
@@ -209,10 +210,10 @@ export async function generateQuotePDF(
         for (const svc of filledServices) {
             let priceStr = '';
             if (svc.pricingMode === 'fixed' && svc.fixedPrice) {
-                priceStr = parseFloat(svc.fixedPrice).toFixed(2) + ' ' + settings.currency;
+                priceStr = formatPrice(parseFloat(svc.fixedPrice), settings.taxCountry) + ' ' + settings.currency;
             } else if (svc.quantity && svc.unitPrice) {
                 const u = getUnitLabel(svc.pricingMode);
-                const t = (parseFloat(svc.quantity) * parseFloat(svc.unitPrice)).toFixed(2);
+                const t = formatPrice(parseFloat(svc.quantity) * parseFloat(svc.unitPrice), settings.taxCountry);
                 priceStr = t + ' ' + settings.currency + ' (' + svc.quantity + ' ' + u + ')';
             }
 
@@ -273,18 +274,18 @@ export async function generateQuotePDF(
     pdf.setFontSize(17);
     pdf.setTextColor(51, 51, 51);
 
-    const t1 = 'Price excluding VAT: ' + settings.currency + ' ' + (base > 0 ? base.toFixed(2) : '0.00');
+    const t1 = 'Price excluding VAT: ' + settings.currency + ' ' + (base > 0 ? formatPrice(base, settings.taxCountry) : formatPrice(0, settings.taxCountry));
     pdf.text(t1, rx, y + 14, { align: 'right' });
     y += 21;
 
-    const t2 = 'VAT ' + vPct + '%: ' + settings.currency + ' ' + (base > 0 ? vatAmt.toFixed(2) : '0.00');
+    const t2 = 'VAT ' + vPct + '%: ' + settings.currency + ' ' + (base > 0 ? formatPrice(vatAmt, settings.taxCountry) : formatPrice(0, settings.taxCountry));
     pdf.text(t2, rx, y + 14, { align: 'right' });
     y += 21;
 
     pdf.setFont('helvetica', 'bold');
     pdf.setFontSize(19);
     pdf.setTextColor(17, 17, 17);
-    const t3 = 'Total incl. VAT: ' + settings.currency + ' ' + (total > 0 ? total.toFixed(2) : '0.00');
+    const t3 = 'Total incl. VAT: ' + settings.currency + ' ' + (total > 0 ? formatPrice(total, settings.taxCountry) : formatPrice(0, settings.taxCountry));
     pdf.text(t3, rx, y + 15, { align: 'right' });
 
     // Footer — left side

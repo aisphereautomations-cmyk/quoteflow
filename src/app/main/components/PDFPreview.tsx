@@ -8,6 +8,7 @@ import { useTranslation } from '../context/LanguageContext';
 import { downloadPDF } from '../utils/pdfGenerator';
 import { generateFileName } from '../utils/pdfGenerator';
 import { getTaxLabels } from '../utils/taxLabels';
+import { formatPrice } from '../utils/formatPrice';
 import styles from './PDFPreview.module.css';
 
 const PAGE_WIDTH = 595; // A4 width at 72dpi
@@ -79,14 +80,15 @@ export default function PDFPreview() {
         let priceDisplay = '';
         if (service.pricingMode === 'fixed') {
             if (service.fixedPrice) {
-                priceDisplay = `${parseFloat(service.fixedPrice).toFixed(2)} ${settings.currency}`;
+                priceDisplay = `${formatPrice(parseFloat(service.fixedPrice), settings.taxCountry)} ${settings.currency}`;
             }
         } else if (service.quantity && service.unitPrice) {
             const unit = getUnitLabel(service.pricingMode);
-            const total = (
+            const total = formatPrice(
                 parseFloat(service.quantity) *
-                parseFloat(service.unitPrice)
-            ).toFixed(2);
+                parseFloat(service.unitPrice),
+                settings.taxCountry
+            );
             priceDisplay = `${total} ${settings.currency} (${service.quantity} ${unit})`;
         }
 
@@ -237,15 +239,15 @@ export default function PDFPreview() {
                         <div className={styles.valuesRight}>
                             <p className={styles.baseValueLine}>
                                 {taxLabels.priceExcl}: {settings.currency}{' '}
-                                {baseVal > 0 ? baseVal.toFixed(2) : '0.00'}
+                                {baseVal > 0 ? formatPrice(baseVal, settings.taxCountry) : formatPrice(0, settings.taxCountry)}
                             </p>
                             <p className={styles.baseValueLine}>
                                 {taxLabels.taxName} {vatPercent}%: {settings.currency}{' '}
-                                {baseVal > 0 ? (totalValue - baseVal).toFixed(2) : '0.00'}
+                                {baseVal > 0 ? formatPrice(totalValue - baseVal, settings.taxCountry) : formatPrice(0, settings.taxCountry)}
                             </p>
                             <p className={styles.totalValueLine}>
                                 {taxLabels.totalIncl}: {settings.currency}{' '}
-                                {totalValue > 0 ? totalValue.toFixed(2) : '0.00'}
+                                {totalValue > 0 ? formatPrice(totalValue, settings.taxCountry) : formatPrice(0, settings.taxCountry)}
                             </p>
                         </div>
                         <div className={styles.footerLeft}>
