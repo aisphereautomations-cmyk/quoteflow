@@ -12,6 +12,7 @@ function buildSystemPrompt(settings?: {
     sliderMarket?: number;
     sliderTone?: number;
     customPricing?: string;
+    language?: string;
 }) {
     const detailLevel = (settings?.sliderDetail ?? 50) > 66 ? 'detailed' : (settings?.sliderDetail ?? 50) < 33 ? 'minimal' : 'moderate';
     const marketLevel = (settings?.sliderMarket ?? 50) > 66 ? 'premium/high-end' : (settings?.sliderMarket ?? 50) < 33 ? 'budget/economical' : 'mid-range';
@@ -195,7 +196,9 @@ USE this context to give location-appropriate pricing suggestions.
 ${settings?.customPricing ? `USER'S CUSTOM PRICE LIST:
 ${settings.customPricing}
 
-IMPORTANT: ALWAYS use these prices when the service matches. These are the user's actual business prices. Override your general market knowledge with these specific prices.` : ''}`;
+IMPORTANT: ALWAYS use these prices when the service matches. These are the user's actual business prices. Override your general market knowledge with these specific prices.` : ''}
+
+${settings?.language && settings.language !== 'en' ? `🌐 LANGUAGE: The user's app is set to "${settings.language}". You MUST respond in this language. The examples above are in Portuguese for illustration only — adapt them to the user's language.` : settings?.language === 'en' ? `🌐 LANGUAGE: The user's app is set to English. You MUST respond in English. The examples above are in Portuguese for illustration only — you must write in English.` : ''}`;
 }
 
 /* ── Fill Quote Tool Definition ── */
@@ -334,6 +337,7 @@ export async function POST(request: NextRequest) {
                 sliderMarket?: number;
                 sliderTone?: number;
                 customPricing?: string;
+                language?: string;
             };
             attachments?: { dataUrl: string; type: 'photo' | 'doc'; name?: string }[];
         };

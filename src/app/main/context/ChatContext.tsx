@@ -352,6 +352,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
                         sliderMarket: sliders.market,
                         sliderTone: sliders.tone,
                         customPricing: settings.customPricing || undefined,
+                        language: settings.language || 'en',
                     },
                     attachments: chatAttachments.length > 0 ? chatAttachments : undefined,
                 }),
