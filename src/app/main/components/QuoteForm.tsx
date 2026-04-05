@@ -435,7 +435,7 @@ export default function QuoteForm() {
                 }}
             />
 
-            <div className={styles.formContainer}>
+            <div className={styles.formContainer} data-tutorial="quote-form">
                 <h2 className={styles.sectionTitle}>{t('quoteForm.sectionTitle')}</h2>
 
                 {/* All blocks (service + photo) — rendered in order */}
@@ -446,10 +446,10 @@ export default function QuoteForm() {
 
                 {/* Add Buttons */}
                 <div className={styles.addBlockRow}>
-                    <button className={styles.addServiceBtn} onClick={addService}>
+                    <button className={styles.addServiceBtn} onClick={addService} data-tutorial="add-service">
                         {t('quoteForm.addService')}
                     </button>
-                    <button className={styles.addPhotoBlockBtn} onClick={addPhotoBlock}>
+                    <button className={styles.addPhotoBlockBtn} onClick={addPhotoBlock} data-tutorial="add-photo-block">
                         📷 {t('quoteForm.addPhotoBlock')}
                     </button>
                 </div>

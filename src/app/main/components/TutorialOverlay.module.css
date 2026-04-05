@@ -1,0 +1,340 @@
+/* ── Tutorial Overlay ──────────────────────────────────── */
+
+/* Fullscreen backdrop that dims the page */
+.backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    pointer-events: all;
+    transition: opacity 0.3s ease;
+}
+
+/* SVG overlay for the spotlight cutout */
+.spotlightSvg {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9998;
+    pointer-events: none;
+}
+
+.spotlightMask {
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* The highlighted target area should be clickable-through */
+.spotlightHole {
+    position: fixed;
+    z-index: 9999;
+    pointer-events: none;
+    border-radius: 10px;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.5),
+                0 0 20px rgba(99, 102, 241, 0.3);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: spotlightPulse 2s ease-in-out infinite;
+}
+
+@keyframes spotlightPulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.5), 0 0 20px rgba(99, 102, 241, 0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(99, 102, 241, 0.6), 0 0 30px rgba(99, 102, 241, 0.4); }
+}
+
+/* ── Tooltip Card ──────────────────────────────────────── */
+
+.tooltip {
+    position: fixed;
+    z-index: 10000;
+    width: 320px;
+    max-width: calc(100vw - 32px);
+    background: rgba(15, 15, 25, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    border-radius: 16px;
+    padding: 20px;
+    color: #f0f0f5;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5),
+                0 0 60px rgba(99, 102, 241, 0.1);
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: tooltipEnter 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tooltipEnter {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Arrow pointer */
+.tooltip::before {
+    content: '';
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    background: rgba(15, 15, 25, 0.92);
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    transform: rotate(45deg);
+}
+
+.tooltipAbove::before {
+    bottom: -7px;
+    left: 50%;
+    margin-left: -6px;
+    border-top: none;
+    border-left: none;
+}
+
+.tooltipBelow::before {
+    top: -7px;
+    left: 50%;
+    margin-left: -6px;
+    border-bottom: none;
+    border-right: none;
+}
+
+.tooltipLeft::before {
+    right: -7px;
+    top: 50%;
+    margin-top: -6px;
+    border-bottom: none;
+    border-left: none;
+}
+
+.tooltipRight::before {
+    left: -7px;
+    top: 50%;
+    margin-top: -6px;
+    border-top: none;
+    border-right: none;
+}
+
+.tooltipTitle {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tooltipEmoji {
+    font-size: 1.2rem;
+}
+
+.tooltipDesc {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: rgba(240, 240, 245, 0.82);
+    margin: 0 0 16px;
+}
+
+/* ── Step Dots ─────────────────────────────────────────── */
+
+.stepDots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.dotActive {
+    width: 20px;
+    border-radius: 10px;
+    background: #6366f1;
+}
+
+.dotCompleted {
+    background: rgba(99, 102, 241, 0.5);
+}
+
+/* ── Navigation Buttons ────────────────────────────────── */
+
+.navRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.navBtn {
+    flex: 1;
+    padding: 9px 16px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.skipBtn {
+    background: transparent;
+    color: rgba(240, 240, 245, 0.5);
+    flex: 0 0 auto;
+}
+
+.skipBtn:hover {
+    color: rgba(240, 240, 245, 0.8);
+}
+
+.backBtn {
+    background: rgba(255, 255, 255, 0.08);
+    color: rgba(240, 240, 245, 0.8);
+}
+
+.backBtn:hover {
+    background: rgba(255, 255, 255, 0.14);
+}
+
+.nextBtn {
+    background: #6366f1;
+    color: #fff;
+}
+
+.nextBtn:hover {
+    background: #5558e6;
+    transform: translateY(-1px);
+}
+
+.doneBtn {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+}
+
+.doneBtn:hover {
+    background: linear-gradient(135deg, #5558e6, #7c4fea);
+    transform: translateY(-1px);
+}
+
+/* ── Step Counter ──────────────────────────────────────── */
+
+.stepCounter {
+    font-size: 0.72rem;
+    color: rgba(240, 240, 245, 0.4);
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* ── Welcome Screen (Step 0) ───────────────────────────── */
+
+.welcomeOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.welcomeCard {
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    background: rgba(15, 15, 25, 0.95);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 20px;
+    padding: 32px 28px;
+    text-align: center;
+    color: #f0f0f5;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+    animation: tooltipEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.welcomeEmoji {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    display: block;
+}
+
+.welcomeTitle {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+    color: #fff;
+}
+
+.welcomeDesc {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: rgba(240, 240, 245, 0.75);
+    margin: 0 0 24px;
+}
+
+.welcomeActions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.startBtn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff;
+    transition: all 0.2s ease;
+}
+
+.startBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+}
+
+.skipTutorialBtn {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    background: transparent;
+    color: rgba(240, 240, 245, 0.5);
+    transition: all 0.2s ease;
+}
+
+.skipTutorialBtn:hover {
+    color: rgba(240, 240, 245, 0.8);
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+    .tooltip {
+        width: calc(100vw - 24px);
+        padding: 16px;
+        border-radius: 14px;
+    }
+
+    .welcomeCard {
+        padding: 24px 20px;
+    }
+}

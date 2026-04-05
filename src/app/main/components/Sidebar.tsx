@@ -14,9 +14,10 @@ import styles from './Sidebar.module.css';
 interface SidebarProps {
     isOpen: boolean;
     onClose: () => void;
+    onReplayTutorial?: () => void;
 }
 
-export default function Sidebar({ isOpen, onClose }: SidebarProps) {
+export default function Sidebar({ isOpen, onClose, onReplayTutorial }: SidebarProps) {
     const router = useRouter();
     const supabase = createClient();
     const { t } = useTranslation();
@@ -122,7 +123,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                 <div className={styles.sidebarContent}>
                     {/* ── 💬 Conversations ── */}
-                    <div className={styles.section}>
+                    <div className={styles.section} data-tutorial="sidebar-conversations">
                         <button
                             className={styles.sectionHeader}
                             onClick={() => setShowConversations(!showConversations)}
@@ -260,7 +261,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </div>
 
                     {/* ── 📄 Quotes ── */}
-                    <div className={styles.section}>
+                    <div className={styles.section} data-tutorial="sidebar-quotes">
                         <button
                             className={styles.sectionHeader}
                             onClick={() => setShowQuotes(!showQuotes)}
@@ -342,7 +343,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </div>
 
                     {/* ── 🎛️ AI Preferences ── */}
-                    <div className={styles.section}>
+                    <div className={styles.section} data-tutorial="sidebar-ai-prefs">
                         <button
                             className={styles.sectionHeader}
                             onClick={() => setShowPreferences(!showPreferences)}
@@ -418,7 +419,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                     </div>
 
                     {/* ── ⚙️ Settings ── */}
-                    <button className={styles.settingsBtn} onClick={handleOpenSettings}>
+                    <button className={styles.settingsBtn} onClick={handleOpenSettings} data-tutorial="sidebar-settings">
                         {t('sidebar.settings')}
                     </button>
 
@@ -431,7 +432,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
                         const photoPct = Math.min(100, Math.round((photoUsed / ml.photoUploadsPerMonth) * 100));
                         const docPct = Math.min(100, Math.round((docUsed / ml.docUploadsPerMonth) * 100));
                         return (
-                            <div className={styles.usageSection}>
+                            <div className={styles.usageSection} data-tutorial="sidebar-media-usage">
                                 <span className={styles.usageTitle}>{t('sidebar.mediaUsage')}</span>
                                 <div className={styles.usageRow}>
                                     <span className={styles.usageLabel}>📷 {photoUsed}/{ml.photoUploadsPerMonth}</span>
@@ -457,6 +458,15 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
 
                     {/* ── Upgrade (visible for starter/pro) ── */}
                     <UpgradeButton />
+
+                    {/* ── 🎓 Tutorial ── */}
+                    <button className={styles.helpBtn} onClick={onReplayTutorial} style={{ marginTop: '0.25rem' }}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                        </svg>
+                        {t('tutorial.replayTutorial')}
+                    </button>
 
                     {/* ── Help ── */}
                     <HelpButton />

@@ -87,7 +87,7 @@ export default function ActionButtons() {
     return (
         <>
             {/* Action Buttons UI */}
-            <div className={styles.actionSection}>
+            <div className={styles.actionSection} data-tutorial="action-buttons">
                 <h2 className="shared-section-title">{t('actionButtons.predefinedMessage')}</h2>
 
                 <div className={styles.messageGroup}>

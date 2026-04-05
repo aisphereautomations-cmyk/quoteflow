@@ -158,7 +158,7 @@ export default function PDFPreview() {
     };
 
     return (
-        <div className={styles.previewContainer}>
+        <div className={styles.previewContainer} data-tutorial="pdf-preview">
             <h2 className={styles.sectionTitle}>{t('pdfPreview.sectionTitle')}</h2>
 
             <div ref={scalerRef} className={styles.previewScaler} style={{ height: scaledH }}>
@@ -278,7 +278,7 @@ export default function PDFPreview() {
                 </div>
             </div>
 
-            <button className={styles.downloadBtn} onClick={handleDownload}>{t('pdfPreview.downloadPdf')}</button>
+            <button className={styles.downloadBtn} onClick={handleDownload} data-tutorial="download-pdf">{t('pdfPreview.downloadPdf')}</button>
 
             <div className={styles.fileNameGroup}>
                 <label className={styles.fileNameLabel}>{t('pdfPreview.fileName')}</label>

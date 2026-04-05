@@ -247,7 +247,7 @@ export default function SettingsDrawer() {
             )}
 
             <div className={styles.drawer}>
-                <div className={styles.header} onClick={handleToggle}>
+                <div className={styles.header} onClick={handleToggle} data-tutorial="settings">
                     <div className={styles.title}>
                         <span>{t('settings.title')}</span>
                     </div>

@@ -256,7 +256,7 @@ export default function AIChat() {
 
     return (
         <>
-            <div className={`${styles.chatContainer} ${isExpanded ? styles.expanded : styles.collapsed}`}>
+            <div className={`${styles.chatContainer} ${isExpanded ? styles.expanded : styles.collapsed}`} data-tutorial="ai-chat">
                 {/* Header */}
                 <div className={styles.chatHeader}>
                     <span className={styles.headerTitle} onClick={toggleExpand}>
@@ -413,7 +413,7 @@ export default function AIChat() {
 
             {!isExpanded && (
                 <>
-                    <div className={styles.actionArea}>
+                    <div className={styles.actionArea} data-tutorial="fill-quote">
                         <button
                             className={`${styles.fillQuoteBtn} ${pendingQuoteData ? styles.fillQuoteBtnReady : styles.fillQuoteBtnDimmed}`}
                             onClick={pendingQuoteData ? handleFillQuote : undefined}
