@@ -39,7 +39,7 @@ export default function Header({ onOpenSidebar }: HeaderProps) {
                     {isSaving ? '...' : '💾'}
                     {currentQuoteId && <span className={styles.savedDot}></span>}
                 </button>
-                <button onClick={onOpenSidebar} className={styles.menuBtn} title="Menu" aria-label="Open menu">
+                <button onClick={onOpenSidebar} className={styles.menuBtn} title="Menu" aria-label="Open menu" data-tutorial="menu-button">
                     ☰
                 </button>
             </div>
