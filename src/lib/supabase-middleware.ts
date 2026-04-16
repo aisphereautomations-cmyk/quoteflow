@@ -60,6 +60,12 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url);
     }
 
+    // Allow success page through without subscription check
+    // (user just paid, webhook may not have arrived yet)
+    if (pathname.startsWith('/pricing/success')) {
+        return supabaseResponse;
+    }
+
     // Paywall: check subscription before allowing access to /main
     if (user && pathname.startsWith('/main')) {
         const { data: subscription } = await supabase
