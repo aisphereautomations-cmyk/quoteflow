@@ -238,6 +238,7 @@ export async function POST(request: NextRequest) {
             request_id: `qf_${user.id}_${Date.now()}`,
             amount: Math.round(finalPrice * 100) / 100,
             currency: 'EUR',
+            auto_capture: true,
             merchant_order_id: `qf_${plan}_${billingCycle}_${Date.now()}`,
             metadata: {
                 user_id: user.id,

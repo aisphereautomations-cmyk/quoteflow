@@ -72,8 +72,33 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Payment intent not found' }, { status: 404 });
         }
 
-        // Check payment status
-        if (intent.status !== 'SUCCEEDED') {
+        // Check payment status — capture if needed
+        if (intent.status === 'REQUIRES_CAPTURE') {
+            // Payment was authorized but not captured — capture it now
+            const captureRes = await fetch(
+                `https://api.airwallex.com/api/v1/pa/payment_intents/${intentId}/capture`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${authData.token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        request_id: `capture_${intentId}_${Date.now()}`,
+                    }),
+                },
+            );
+            const captureData = await captureRes.json();
+            if (captureData.status !== 'SUCCEEDED') {
+                console.error('Capture failed:', captureData);
+                return NextResponse.json({
+                    error: `Payment capture failed. Status: ${captureData.status}`,
+                    status: captureData.status,
+                }, { status: 400 });
+            }
+            // Update intent reference to captured version
+            intent.status = 'SUCCEEDED';
+        } else if (intent.status !== 'SUCCEEDED') {
             return NextResponse.json({
                 error: `Payment not confirmed. Status: ${intent.status}`,
                 status: intent.status,
