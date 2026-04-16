@@ -94,10 +94,15 @@ export async function POST(request: NextRequest) {
         periodEnd.setMonth(periodEnd.getMonth() + 1);
     }
 
-    // Upsert subscription
+    // Delete any existing subscription first, then insert new one
+    await admin
+        .from('subscriptions')
+        .delete()
+        .eq('user_id', targetUser.id);
+
     const { data: sub, error: subError } = await admin
         .from('subscriptions')
-        .upsert({
+        .insert({
             user_id: targetUser.id,
             plan,
             billing_cycle: billingCycle,
@@ -105,8 +110,7 @@ export async function POST(request: NextRequest) {
             current_period_start: new Date().toISOString(),
             current_period_end: periodEnd.toISOString(),
             amount_paid: 0,
-            updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id' })
+        })
         .select()
         .single();
 

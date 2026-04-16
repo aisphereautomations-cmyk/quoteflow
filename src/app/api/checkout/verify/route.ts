@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
 
         const { error: subError } = await admin
             .from('subscriptions')
-            .upsert({
+            .insert({
                 user_id: user.id,
                 plan,
                 billing_cycle: billingCycle,
@@ -140,8 +140,7 @@ export async function POST(request: NextRequest) {
                 current_period_end: periodEnd.toISOString(),
                 promo_code_used: promoCode || null,
                 amount_paid: intent.amount,
-                updated_at: new Date().toISOString(),
-            }, { onConflict: 'user_id' });
+            });
 
         if (subError) {
             console.error('Subscription create error:', subError);

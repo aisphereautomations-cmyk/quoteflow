@@ -38,10 +38,10 @@ export async function POST(request: NextRequest) {
                     periodEnd.setMonth(periodEnd.getMonth() + 1);
                 }
 
-                // Upsert subscription
+                // Insert subscription
                 await supabaseAdmin
                     .from('subscriptions')
-                    .upsert({
+                    .insert({
                         user_id: userId,
                         plan,
                         billing_cycle: billingCycle || 'monthly',
@@ -51,8 +51,7 @@ export async function POST(request: NextRequest) {
                         current_period_end: periodEnd.toISOString(),
                         promo_code_used: promoCode || null,
                         amount_paid: intent.amount,
-                        updated_at: new Date().toISOString(),
-                    }, { onConflict: 'user_id' });
+                    });
 
                 // Increment promo usage if applicable
                 if (promoCode) {
