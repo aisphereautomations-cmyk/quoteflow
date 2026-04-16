@@ -26,15 +26,27 @@
     animation: popIn 0.4s ease;
 }
 
+.errorIcon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #b91c1c, #f97316);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: #fff;
+    margin: 0 auto 24px;
+    animation: popIn 0.4s ease;
+}
+
 @keyframes popIn {
     0% {
         transform: scale(0);
     }
-
     70% {
         transform: scale(1.15);
     }
-
     100% {
         transform: scale(1);
     }
@@ -89,26 +101,13 @@
     box-shadow: 0 8px 24px rgba(107, 33, 168, 0.3);
 }
 
-.retryBtn {
-    width: 100%;
-    padding: 12px;
-    background: transparent;
-    border: 1px solid #333;
-    border-radius: 12px;
-    color: #888;
-    font-weight: 600;
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.25s;
-    margin-bottom: 16px;
-}
-
-.retryBtn:hover {
-    border-color: #555;
-    color: #fff;
-}
-
 .autoRedirect {
     font-size: 0.75rem;
     color: #555;
+}
+
+.supportText {
+    font-size: 0.8rem;
+    color: #555;
+    margin-top: 8px;
 }

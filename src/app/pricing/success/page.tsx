@@ -1,69 +1,62 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase-browser';
+import { useEffect, useState, useCallback, useRef } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import styles from './success.module.css';
 
-export default function PaymentSuccessPage() {
+function PaymentSuccessContent() {
     const router = useRouter();
-    const supabase = createClient();
-    const [status, setStatus] = useState<'verifying' | 'ready' | 'timeout'>('verifying');
+    const searchParams = useSearchParams();
+    const [status, setStatus] = useState<'verifying' | 'ready' | 'error'>('verifying');
+    const [errorMsg, setErrorMsg] = useState('');
+    const hasStarted = useRef(false);
 
-    const checkSubscription = useCallback(async (): Promise<boolean> => {
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return false;
+    const verifyPayment = useCallback(async () => {
+        // Prevent double execution from React strict mode
+        if (hasStarted.current) return;
+        hasStarted.current = true;
 
-            const { data } = await supabase
-                .from('subscriptions')
-                .select('status, trial_ends_at')
-                .eq('user_id', user.id)
-                .in('status', ['active', 'trial'])
-                .maybeSingle();
+        const intentId = searchParams.get('id');
 
-            if (data) {
-                const isActive =
-                    data.status === 'active' ||
-                    (data.status === 'trial' && data.trial_ends_at
-                        ? new Date(data.trial_ends_at) > new Date()
-                        : false);
-                return isActive;
-            }
-            return false;
-        } catch {
-            return false;
+        if (!intentId) {
+            // No intent ID — might be a free trial or direct activation
+            // Try going to /main directly
+            router.push('/main');
+            return;
         }
-    }, [supabase]);
+
+        try {
+            const res = await fetch('/api/checkout/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ intentId }),
+            });
+
+            const data = await res.json();
+
+            if (data.success) {
+                setStatus('ready');
+                // Auto redirect after showing success
+                setTimeout(() => router.push('/main'), 3000);
+            } else if (data.alreadyActive) {
+                // Already has a subscription, just go to main
+                setStatus('ready');
+                setTimeout(() => router.push('/main'), 1500);
+            } else {
+                setStatus('error');
+                setErrorMsg(data.error || 'Could not verify payment');
+            }
+        } catch (err) {
+            console.error('Payment verification error:', err);
+            setStatus('error');
+            setErrorMsg('Network error. Please check your connection and try again.');
+        }
+    }, [searchParams, router]);
 
     useEffect(() => {
-        let cancelled = false;
-        let attempts = 0;
-        const maxAttempts = 30; // 30 attempts × 2s = 60s max wait
-
-        const poll = async () => {
-            while (!cancelled && attempts < maxAttempts) {
-                const active = await checkSubscription();
-                if (active) {
-                    if (!cancelled) {
-                        setStatus('ready');
-                        // Give user a moment to see the success message
-                        setTimeout(() => {
-                            if (!cancelled) router.push('/main');
-                        }, 3000);
-                    }
-                    return;
-                }
-                attempts++;
-                // Wait 2 seconds before next check
-                await new Promise(r => setTimeout(r, 2000));
-            }
-            if (!cancelled) setStatus('timeout');
-        };
-
-        poll();
-        return () => { cancelled = true; };
-    }, [checkSubscription, router]);
+        verifyPayment();
+    }, [verifyPayment]);
 
     return (
         <div className={styles.container}>
@@ -97,32 +90,45 @@ export default function PaymentSuccessPage() {
                     </>
                 )}
 
-                {status === 'timeout' && (
+                {status === 'error' && (
                     <>
-                        <div className={styles.checkmark}>✓</div>
-                        <h1 className={styles.title}>Payment Confirmed!</h1>
+                        <div className={styles.errorIcon}>⚠</div>
+                        <h1 className={styles.title}>Activation Issue</h1>
                         <p className={styles.subtitle}>
-                            Your payment was successful. Your subscription may take a moment to activate. 
-                            Please try entering the app — if it redirects you back, wait a minute and try again.
+                            Your payment was received, but we had trouble activating your account.
+                            {errorMsg && <><br /><br /><strong>Details:</strong> {errorMsg}</>}
                         </p>
                         <button
                             className={styles.startBtn}
-                            onClick={() => router.push('/main')}
-                        >
-                            Enter App →
-                        </button>
-                        <button
-                            className={styles.retryBtn}
                             onClick={() => {
+                                hasStarted.current = false;
                                 setStatus('verifying');
-                                window.location.reload();
+                                verifyPayment();
                             }}
                         >
-                            Check Again
+                            Try Again
                         </button>
+                        <p className={styles.supportText}>
+                            If this persists, contact support and we'll fix it immediately.
+                        </p>
                     </>
                 )}
             </div>
         </div>
+    );
+}
+
+export default function PaymentSuccessPage() {
+    return (
+        <Suspense fallback={
+            <div className={styles.container}>
+                <div className={styles.card}>
+                    <div className={styles.spinner} />
+                    <h1 className={styles.title}>Loading...</h1>
+                </div>
+            </div>
+        }>
+            <PaymentSuccessContent />
+        </Suspense>
     );
 }
